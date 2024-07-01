@@ -5,7 +5,7 @@ bool Arguments::empty() const {
 	return file_path.empty() && !help && !version && !init;
 }
 
-CLI::CLI(std::vector<std::string>& raw_args) {
+CLI::CLI(const std::vector<std::string>& raw_args) {
 	for (const std::string& arg : raw_args) {
 		if (arg.find(".zk", 0) != -1) args.file_path = arg;
 		else if (arg.find("help", 0) != -1) args.help = true;

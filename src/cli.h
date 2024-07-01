@@ -17,7 +17,7 @@ struct Arguments {
 class CLI {
 public:
 	Arguments args{};
-	CLI(std::vector<std::string>& raw_args);
+	CLI(const std::vector<std::string>& raw_args);
 	void checkout() const;
 	void show_help() const;
 };
