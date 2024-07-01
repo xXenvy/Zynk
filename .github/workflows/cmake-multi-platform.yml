@@ -1,4 +1,4 @@
-name: Build with CMake (multiple platforms)
+name: CMake
 
 on: [push]
 
