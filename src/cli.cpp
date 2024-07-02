@@ -18,6 +18,7 @@ void CLI::checkout() const {
 	if (args.empty()) {
 		throw std::logic_error("No argument was given. Consider using --help.");
 	}
+	// Todo: rewrite this.
 	if (!args.file_path.empty() && args.help) {
 		throw std::logic_error("Too many arguments.");
 	}

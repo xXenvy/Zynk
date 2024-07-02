@@ -7,7 +7,7 @@
 constexpr char const* version = "0.0.1";
 
 int main(int argc, char* argv[]) {
-	CLI cli(std::vector<std::string>(argv + 1, argv + argc));
+	CLI cli({ argv + 1, argv + argc });
 	try {
 		cli.checkout();
 	} catch (const std::exception& error) {
