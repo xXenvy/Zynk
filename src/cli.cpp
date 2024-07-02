@@ -11,7 +11,6 @@ CLI::CLI(const std::vector<std::string>& raw_args) {
 		else if (arg.find("help", 0) != -1) args.help = true;
 		else if (arg.find("version", 0) != -1) args.version = true;
 		else if (arg.find("init", 0) != -1) args.init = true;
-		else args.extras.push_back(arg);
 	}
 }
 
@@ -21,9 +20,6 @@ void CLI::checkout() const {
 	}
 	if (!args.file_path.empty() && args.help) {
 		throw std::logic_error("Too many arguments.");
-	}
-	for (const std::string& extra : args.extras) {
-		throw std::logic_error(std::string("Unexpected argument: " + extra));
 	}
 }
 

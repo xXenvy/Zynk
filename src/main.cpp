@@ -1,21 +1,17 @@
-﻿#include <iostream>
-#include <fstream>
+﻿#include <fstream>
+#include <iostream>
+
+#include "interpreter.h"
 #include "cli.h"
 
 constexpr char const* version = "0.0.1";
-
-void create_init_file() {
-	std::ofstream initfile("main.zk");
-	initfile << "def main() {\n\n}\n";
-	std::cout << "Successfully created a new main.zk file." << std::endl;
-}
 
 int main(int argc, char* argv[]) {
 	CLI cli(std::vector<std::string>(argv + 1, argv + argc));
 	try {
 		cli.checkout();
-	} catch (const std::exception& err) {
-		std::cout << err.what() << std::endl;
+	} catch (const std::exception& error) {
+		std::cout << error.what() << std::endl;
 		return -1;
 	}
 	if (cli.args.help) {
@@ -27,7 +23,13 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	if (cli.args.init) {
-		create_init_file();
+		std::ofstream initfile("main.zk");
+		initfile << "def main() {\n\n}\n";
+		std::cout << "Successfully created a new main.zk file." << std::endl;
+		return 0;
+	}
+	if (!cli.args.file_path.empty()) {
+		run_interpreter(cli.args.file_path);
 		return 0;
 	}
 }

@@ -9,7 +9,6 @@ struct Arguments {
 	bool help;
 	bool version;
 	bool init;
-	std::vector<std::string> extras;
 
 	bool empty() const;
 };
