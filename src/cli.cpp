@@ -26,7 +26,7 @@ void CLI::checkout() const {
 void CLI::show_help() const {
 	std::cout << std::endl << "<----- Zynk Help ----->" << std::endl;
 	std::cout << "Zynk - A simple interpreted programming language, written in C++." << std::endl << std::endl;
-	std::cout << "Example Usage:\n >> Zynk main.zk\n\n";
+	std::cout << "Example Usage:\n >> Zynk main2.zk\n\n";
 	std::cout << "Arguments:\n"
 		" --file_path <path>: Specifies the path to the script file that you want to interpret.\n"
 		" --init: Initializes a basic script file template in the current directory.\n"
