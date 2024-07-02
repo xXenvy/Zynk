@@ -2,7 +2,7 @@
 
 ![commits](https://img.shields.io/github/commit-activity/w/xXenvy/Zynk?style=for-the-badge&color=%2315b328)
 ![license](https://img.shields.io/github/license/xXenvy/Zynk?style=for-the-badge&color=%2315b328)
-![release](https://img.shields.io/github/v/release/xXenvy/Zynk?include_prereleases&style=for-the-badge&color=%2315b328)
+<!--- ![release](https://img.shields.io/github/v/release/xXenvy/Zynk?include_prereleases&style=for-the-badge&color=%2315b328) -->
 
 ## `📃` Introduction
 Zynk is a Touring-complete, interpreted programming language written in C++. This project was created as a personal endeavor to learn and practice C++. It is not intended for extensive practical use but rather serves as a learning platform.
