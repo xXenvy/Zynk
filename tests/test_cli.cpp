@@ -68,5 +68,5 @@ TEST(CLIArguments, ShouldNotBeEmpty) {
     EXPECT_TRUE(args.help);
     EXPECT_TRUE(args.version);
     EXPECT_FALSE(args.init);
-    EXPECT_TRUE(args.file_path.empty());
+    EXPECT_FALSE(args.file_path.empty());
 }
