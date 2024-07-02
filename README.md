@@ -20,21 +20,29 @@ Zynk is a Touring-complete, interpreted programming language written in C++. Thi
 
 ### 2. Build from Source
 1. Clone the repository:
-    ```shell
-    git clone https://github.com/xXenvy/Zynk.git
-    ```
+```shell
+git clone https://github.com/xXenvy/Zynk.git
+```
 
 2. Navigate to the project directory:
-    ```shell
-    cd Zynk
-    ```
+```shell
+cd Zynk
+```
 
-3. Build the project:
-    ```shell
-    make
-    ```
+3. Create a directory for temporary files (commonly named `build`):
+```shell
+mkdir build
+cd build
+```
 
-4. Run the interpreter:
-    ```shell
-    ./zynk
-    ```
+4. Configure CMake and build the project.
+> Command to build project depends on your system.
+```shell
+cmake ..
+cmake --build .
+```
+
+5. Once the compilation is complete, you can run the Zynk interpreter from the `src/Debug` directory:
+```shell
+./Zynk
+ ```
