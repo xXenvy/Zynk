@@ -1,7 +1,11 @@
-# Zynk - Touring-complete, interpreted programming language
+<div align="center">
+  <img src="https://github.com/xXenvy/Zynk/assets/111158232/f960db21-3f70-4a74-b504-5123448bbc85" width="200" height="200">
 
-![commits](https://img.shields.io/github/commit-activity/w/xXenvy/Zynk?style=for-the-badge&color=%2315b328)
-![license](https://img.shields.io/github/license/xXenvy/Zynk?style=for-the-badge&color=%2315b328)
+  # Zynk - Touring-complete, interpreted programming language
+
+  ![commits](https://img.shields.io/github/commit-activity/w/xXenvy/Zynk?style=for-the-badge&color=%2315b328)
+  ![license](https://img.shields.io/github/license/xXenvy/Zynk?style=for-the-badge&color=%2315b328)
+</div>
 <!--- ![release](https://img.shields.io/github/v/release/xXenvy/Zynk?include_prereleases&style=for-the-badge&color=%2315b328) -->
 
 ## `📃` Introduction
