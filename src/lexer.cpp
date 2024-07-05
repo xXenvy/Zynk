@@ -68,9 +68,11 @@ Token Lexer::identifier() {
     if (value == "def") return Token(TokenType::DEF, value);
     if (value == "println") return Token(TokenType::PRINTLN, value);
     if (value == "print") return Token(TokenType::PRINT, value);
+    if (value == "true" || value == "false") return Token(TokenType::BOOL, value);
     if (value == "int") return Token(TokenType::INT, "TYPE");
     if (value == "float") return Token(TokenType::FLOAT, "TYPE");
     if (value == "String") return Token(TokenType::STRING, "TYPE");
+    if (value == "bool") return Token(TokenType::BOOL, "TYPE");
     return Token(TokenType::IDENTIFIER, value);
 }
 

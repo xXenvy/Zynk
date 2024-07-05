@@ -123,6 +123,25 @@ TEST(LexerTokenizeTest, StringVariableDefinitions) {
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
+TEST(LexerTokenizeTest, BoolVariableDefinitions) {
+	const std::string source = "a: bool = false;\nb: bool = true;\nc: bool = false;";
+	Lexer lexer(source);
+	const std::vector<Token> tokens = lexer.tokenize();
+	int type_counter = 0;
+
+	for (const Token& token : tokens) {
+		if (token.value == "TYPE") {
+			EXPECT_TRUE(token.type == TokenType::BOOL);
+			type_counter++;
+		}
+	}
+
+	EXPECT_TRUE(tokens.size() == 19);
+	EXPECT_TRUE(type_counter == 3);
+	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
 TEST(LexerTokenizeTest, ManySemicolons) {
 	Lexer lexer(";;;\n;;;\n;;;;;;");
 	const std::vector<Token> tokens = lexer.tokenize();
