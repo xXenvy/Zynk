@@ -1,13 +1,15 @@
 ﻿cmake_minimum_required(VERSION 3.8)
+# include_directories(boost_1_85_0)
 
 set(Sources
-	main.cpp
 	lexer.cpp
 	cli.cpp
-	cli.h
-	interpreter.h
 	interpreter.cpp
 )
-add_library(ZynkLib cli.h cli.cpp)
-add_executable(Zynk ${Sources})
-# add_library(Zynk STATIC ${Sources})
+set(Headers
+	include/cli.hpp
+	include/interpreter.hpp
+	include/lexer.hpp
+)
+add_library(ZynkLib ${Sources} ${Headers})
+add_executable(Zynk main.cpp ${Sources} ${Headers})

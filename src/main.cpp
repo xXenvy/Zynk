@@ -1,8 +1,8 @@
 ﻿#include <fstream>
 #include <iostream>
 
-#include "interpreter.h"
-#include "cli.h"
+#include "include/interpreter.hpp"
+#include "include/cli.hpp"
 
 constexpr char const* version = "0.0.1";
 
@@ -24,12 +24,10 @@ int main(int argc, char* argv[]) {
 	}
 	if (cli.args.init) {
 		std::ofstream initfile("main.zk");
-		initfile << "def main() {\n\n}\n";
+		initfile << "def main() {\n    println(\"Hello Pimpki!\") \n}\n";
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
-	if (!cli.args.file_path.empty()) {
-		run_interpreter(cli.args.file_path);
-		return 0;
-	}
+	ZynkInterpreter interpreter;
+	interpreter.interpret_file(cli.args.file_path);
 }

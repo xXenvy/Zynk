@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../src/cli.h"
+#include "../src/include/cli.hpp"
 
 TEST(CLIArgsTest, FileArgumentShortOption) {
     CLI cli({ "main.zk" });
