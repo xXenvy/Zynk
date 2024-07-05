@@ -1,12 +1,10 @@
 #include "include/lexer.hpp"
 #include <iostream>
-#include <vector>
 
 Token::Token(TokenType type, const std::string& value) : type(type), value(value) {}
 
 Lexer::Lexer(const std::string& fileSource) {
     source = fileSource;
-    std::cout << source << std::endl;
 }
 
 std::vector<Token> Lexer::tokenize() {
@@ -90,7 +88,8 @@ Token Lexer::number() {
 }
 
 Token Lexer::string() {
-    const size_t start = position++;
+    moveForward();
+    const size_t start = position;
     char current = peek();
 
     while (current != '\0') {

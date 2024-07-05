@@ -7,7 +7,7 @@
 enum class TokenType {
     DEF, PRINTLN, PRINT, // Keywords.
 
-    INT, FLOAT, STRING, // Types.
+    INT, FLOAT, STRING, // Types. TODO: add bool
 
     ADD, SUBSTRACT, MULTIPLY, // Operators.
     DIVIDE, EQUAL, NOT_EQUAL,
