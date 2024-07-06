@@ -2,10 +2,7 @@
 #include <iostream>
 
 Token::Token(TokenType type, const std::string& value) : type(type), value(value) {}
-
-Lexer::Lexer(const std::string& fileSource) {
-    source = fileSource;
-}
+Lexer::Lexer(const std::string& fileSource) : source(fileSource) {}
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
@@ -95,10 +92,11 @@ Token Lexer::string() {
     char current = peek();
 
     while (current != '\0') {
-        moveForward();
         if (current == '"') break;
+        moveForward();
         current = peek();
     }
-    const std::string value = source.substr(start, (position - start) - 1);
+    const std::string value = source.substr(start, position - start);
+    moveForward();
     return Token(TokenType::STRING, value);
 }

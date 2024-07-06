@@ -1,9 +1,8 @@
-#include <gtest/gtest.h>
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include "../src/include/lexer.hpp"
-
 
 TEST(LexerTokenizeTest, PrintlnKeyword) {
 	Lexer lexer("println(10);\nprintln(\"TEST\");\nprintln(1.5);");

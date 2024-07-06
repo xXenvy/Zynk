@@ -1,4 +1,6 @@
 #include "include/interpreter.hpp"
+#include "include/lexer.hpp"
+
 #include <string>
 #include <iostream>
 #include <fstream>
