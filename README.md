@@ -1,5 +1,6 @@
 <div align="center">
-  <img src="https://github.com/xXenvy/Zynk/assets/111158232/f960db21-3f70-4a74-b504-5123448bbc85" width="200" height="200">
+  
+  <img src="https://github.com/xXenvy/Zynk/assets/111158232/2f92acf0-409e-4e6d-b80f-2379b01d31f7" width="200" height="200">
 
   # Zynk - Touring-complete, interpreted programming language
 
