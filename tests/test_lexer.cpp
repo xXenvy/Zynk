@@ -60,7 +60,7 @@ TEST(LexerTokenizeTest, MultipleFunctionDefinitions) {
 	Lexer lexer(base);
 	const std::vector<Token> tokens = lexer.tokenize();
 
-	EXPECT_TRUE(tokens.size() == 71);
+	EXPECT_TRUE(tokens.size() == 61);
 	EXPECT_TRUE(tokens.front().type == TokenType::DEF);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
@@ -201,13 +201,13 @@ TEST(LexerTokenizeTest, AddOperator) {
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
-TEST(LexerTokenizeTest, SubstractOperator) {
+TEST(LexerTokenizeTest, SubtractOperator) {
 	Lexer lexer("10 - 50;\n5.1 - 5;\n");
 	const std::vector<Token> tokens = lexer.tokenize();
 	int operators = 0;
 
 	for (const Token& token : tokens) {
-		if (token.type == TokenType::SUBSTRACT) operators++;
+		if (token.type == TokenType::SUBTRACT) operators++;
 	}
 
 	EXPECT_TRUE(operators == 2);

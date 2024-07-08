@@ -1,7 +1,6 @@
 #include "include/lexer.hpp"
 #include <iostream>
 
-Token::Token(TokenType type, const std::string& value) : type(type), value(value) {}
 Lexer::Lexer(const std::string& fileSource) : source(fileSource) {}
 
 std::vector<Token> Lexer::tokenize() {
@@ -19,18 +18,18 @@ char Lexer::peek() const {
 }
 
 void Lexer::moveForward() {
-    position++;
+    if (position <= source.size()) position++;
 }
 
 Token Lexer::next() {
-    while (std::isspace(peek())) moveForward(); // To remove spaces.
+    while (std::isspace(peek())) moveForward(); // To remove the spaces.
     const char current = peek();
 
     switch (peek()) {
         case '\0': return Token(TokenType::END_OF_FILE, "EOF");
         case '"': return string();
         default: {
-            if (std::isalpha(current)) return identifier();
+            if (std::isalpha(current) || current == '_') return identifier();
             if (std::isdigit(current)) return number();
         }
     }
@@ -40,7 +39,7 @@ Token Lexer::next() {
         case ':': return Token(TokenType::COLON, ":");
         case '=': return Token(TokenType::EQUAL, "=");
         case '+': return Token(TokenType::ADD, "+");
-        case '-': return Token(TokenType::SUBSTRACT, "-");
+        case '-': return Token(TokenType::SUBTRACT, "-");
         case '*': return Token(TokenType::MULTIPLY, "*");
         case '/': return Token(TokenType::DIVIDE, "/");
         case '{': return Token(TokenType::LBRACE, "{");
@@ -59,7 +58,7 @@ Token Lexer::next() {
 
 Token Lexer::identifier() {
     const size_t start = position;
-    while (isalpha(peek())) moveForward();
+    while (std::isalnum(peek()) || peek() == '_') moveForward();
     const std::string value = source.substr(start, position - start);
 
     if (value == "def") return Token(TokenType::DEF, value);
@@ -87,7 +86,8 @@ Token Lexer::number() {
 }
 
 Token Lexer::string() {
-    moveForward();
+    moveForward(); // Skip the opening quote.
+
     const size_t start = position;
     char current = peek();
 
@@ -96,6 +96,10 @@ Token Lexer::string() {
         moveForward();
         current = peek();
     }
+    if (current == '\0') {
+        return Token(TokenType::UNKNOWN, "Unterminated string");
+    }
+
     const std::string value = source.substr(start, position - start);
     moveForward();
     return Token(TokenType::STRING, value);

@@ -29,5 +29,10 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	ZynkInterpreter interpreter;
-	interpreter.interpret_file(cli.args.file_path);
+	try {
+		interpreter.interpret_file(cli.args.file_path);
+	}
+	catch (const std::runtime_error& error) {
+		std::cerr << error.what() << std::endl;
+	}
 }

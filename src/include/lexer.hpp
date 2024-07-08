@@ -3,28 +3,7 @@
 
 #include <string>
 #include <vector>
-
-enum class TokenType {
-    DEF, PRINTLN, PRINT, // Keywords.
-
-    INT, FLOAT, STRING, BOOL, // Types.
-
-    ADD, SUBSTRACT, MULTIPLY, // Operators.
-    DIVIDE, EQUAL, NOT_EQUAL,
-
-    IDENTIFIER, COLON, LBRACE, // Syntax.
-    RBRACE, SEMICOLON, LBRACKET, 
-    RBRACKET,
-
-    END_OF_FILE, UNKNOWN, // Extra.
-};
-
-struct Token {
-    TokenType type;
-    std::string value;
-
-    Token(TokenType type, const std::string& value);
-};
+#include "token.hpp"
 
 class Lexer {
 private:
