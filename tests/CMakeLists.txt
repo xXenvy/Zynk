@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 
 set(Sources 
-	test_cli.cpp   
+	test_cli.cpp
+    test_lexer.cpp
+    test_interpreter.cpp
 )
 set(GoogleTestVersion v1.14.0)
 

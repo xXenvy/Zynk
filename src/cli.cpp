@@ -1,5 +1,5 @@
 #include <iostream>
-#include "cli.h"
+#include "include/cli.hpp"
 
 bool Arguments::empty() const {
 	return file_path.empty() && !help && !version && !init;

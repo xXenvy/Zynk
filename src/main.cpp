@@ -1,8 +1,8 @@
 ﻿#include <fstream>
 #include <iostream>
 
-#include "interpreter.h"
-#include "cli.h"
+#include "include/interpreter.hpp"
+#include "include/cli.hpp"
 
 constexpr char const* version = "0.0.1";
 
@@ -24,12 +24,18 @@ int main(int argc, char* argv[]) {
 	}
 	if (cli.args.init) {
 		std::ofstream initfile("main.zk");
-		initfile << "def main() {\n\n}\n";
+		initfile << "def main() {\n    println(\"Hello Pimpki!\") \n}\n";
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
-	if (!cli.args.file_path.empty()) {
-		run_interpreter(cli.args.file_path);
-		return 0;
+	ZynkInterpreter interpreter;
+	try {
+		const std::vector<Token> tokens = interpreter.interpret_file(cli.args.file_path);
+		for (const Token& token : tokens) {
+			std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
+		}
+	} catch (const std::runtime_error& error) {
+		std::cerr << error.what() << std::endl;
+		return -1;
 	}
 }
