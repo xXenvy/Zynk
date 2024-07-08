@@ -62,4 +62,5 @@ As Zynk progresses towards version 1.0, the following components are planned and
 - [ ] **Evaluator:** Creating an evaluator to interpret and execute code represented by the AST.
 - [ ] **Runtime:** Implementing a runtime environment responsible for managing execution contexts, memory allocation, and variable scope resolution during program execution.
 - [ ] **Documentation:** Developing thorough documentation that covers usage instructions, language syntax and examples.
+- [ ] **Visual Studio Code Plugin:** Creating a plugin for Visual Studio Code to enhance the development experience for Zynk.
 
