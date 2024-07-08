@@ -99,7 +99,6 @@ Token Lexer::string() {
     if (current == '\0') {
         return Token(TokenType::UNKNOWN, "Unterminated string");
     }
-
     const std::string value = source.substr(start, position - start);
     moveForward();
     return Token(TokenType::STRING, value);
