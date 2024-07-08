@@ -8,10 +8,6 @@
 std::vector<Token> ZynkInterpreter::interpret(const std::string& source) {
 	Lexer lexer(source);
 	std::vector<Token> tokens = lexer.tokenize();
-
-	for (const Token& token : tokens) {
-		std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
-	}
 	return tokens;
 }
 
