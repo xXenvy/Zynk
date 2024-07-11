@@ -31,9 +31,6 @@ int main(int argc, char* argv[]) {
 	ZynkInterpreter interpreter;
 	try {
 		const std::vector<Token> tokens = interpreter.interpret_file(cli.args.file_path);
-		for (const Token& token : tokens) {
-			std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
-		}
 	} catch (const std::runtime_error& error) {
 		std::cerr << error.what() << std::endl;
 		return -1;

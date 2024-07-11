@@ -11,6 +11,7 @@ set(Headers
 	include/interpreter.hpp
 	include/lexer.hpp
 	include/parser.hpp
+	include/ast.hpp
 )
 add_library(ZynkLib ${Sources} ${Headers})
 add_executable(Zynk main.cpp ${Sources} ${Headers})
