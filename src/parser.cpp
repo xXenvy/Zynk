@@ -6,7 +6,7 @@ Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 ProgramNode* Parser::parse() {
 	ProgramNode* programTree = new ProgramNode();
 
-	while (!end_of_file()) {
+	while (!endOfFile()) {
 		programTree->nodes.push_back(parseCurrent());
 	}
 	return programTree;
@@ -20,36 +20,76 @@ ASTNode* Parser::parseCurrent() {
 			return parseFunction();
 		case TokenType::IDENTIFIER:
 			return parseVarDeclaration();
+		case TokenType::PRINT:
+			return parsePrint(false);
+		case TokenType::PRINTLN:
+			return parsePrint(true);
 		default:
-			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented.", &current.line};
+			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented " + current.value, &current.line};
+	}
+}
+
+ASTNode* Parser::parseExpression(int priority = 0) {
+	return parseBinaryOperation(priority);
+}
+
+ASTNode* Parser::parseBinaryOperation(int priority) {
+	ASTNode* left = parsePrimary();
+
+	while (!endOfFile() && isOperator(currentToken().type) && getOperatorPriority(currentToken().type) >= priority) {
+		Token op = currentToken();
+		moveForward();
+
+		ASTNode* right = parseExpression(getOperatorPriority(op.type) + 1);
+
+		left = new BinaryOperationNode(left, op.value, right);
+	}
+
+	return left;
+}
+
+ASTNode* Parser::parsePrimary() {
+	const Token current = currentToken();
+	moveForward();
+
+	switch (current.type) {
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::STRING:
+		case TokenType::BOOL:
+			return new ValueNode(current.value);
+		case TokenType::IDENTIFIER:
+			return new VariableNode(current.value);
+		default:
+			throw ZynkError{ ZynkErrorType::SyntaxError, "Invalid expression", &current.line };
 	}
 }
 
 ASTNode* Parser::parseFunction() {
-	FunctionNode* node = new FunctionNode;
-	moveForward(); // To skip 'def' keyword
-
-	node->name = currentToken().value;
+	FunctionNode* function = new FunctionNode;
 	const size_t line = currentToken().line;
 
-	consume({ TokenType::IDENTIFIER, node->name, line });
+	consume({ TokenType::DEF, "def", line });
+	function->name = currentToken().value; // Function name.
+
+	consume({ TokenType::IDENTIFIER, function->name, line });
 	consume({ TokenType::LBRACKET, "(", line });
 	consume({ TokenType::RBRACKET, ")", line });
 	consume({ TokenType::LBRACE, "{", line});
 
-	while (currentToken().type != TokenType::RBRACE && !end_of_file()) {
-		node->body.push_back(parseCurrent());
+	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
+		function->body.push_back(parseCurrent());
 	}
 	consume({ TokenType::RBRACE, "}", currentToken().line });
-	return node;
+	return function;
 }
 
 ASTNode* Parser::parseVarDeclaration() {
-	VariableDeclarationNode* node = new VariableDeclarationNode;
+	VariableDeclarationNode* var = new VariableDeclarationNode{};
 	const size_t currentLine = currentToken().line;
-	node->name = currentToken().value;
+	var->name = currentToken().value;
 
-	consume({ TokenType::IDENTIFIER, node->name, currentLine});
+	consume({ TokenType::IDENTIFIER, var->name, currentLine});
 	consume({ TokenType::COLON, ":", currentLine });
 
 	const Token varType = currentToken();
@@ -59,7 +99,7 @@ ASTNode* Parser::parseVarDeclaration() {
 		case TokenType::FLOAT: 
 		case TokenType::STRING:
 		case TokenType::BOOL:
-			node->type = varType.value;
+			var->type = varType.value;
 			consume(varType);
 			break;
 		default:
@@ -70,22 +110,77 @@ ASTNode* Parser::parseVarDeclaration() {
 			};
 	}
 	consume({ TokenType::EQUAL, "=", currentLine });
-	node->value = currentToken().value;
-	moveForward();
+	var->value = parseExpression();
 	consume({ TokenType::SEMICOLON, ";", currentLine });
-	return node;
+	return var;
 }
 
-bool Parser::end_of_file() const {
+ASTNode* Parser::parsePrint(bool newLine) {
+	PrintNode* print = new PrintNode;
+	const size_t currentLine = currentToken().line;
+	print->newLine = newLine;
+
+	if (newLine) {
+		consume({ TokenType::PRINTLN, "println", currentLine });
+	} else {
+		consume({ TokenType::PRINT, "print", currentLine });
+	}
+
+	consume({ TokenType::LBRACKET, "(", currentLine });
+	switch (currentToken().type) {
+		case TokenType::STRING:
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::BOOL:
+			print->expression = parseExpression();
+			break;
+		default:
+			throw ZynkError{
+				ZynkErrorType::InvalidTypeError,
+				"Invalid print value. Expected: String, bool, float or int.",
+				&currentLine,
+			};
+	}
+	consume({ TokenType::RBRACKET, ")", currentLine });
+	consume({ TokenType::SEMICOLON, ";", currentLine });
+	return print;
+}
+
+bool Parser::endOfFile() const {
 	return position > tokens.size() || tokens[position].type == TokenType::END_OF_FILE;
 }
 
+bool Parser::isOperator(TokenType type) const {
+	switch (type) {
+		case TokenType::ADD:
+		case TokenType::SUBTRACT:
+		case TokenType::MULTIPLY:
+		case TokenType::DIVIDE:
+			return true;
+		default:
+			return false;
+	}
+}
+
+int Parser::getOperatorPriority(TokenType type) const {
+	switch (type) {
+		case TokenType::ADD:
+		case TokenType::SUBTRACT:
+			return 1;
+		case TokenType::MULTIPLY:
+		case TokenType::DIVIDE:
+			return 2;
+		default:
+			return 0;
+	}
+}
+
 void Parser::moveForward() {
-	if (!end_of_file()) position++;
+	if (!endOfFile()) position++;
 }
 
 Token Parser::currentToken() const {
-    if (!end_of_file()) return tokens[position];
+    if (!endOfFile()) return tokens[position];
     return { TokenType::END_OF_FILE, "EOF", tokens.back().line};
 }
 

@@ -9,19 +9,26 @@ class Parser {
 private:
 	const std::vector<Token> tokens;
 	size_t position = 0;
-public:
+public: // todo: consider moving some methods to private
 	Parser(const std::vector<Token>& tokens);
 	ProgramNode* parse();
 	ASTNode* parseCurrent();
-
-	bool end_of_file() const;
 	void moveForward();
+
+	bool endOfFile() const;
+	bool isOperator(TokenType type) const;
+	int getOperatorPriority(TokenType type) const;
 
 	Token consume(Token expected);
 	Token currentToken() const;
 
 	ASTNode* parseFunction();
 	ASTNode* parseVarDeclaration();
+	ASTNode* parsePrint(bool newLine);
+
+	ASTNode* parseExpression(int priority);
+	ASTNode* parsePrimary();
+	ASTNode* parseBinaryOperation(int priority);
 
 };
 

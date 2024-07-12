@@ -35,7 +35,31 @@ void displayAST(ASTNode* node, int indent = 0) {
         }
         case ASTNodeType::VariableDeclaration: {
             VariableDeclarationNode* varNode = static_cast<VariableDeclarationNode*>(node);
-            std::cout << "VarDeclaration: " << varNode->name << " (" << varNode->type << ") = " << varNode->value << std::endl;
+            std::cout << "VarDeclaration: " << varNode->name << " (" << varNode->type << ")" << std::endl;
+            displayAST(varNode->value, indent + 1);
+            break;
+        }
+        case ASTNodeType::Print: {
+            PrintNode* printNode = static_cast<PrintNode*>(node);
+            std::cout << "PrintStatement: " << "(newLine=" << printNode->newLine << ")" << std::endl;
+            displayAST(printNode->expression, indent + 1);
+            break;
+        }
+        case ASTNodeType::BinaryOperation: {
+            BinaryOperationNode* binOpNode = static_cast<BinaryOperationNode*>(node);
+            std::cout << "BinaryOperation: " << binOpNode->op << std::endl;
+            displayAST(binOpNode->left, indent + 1);
+            displayAST(binOpNode->right, indent + 1);
+            break;
+        }
+        case ASTNodeType::Value: {
+            ValueNode* valueNode = static_cast<ValueNode*>(node);
+            std::cout << "Value: " << valueNode->value << std::endl;
+            break;
+        }
+        case ASTNodeType::Variable: {
+            VariableNode* varNode = static_cast<VariableNode*>(node);
+            std::cout << "Variable: " << varNode->name << std::endl;
             break;
         }
         default:
@@ -47,6 +71,10 @@ void displayAST(ASTNode* node, int indent = 0) {
 const ProgramNode* ZynkInterpreter::interpret(const std::string& source) {
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
+
+    for (const Token& token : tokens) {
+        std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
+    }
 
 	Parser parser(tokens);
     ProgramNode* node = parser.parse();
