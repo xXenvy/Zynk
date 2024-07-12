@@ -1,103 +1,103 @@
 #include "include/parser.hpp"
-#include <iostream>
+#include "include/errors.hpp"
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 
 ProgramNode* Parser::parse() {
-	auto program = new ProgramNode();
+	ProgramNode* programTree = new ProgramNode();
 
-	while (!eof()) {
-		program->nodes.push_back(parseCurrent());
-		moveForward();
+	while (!end_of_file()) {
+		programTree->nodes.push_back(parseCurrent());
 	}
-
-	return program;
+	return programTree;
 }
 
 ASTNode* Parser::parseCurrent() {
-	const TokenType current = currentToken().type;
-	std::cout << "Current: " << static_cast<int>(current) << std::endl;
+	const Token current = currentToken();
 
-	switch (current) {
+	switch (current.type) {
 		case TokenType::DEF:
 			return parseFunction();
 		case TokenType::IDENTIFIER:
 			return parseVarDeclaration();
 		default:
-			throw std::runtime_error("test");
+			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented.", &current.line};
 	}
 }
 
 ASTNode* Parser::parseFunction() {
 	FunctionNode* node = new FunctionNode;
-	moveForward();
+	moveForward(); // To skip 'def' keyword
 
-	// todo: check for errors. For now we expect a proper code.
 	node->name = currentToken().value;
-	consume(TokenType::IDENTIFIER);
-	consume(TokenType::LBRACKET);
-	consume(TokenType::RBRACKET);
+	const size_t line = currentToken().line;
 
-	consume(TokenType::LBRACE);
+	consume({ TokenType::IDENTIFIER, node->name, line });
+	consume({ TokenType::LBRACKET, "(", line });
+	consume({ TokenType::RBRACKET, ")", line });
+	consume({ TokenType::LBRACE, "{", line});
 
-	while (currentToken().type != TokenType::RBRACE) {
+	while (currentToken().type != TokenType::RBRACE && !end_of_file()) {
 		node->body.push_back(parseCurrent());
 	}
+	consume({ TokenType::RBRACE, "}", currentToken().line });
 	return node;
 }
 
 ASTNode* Parser::parseVarDeclaration() {
 	VariableDeclarationNode* node = new VariableDeclarationNode;
-
-	// todo: check for errors. For now we expect a proper code.
+	const size_t currentLine = currentToken().line;
 	node->name = currentToken().value;
-	consume(TokenType::IDENTIFIER);
-	consume(TokenType::COLON);
 
-	switch (currentToken().type) {
-		case TokenType::INT:
-			node->type = "int";
-			consume(TokenType::INT);
-			break;
+	consume({ TokenType::IDENTIFIER, node->name, currentLine});
+	consume({ TokenType::COLON, ":", currentLine });
+
+	const Token varType = currentToken();
+
+	switch (varType.type) {
+		case TokenType::INT: 
+		case TokenType::FLOAT: 
 		case TokenType::STRING:
-			node->type = "String";
-			consume(TokenType::STRING);
-			break;
-		case TokenType::FLOAT:
-			node->type = "float";
-			consume(TokenType::FLOAT);
+		case TokenType::BOOL:
+			node->type = varType.value;
+			consume(varType);
 			break;
 		default:
-			std::cout << 10 << std::endl;
-			throw std::runtime_error("Unexpected token");
+			throw ZynkError{ 
+				ZynkErrorType::InvalidTypeError,
+				"Expected: String, bool, float or int. Found: '" + varType.value + "' instead.",
+				&currentLine,
+			};
 	}
-	consume(TokenType::EQUAL);
+	consume({ TokenType::EQUAL, "=", currentLine });
 	node->value = currentToken().value;
 	moveForward();
-	consume(TokenType::SEMICOLON);
+	consume({ TokenType::SEMICOLON, ";", currentLine });
 	return node;
 }
 
-bool Parser::eof() const {
+bool Parser::end_of_file() const {
 	return position > tokens.size() || tokens[position].type == TokenType::END_OF_FILE;
 }
 
 void Parser::moveForward() {
-	if (!eof()) position++;
+	if (!end_of_file()) position++;
 }
 
 Token Parser::currentToken() const {
-    if (!eof()) return tokens[position];
-    return { TokenType::END_OF_FILE, "" };
+    if (!end_of_file()) return tokens[position];
+    return { TokenType::END_OF_FILE, "EOF", tokens.back().line};
 }
 
-Token Parser::consume(TokenType expected) {
+Token Parser::consume(Token expected) {
 	const Token current = currentToken();
-	if (current.type == expected) {
+	if (current.type == expected.type) {
 		moveForward();
 		return current;
 	};
-	std::cout << static_cast<int>(expected) << std::endl;
-	std::cout << static_cast<int>(current.type) << std::endl;
-	throw std::runtime_error("Unexpected token");
+	throw ZynkError{
+		ZynkErrorType::SyntaxError,
+		"Expected '" + expected.value + "', found: '" + current.value + "' instead.\n",
+		&expected.line,
+	};
 }

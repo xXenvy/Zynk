@@ -2,8 +2,8 @@
 #include "include/lexer.hpp"
 #include "include/parser.hpp"
 #include "include/ast.hpp"
+#include "include/errors.hpp"
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -44,30 +44,23 @@ void displayAST(ASTNode* node, int indent = 0) {
         }
 }
 
-const std::vector<Token> ZynkInterpreter::interpret(const std::string& source) {
+const ProgramNode* ZynkInterpreter::interpret(const std::string& source) {
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 
-    for (const Token& token : tokens) {
-        std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
-    }
-    std::cout << std::endl;
-
 	Parser parser(tokens);
-	ProgramNode* node = parser.parse();
-
-	std::cout << std::endl;
+    ProgramNode* node = parser.parse();
     displayAST(node);
 
-	delete node; // Free alocated memory.
-
-	return tokens;
+    return node;
 }
 
-const std::vector<Token> ZynkInterpreter::interpret_file(const std::string& filePath) {
+const ProgramNode* ZynkInterpreter::interpret_file(const std::string& filePath) {
 	std::ifstream file(filePath);
-	if (!file.is_open()) throw std::runtime_error("Failed to open a file: " + filePath);
-
+    if (!file.is_open()) {
+        throw ZynkError{ ZynkErrorType::FileOpenError, "Failed to open a file " + filePath};
+    }
+        
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	return interpret(buffer.str());

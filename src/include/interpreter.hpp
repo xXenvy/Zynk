@@ -2,20 +2,12 @@
 #define INTERPRETER_H
 
 #include <string>
-#include <vector>
-#include "token.hpp"
+#include "ast.hpp"
 
-class BaseInterpreter {
+class ZynkInterpreter {
 public:
-    virtual const std::vector<Token> interpret(const std::string& source) = 0;
-    virtual const std::vector<Token> interpret_file(const std::string& file_path) = 0;
-};
-
-
-class ZynkInterpreter : public BaseInterpreter {
-public:
-    const std::vector<Token> interpret(const std::string& source) override;
-    const std::vector<Token> interpret_file(const std::string& file_path) override;
+    const ProgramNode* interpret(const std::string& source);
+    const ProgramNode* interpret_file(const std::string& file_path);
 };
 
 #endif // INTERPRETER_H

@@ -14,10 +14,10 @@ public:
 	ProgramNode* parse();
 	ASTNode* parseCurrent();
 
-	bool eof() const;
+	bool end_of_file() const;
 	void moveForward();
 
-	Token consume(TokenType expected);
+	Token consume(Token expected);
 	Token currentToken() const;
 
 	ASTNode* parseFunction();

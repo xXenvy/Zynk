@@ -9,6 +9,7 @@ class Lexer {
 private:
     std::string source;
     size_t position = 0;
+    size_t line = 1;
 
     char peek() const;
     void moveForward();

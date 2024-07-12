@@ -38,6 +38,7 @@ struct FunctionNode : public ASTNode {
 struct PrintStatementNode : public ASTNode {
     PrintStatementNode() : ASTNode(ASTNodeType::PrintStatement) {}
     std::string message;
+    bool newLine;
 };
 
 struct VariableDeclarationNode : public ASTNode {

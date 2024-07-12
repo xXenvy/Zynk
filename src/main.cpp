@@ -3,6 +3,7 @@
 
 #include "include/interpreter.hpp"
 #include "include/cli.hpp"
+#include "include/errors.hpp"
 
 constexpr char const* version = "0.0.1";
 
@@ -30,9 +31,10 @@ int main(int argc, char* argv[]) {
 	}
 	ZynkInterpreter interpreter;
 	try {
-		const std::vector<Token> tokens = interpreter.interpret_file(cli.args.file_path);
-	} catch (const std::runtime_error& error) {
-		std::cerr << error.what() << std::endl;
+		const ProgramNode* program = interpreter.interpret_file(cli.args.file_path);
+		delete program;
+	} catch (const ZynkError& error) {
+		error.print();
 		return -1;
 	}
 }
