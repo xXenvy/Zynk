@@ -152,7 +152,7 @@ TEST(ParserTest, parsePrintAndPrintlnCalls) {
 	ASSERT_TRUE(program->type == ASTType::Program);
 	ASSERT_TRUE(program->body.size() == 2);
 	
-	bool newLine = 0;
+	int newLine = 0;
 	for (ASTBase* printBase : program->body) {
 		const ASTPrint* print = static_cast<ASTPrint*>(printBase);
 		ASSERT_EQ(print->newLine, newLine);
