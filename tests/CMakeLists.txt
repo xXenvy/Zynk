@@ -4,6 +4,7 @@ set(Sources
 	test_cli.cpp
     test_lexer.cpp
     test_interpreter.cpp
+    test_parser.cpp
 )
 set(GoogleTestVersion v1.14.0)
 

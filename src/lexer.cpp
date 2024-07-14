@@ -18,15 +18,18 @@ char Lexer::peek() const {
 }
 
 void Lexer::moveForward() {
-    if (position <= source.size()) position++;
+    if (position > source.size()) return;
+    position++;
+    if (peek() == '\n') line++;
 }
 
 Token Lexer::next() {
     while (std::isspace(peek())) moveForward(); // To remove the spaces.
     const char current = peek();
+    const size_t currentLine = line;
 
     switch (peek()) {
-        case '\0': return Token(TokenType::END_OF_FILE, "EOF");
+        case '\0': return Token(TokenType::END_OF_FILE, "EOF", currentLine);
         case '"': return string();
         default: {
             if (std::isalpha(current) || current == '_') return identifier();
@@ -36,23 +39,23 @@ Token Lexer::next() {
 
     moveForward();
     switch (current) {
-        case ':': return Token(TokenType::COLON, ":");
-        case '=': return Token(TokenType::EQUAL, "=");
-        case '+': return Token(TokenType::ADD, "+");
-        case '-': return Token(TokenType::SUBTRACT, "-");
-        case '*': return Token(TokenType::MULTIPLY, "*");
-        case '/': return Token(TokenType::DIVIDE, "/");
-        case '{': return Token(TokenType::LBRACE, "{");
-        case '}': return Token(TokenType::RBRACE, "}");
-        case ';': return Token(TokenType::SEMICOLON, ";");
-        case '(': return Token(TokenType::LBRACKET, "(");
-        case ')': return Token(TokenType::RBRACKET, ")");
+        case ':': return Token(TokenType::COLON, ":", currentLine);
+        case '=': return Token(TokenType::EQUAL, "=", currentLine);
+        case '+': return Token(TokenType::ADD, "+", currentLine);
+        case '-': return Token(TokenType::SUBTRACT, "-", currentLine);
+        case '*': return Token(TokenType::MULTIPLY, "*", currentLine);
+        case '/': return Token(TokenType::DIVIDE, "/", currentLine);
+        case '{': return Token(TokenType::LBRACE, "{", currentLine);
+        case '}': return Token(TokenType::RBRACE, "}", currentLine);
+        case ';': return Token(TokenType::SEMICOLON, ";", currentLine);
+        case '(': return Token(TokenType::LBRACKET, "(", currentLine);
+        case ')': return Token(TokenType::RBRACKET, ")", currentLine);
         case '!': {
-            if (peek() != '=') return Token(TokenType::UNKNOWN, std::string(1, current));
+            if (peek() != '=') return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
             moveForward();
-            return Token(TokenType::NOT_EQUAL, "!=");
+            return Token(TokenType::NOT_EQUAL, "!=", currentLine);
         }
-        default: return Token(TokenType::UNKNOWN, std::string(1, current));
+        default: return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
     }
 }
 
@@ -61,15 +64,15 @@ Token Lexer::identifier() {
     while (std::isalnum(peek()) || peek() == '_') moveForward();
     const std::string value = source.substr(start, position - start);
 
-    if (value == "def") return Token(TokenType::DEF, value);
-    if (value == "println") return Token(TokenType::PRINTLN, value);
-    if (value == "print") return Token(TokenType::PRINT, value);
-    if (value == "true" || value == "false") return Token(TokenType::BOOL, value);
-    if (value == "int") return Token(TokenType::INT, "TYPE");
-    if (value == "float") return Token(TokenType::FLOAT, "TYPE");
-    if (value == "String") return Token(TokenType::STRING, "TYPE");
-    if (value == "bool") return Token(TokenType::BOOL, "TYPE");
-    return Token(TokenType::IDENTIFIER, value);
+    if (value == "def") return Token(TokenType::DEF, value, line);
+    if (value == "println") return Token(TokenType::PRINTLN, value, line);
+    if (value == "print") return Token(TokenType::PRINT, value, line);
+    if (value == "true" || value == "false") return Token(TokenType::BOOL, value, line);
+    if (value == "int") return Token(TokenType::INT, "int", line);
+    if (value == "float") return Token(TokenType::FLOAT, "float", line);
+    if (value == "String") return Token(TokenType::STRING, "String", line);
+    if (value == "bool") return Token(TokenType::BOOL, "bool", line);
+    return Token(TokenType::IDENTIFIER, value, line);
 }
 
 Token Lexer::number() {
@@ -81,8 +84,8 @@ Token Lexer::number() {
         current = peek();
     }
     const std::string value = source.substr(start, position - start);
-    if (value.find('.') != std::string::npos) return Token(TokenType::FLOAT, value);
-    return Token(TokenType::INT, value);
+    if (value.find('.') != std::string::npos) return Token(TokenType::FLOAT, value, line);
+    return Token(TokenType::INT, value, line);
 }
 
 Token Lexer::string() {
@@ -97,9 +100,9 @@ Token Lexer::string() {
         current = peek();
     }
     if (current == '\0') {
-        return Token(TokenType::UNKNOWN, "Unterminated string");
+        return Token(TokenType::UNKNOWN, "Unterminated string", line);
     }
     const std::string value = source.substr(start, position - start);
     moveForward();
-    return Token(TokenType::STRING, value);
+    return Token(TokenType::STRING, value, line);
 }

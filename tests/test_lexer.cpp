@@ -10,7 +10,10 @@ TEST(LexerTokenizeTest, PrintlnKeyword) {
 	int keywords = 0;
 
 	for (const Token& token : tokens) {
-		if (token.type == TokenType::PRINTLN) keywords++;
+		if (token.type == TokenType::PRINTLN) {
+			keywords++;
+			ASSERT_TRUE(keywords == token.line);
+		}
 	}
 
 	EXPECT_TRUE(keywords == 3);
@@ -40,6 +43,7 @@ TEST(LexerTokenizeTest, EmptySource) {
 
 	EXPECT_TRUE(tokens.size() == 1);
 	EXPECT_TRUE(tokens.front().type == TokenType::END_OF_FILE);
+	EXPECT_TRUE(tokens.front().line == 1);
 }
 
 TEST(LexerTokenizeTest, SimpleFunctionDefinition) {
@@ -49,6 +53,8 @@ TEST(LexerTokenizeTest, SimpleFunctionDefinition) {
 	EXPECT_TRUE(tokens.size() == 7);
 	EXPECT_TRUE(tokens.front().type == TokenType::DEF);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+	EXPECT_TRUE(tokens.front().line == 1);
+	EXPECT_TRUE(tokens.back().line == 4);
 }
 
 TEST(LexerTokenizeTest, MultipleFunctionDefinitions) {
@@ -72,14 +78,14 @@ TEST(LexerTokenizeTest, IntVariableDefinitions) {
 	int type_counter = 0;
 
 	for (const Token& token : tokens) {
-		if (token.value == "TYPE") {
+		if (token.value == "int") {
 			EXPECT_TRUE(token.type == TokenType::INT);
 			type_counter++;
 		}
 	}
 
 	EXPECT_TRUE(tokens.size() == 19);
-	EXPECT_TRUE(type_counter == 3);
+	EXPECT_TRUE(type_counter == 3 && tokens.back().line == 3);
 	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
@@ -91,7 +97,7 @@ TEST(LexerTokenizeTest, FloatVariableDefinitions) {
 	int type_counter = 0;
 
 	for (const Token& token : tokens) {
-		if (token.value == "TYPE") {
+		if (token.value == "float") {
 			EXPECT_TRUE(token.type == TokenType::FLOAT);
 			type_counter++;
 		}
@@ -110,7 +116,7 @@ TEST(LexerTokenizeTest, StringVariableDefinitions) {
 	int type_counter = 0;
 
 	for (const Token& token : tokens) {
-		if (token.value == "TYPE") {
+		if (token.value == "String") {
 			EXPECT_TRUE(token.type == TokenType::STRING);
 			type_counter++;
 		}
@@ -129,7 +135,7 @@ TEST(LexerTokenizeTest, BoolVariableDefinitions) {
 	int type_counter = 0;
 
 	for (const Token& token : tokens) {
-		if (token.value == "TYPE") {
+		if (token.value == "bool") {
 			EXPECT_TRUE(token.type == TokenType::BOOL);
 			type_counter++;
 		}
