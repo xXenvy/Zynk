@@ -72,9 +72,9 @@ const ASTProgram* ZynkInterpreter::interpret(const std::string& source) {
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 
-    for (const Token& token : tokens) {
-        std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
-    }
+    //for (const Token& token : tokens) {
+        //std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
+    //}
 
 	Parser parser(tokens);
     ASTProgram* node = parser.parse();
