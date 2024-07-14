@@ -58,7 +58,7 @@ cmake --build .
 
 As Zynk progresses towards version 1.0, the following components are planned and required for the interpreter:
 - [x] **Lexer:** Implementing a lexer to tokenize input source code.
-- [ ] **Parser:** Developing a parser to parse tokens into an abstract syntax tree (AST).
+- [x] **Parser:** Developing a parser to parse tokens into an abstract syntax tree (AST).
 - [ ] **Evaluator:** Creating an evaluator to interpret and execute code represented by the AST.
 - [ ] **Runtime:** Implementing a runtime environment responsible for managing execution contexts, memory allocation, and variable scope resolution during program execution.
 - [ ] **Documentation:** Developing thorough documentation that covers usage instructions, language syntax and examples.

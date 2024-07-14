@@ -10,9 +10,10 @@ TEST(InterpreterTest, Basic) {
 
 	EXPECT_TRUE(program->type == ASTType::Program);
 	EXPECT_TRUE(program->body.size() == 1);
+	delete program;
 }
 
-TEST(InterpreterTest, ShouldThrowRuntimeError) {
+TEST(InterpreterTest, ShouldThrowFileOpenError) {
     ZynkInterpreter interpreter;
 	try {
 		interpreter.interpret_file("invalidfile.zk");

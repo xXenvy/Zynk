@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 	}
 	if (cli.args.init) {
 		std::ofstream initfile("main.zk");
-		initfile << "def main() {\n    println(\"Hello Pimpki!\") \n}\n";
+		initfile << "def main() {\n    println(\"Hello Pimpki!\"); \n}\n";
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
