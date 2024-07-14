@@ -11,27 +11,31 @@ enum class ZynkErrorType {
     UnknownError,
     InvalidTypeError,
     FileOpenError,
+    ExpressionError,
+    PanicError,
 };
 
 struct ZynkError : public std::runtime_error {
-    ZynkErrorType type;
+    const ZynkErrorType base_type;
     const size_t* line;
 
     ZynkError(ZynkErrorType type, const std::string& message, const size_t* line = nullptr)
-        : std::runtime_error(message), type(type), line(line) {}
+        : std::runtime_error(message), base_type(type), line(line) {}
 
     void print() const {
-        std::cerr << "Error[" << toString(type) << "]: "
-            << (line ? "Error at line: " + std::to_string(*line) + ". " : "")
+        std::cerr << "Error[" << toString() << "]: "
+            << (line ? "At line: " + std::to_string(*line) + ". " : "")
             << what() << std::endl;
     }
 private:
-    std::string toString(ZynkErrorType type) const {
-        switch (type) {
+    std::string toString() const {
+        switch (base_type) {
             case ZynkErrorType::SyntaxError: return "SyntaxError";
             case ZynkErrorType::RuntimeError: return "RuntimeError";
             case ZynkErrorType::InvalidTypeError: return "InvalidTypeError";
             case ZynkErrorType::FileOpenError: return "FileOpenError";
+            case ZynkErrorType::ExpressionError: return "ExpressionError";
+            case ZynkErrorType::PanicError: return "PanicError";
             default: return "UnknownError";
         }
     }

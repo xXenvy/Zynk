@@ -6,10 +6,10 @@ TEST(InterpreterTest, Basic) {
 	// For now there is no need to test the interpreter stronger, 
 	// as most things are tested in the lexer anyway.
 	ZynkInterpreter interpreter;
-	const ProgramNode* program = interpreter.interpret("def main123() {}\n");
+	const ASTProgram* program = interpreter.interpret("def main123() {}\n");
 
-	EXPECT_TRUE(program->type == ASTNodeType::Program);
-	EXPECT_TRUE(program->nodes.size() == 1);
+	EXPECT_TRUE(program->type == ASTType::Program);
+	EXPECT_TRUE(program->body.size() == 1);
 }
 
 TEST(InterpreterTest, ShouldThrowRuntimeError) {
@@ -19,7 +19,7 @@ TEST(InterpreterTest, ShouldThrowRuntimeError) {
 		FAIL() << "Expected ZynkError thrown.";
 	}
 	catch (const ZynkError& error) {
-		EXPECT_EQ(error.type, ZynkErrorType::FileOpenError);
+		EXPECT_EQ(error.base_type, ZynkErrorType::FileOpenError);
 	}
 	catch (const std::exception& error) {
 		FAIL() << "Unexpected exception type: " << error.what();

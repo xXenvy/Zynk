@@ -31,10 +31,17 @@ int main(int argc, char* argv[]) {
 	}
 	ZynkInterpreter interpreter;
 	try {
-		const ProgramNode* program = interpreter.interpret_file(cli.args.file_path);
+		const ASTProgram* program = interpreter.interpret_file(cli.args.file_path);
 		delete program;
 	} catch (const ZynkError& error) {
 		error.print();
+		return -1;
+	} catch (const std::exception& unknown_error) {
+		// We don't know what kind of error is this, so let's build a PanicError.
+		ZynkError{
+			ZynkErrorType::PanicError,
+			unknown_error.what()
+		}.print();
 		return -1;
 	}
 }

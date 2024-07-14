@@ -9,16 +9,17 @@ TEST(ParserTest, parseVariable) {
 	const std::vector<Token> tokens = lexer.tokenize();
 	
 	Parser parser(tokens);
-	const ProgramNode* program = parser.parse();
+	const ASTProgram* program = parser.parse();
 	
-	ASSERT_TRUE(program->type == ASTNodeType::Program);
-	ASSERT_TRUE(program->nodes.size() == 1);
-	ASSERT_TRUE(program->nodes.front()->type == ASTNodeType::VariableDeclaration);
+	ASSERT_TRUE(program->type == ASTType::Program);
+	ASSERT_TRUE(program->body.size() == 1);
+	ASSERT_TRUE(program->body.front()->type == ASTType::VariableDeclaration);
 
-	const VariableDeclarationNode* variable = static_cast<VariableDeclarationNode*>(program->nodes.front());
+	const ASTVariableDeclaration* variable = static_cast<ASTVariableDeclaration*>(program->body.front());
 	ASSERT_TRUE(variable->type == "int");
 	ASSERT_TRUE(variable->name == "a");
-	// ASSERT_TRUE(variable->value == "1");
+	const ASTValue* value = static_cast<ASTValue*>(variable->value);
+	ASSERT_TRUE(value->value == "1");
 
 	delete program;
 }
@@ -28,13 +29,13 @@ TEST(ParserTest, parseEmptyFunction) {
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);
-	const ProgramNode* program = parser.parse();
+	const ASTProgram* program = parser.parse();
 
-	ASSERT_TRUE(program->type == ASTNodeType::Program);
-	ASSERT_TRUE(program->nodes.size() == 1);
-	ASSERT_TRUE(program->nodes.front()->type == ASTNodeType::Function);
+	ASSERT_TRUE(program->type == ASTType::Program);
+	ASSERT_TRUE(program->body.size() == 1);
+	ASSERT_TRUE(program->body.front()->type == ASTType::Function);
 
-	const FunctionNode* function = static_cast<FunctionNode*>(program->nodes.front());
+	const ASTFunction* function = static_cast<ASTFunction*>(program->body.front());
 	ASSERT_TRUE(function->name == "main");
 	ASSERT_TRUE(function->body.size() == 0);
 
@@ -51,7 +52,7 @@ TEST(ParserTest, ShouldThrowSyntaxError) {
 		FAIL() << "Expected ZynkError thrown.";
 	}
 	catch (const ZynkError& error) {
-		EXPECT_EQ(error.type, ZynkErrorType::SyntaxError);
+		EXPECT_EQ(error.base_type, ZynkErrorType::SyntaxError);
 	}
 	catch (const std::exception& error) {
 		FAIL() << "Unexpected exception type: " << error.what();
@@ -67,7 +68,7 @@ TEST(ParserTest, ShouldThrowInvalidTypeError) {
 		FAIL() << "Expected ZynkError thrown.";
 	}
 	catch (const ZynkError& error) {
-		EXPECT_EQ(error.type, ZynkErrorType::InvalidTypeError);
+		EXPECT_EQ(error.base_type, ZynkErrorType::InvalidTypeError);
 	}
 	catch (const std::exception& error) {
 		FAIL() << "Unexpected exception type: " << error.what();

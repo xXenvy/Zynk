@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-enum class ASTNodeType {
+enum class ASTType {
     Program,
     Function,
     VariableDeclaration,
@@ -14,79 +14,82 @@ enum class ASTNodeType {
     BinaryOperation
 };
 
-struct ASTNode {
-    ASTNodeType type;
-    ASTNode(ASTNodeType type) : type(type) {}
+struct ASTBase {
+    ASTType type;
+    ASTBase(ASTType type) : type(type) {}
 };
 
-struct ProgramNode : public ASTNode {
-    ProgramNode() : ASTNode(ASTNodeType::Program) {}
+struct ASTProgram : public ASTBase {
+    ASTProgram() : ASTBase(ASTType::Program) {}
 
-    std::vector<ASTNode*> nodes;
+    std::vector<ASTBase*> body;
 
-    ~ProgramNode() {
-        for (ASTNode* node : nodes) {
-            delete node;
+    ~ASTProgram() {
+        for (ASTBase* ast : body) {
+            delete ast;
         }
     }
 };
 
-struct FunctionNode : public ASTNode {
-    FunctionNode() : ASTNode(ASTNodeType::Function) {}
+struct ASTFunction : public ASTBase {
+    ASTFunction(const std::string& name) 
+        : ASTBase(ASTType::Function), name(name) {}
 
     std::string name;
-    std::vector<ASTNode*> body;
+    std::vector<ASTBase*> body;
 
-    ~FunctionNode() {
-        for (ASTNode* node : body) {
+    ~ASTFunction() {
+        for (ASTBase* node : body) {
             delete node;
         }
     }
 };
 
-struct PrintNode : public ASTNode {
-    PrintNode() : ASTNode(ASTNodeType::Print), newLine(true) {}
+struct ASTPrint : public ASTBase {
+    ASTPrint(ASTBase* expr, bool newLine) : 
+        ASTBase(ASTType::Print), newLine(newLine), expression(expr) {}
     bool newLine;
-    ASTNode* expression;
+    ASTBase* expression;
 
-    ~PrintNode() {
+    ~ASTPrint() {
         delete expression;
     }
 };
 
-struct VariableDeclarationNode : public ASTNode {
-    VariableDeclarationNode() : ASTNode(ASTNodeType::VariableDeclaration) {}
+struct ASTVariableDeclaration : public ASTBase {
+    ASTVariableDeclaration(const std::string& name, const std::string& type, ASTBase* value) 
+        : ASTBase(ASTType::VariableDeclaration), name(name), type(type), value(value) {}
     std::string name;
     std::string type;
-    ASTNode* value;
+    ASTBase* value;
 
-    ~VariableDeclarationNode() {
+    ~ASTVariableDeclaration() {
         delete value;
     }
 };
 
-struct ValueNode : public ASTNode {
-    ValueNode(const std::string& value) : ASTNode(ASTNodeType::Value), value(value) {}
+struct ASTValue : public ASTBase {
+    ASTValue(const std::string& value) : ASTBase(ASTType::Value), value(value) {}
     std::string value;
 };
 
-struct VariableNode : public ASTNode {
-    VariableNode(const std::string& name) : ASTNode(ASTNodeType::Variable), name(name) {}
+struct ASTVariable : public ASTBase {
+    ASTVariable(const std::string& name) : ASTBase(ASTType::Variable), name(name) {}
     std::string name;
 };
 
-struct BinaryOperationNode : public ASTNode {
-    BinaryOperationNode(ASTNode* left, const std::string& op, ASTNode* right)
-        : ASTNode(ASTNodeType::BinaryOperation), left(left), op(op), right(right) {}
+struct ASTBinaryOperation : public ASTBase {
+    ASTBinaryOperation(ASTBase* left, const std::string& op, ASTBase* right)
+        : ASTBase(ASTType::BinaryOperation), left(left), op(op), right(right) {}
 
-    ASTNode* left;
+    ASTBase* left;
     std::string op;
-    ASTNode* right;
+    ASTBase* right;
 
-    ~BinaryOperationNode() {
+    ~ASTBinaryOperation() {
         delete left;
         delete right;
     }
 };
 
-#endif
+#endif // AST_H

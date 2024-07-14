@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 
-void displayAST(ASTNode* node, int indent = 0) {
+void displayAST(ASTBase* node, int indent = 0) {
     if (node == nullptr) return;
 
     for (int i = 0; i < indent; ++i) {
@@ -17,48 +17,48 @@ void displayAST(ASTNode* node, int indent = 0) {
     std::cout << "Node type(" << static_cast<int>(node->type) << ") ";
 
     switch (node->type) {
-        case ASTNodeType::Program: {
-            ProgramNode* programNode = static_cast<ProgramNode*>(node);
+        case ASTType::Program: {
+            ASTProgram* programNode = static_cast<ASTProgram*>(node);
             std::cout << "Program: " << std::endl;
-            for (ASTNode* child : programNode->nodes) {
+            for (ASTBase* child : programNode->body) {
                 displayAST(child, indent + 1);
             }
             break;
         }
-        case ASTNodeType::Function: {
-            FunctionNode* funcNode = static_cast<FunctionNode*>(node);
+        case ASTType::Function: {
+            ASTFunction* funcNode = static_cast<ASTFunction*>(node);
             std::cout << "Function: " << funcNode->name << std::endl;
-            for (ASTNode* stmt : funcNode->body) {
+            for (ASTBase* stmt : funcNode->body) {
                 displayAST(stmt, indent + 1);
             }
             break;
         }
-        case ASTNodeType::VariableDeclaration: {
-            VariableDeclarationNode* varNode = static_cast<VariableDeclarationNode*>(node);
+        case ASTType::VariableDeclaration: {
+            ASTVariableDeclaration* varNode = static_cast<ASTVariableDeclaration*>(node);
             std::cout << "VarDeclaration: " << varNode->name << " (" << varNode->type << ")" << std::endl;
             displayAST(varNode->value, indent + 1);
             break;
         }
-        case ASTNodeType::Print: {
-            PrintNode* printNode = static_cast<PrintNode*>(node);
+        case ASTType::Print: {
+            ASTPrint* printNode = static_cast<ASTPrint*>(node);
             std::cout << "PrintStatement: " << "(newLine=" << printNode->newLine << ")" << std::endl;
             displayAST(printNode->expression, indent + 1);
             break;
         }
-        case ASTNodeType::BinaryOperation: {
-            BinaryOperationNode* binOpNode = static_cast<BinaryOperationNode*>(node);
+        case ASTType::BinaryOperation: {
+            ASTBinaryOperation* binOpNode = static_cast<ASTBinaryOperation*>(node);
             std::cout << "BinaryOperation: " << binOpNode->op << std::endl;
             displayAST(binOpNode->left, indent + 1);
             displayAST(binOpNode->right, indent + 1);
             break;
         }
-        case ASTNodeType::Value: {
-            ValueNode* valueNode = static_cast<ValueNode*>(node);
+        case ASTType::Value: {
+            ASTValue* valueNode = static_cast<ASTValue*>(node);
             std::cout << "Value: " << valueNode->value << std::endl;
             break;
         }
-        case ASTNodeType::Variable: {
-            VariableNode* varNode = static_cast<VariableNode*>(node);
+        case ASTType::Variable: {
+            ASTVariable* varNode = static_cast<ASTVariable*>(node);
             std::cout << "Variable: " << varNode->name << std::endl;
             break;
         }
@@ -68,7 +68,7 @@ void displayAST(ASTNode* node, int indent = 0) {
         }
 }
 
-const ProgramNode* ZynkInterpreter::interpret(const std::string& source) {
+const ASTProgram* ZynkInterpreter::interpret(const std::string& source) {
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 
@@ -77,13 +77,13 @@ const ProgramNode* ZynkInterpreter::interpret(const std::string& source) {
     }
 
 	Parser parser(tokens);
-    ProgramNode* node = parser.parse();
+    ASTProgram* node = parser.parse();
     displayAST(node);
 
     return node;
 }
 
-const ProgramNode* ZynkInterpreter::interpret_file(const std::string& filePath) {
+const ASTProgram* ZynkInterpreter::interpret_file(const std::string& filePath) {
 	std::ifstream file(filePath);
     if (!file.is_open()) {
         throw ZynkError{ ZynkErrorType::FileOpenError, "Failed to open a file " + filePath};

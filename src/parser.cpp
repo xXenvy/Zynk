@@ -3,18 +3,18 @@
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 
-ProgramNode* Parser::parse() {
-	ProgramNode* programTree = new ProgramNode();
-
+ASTProgram* Parser::parse() {
+	// Process to parse ProgramNode from provided tokens.
+	ASTProgram* programTree = new ASTProgram();
 	while (!endOfFile()) {
-		programTree->nodes.push_back(parseCurrent());
+		programTree->body.push_back(parseCurrent());
 	}
 	return programTree;
 }
 
-ASTNode* Parser::parseCurrent() {
+ASTBase* Parser::parseCurrent() {
+	// Parses current token.
 	const Token current = currentToken();
-
 	switch (current.type) {
 		case TokenType::DEF:
 			return parseFunction();
@@ -29,27 +29,93 @@ ASTNode* Parser::parseCurrent() {
 	}
 }
 
-ASTNode* Parser::parseExpression(int priority = 0) {
-	return parseBinaryOperation(priority);
-}
+ASTBase* Parser::parseFunction() {
+	const size_t currentLine = currentToken().line;
+	consume({ TokenType::DEF, "def", currentLine });
 
-ASTNode* Parser::parseBinaryOperation(int priority) {
-	ASTNode* left = parsePrimary();
+	const std::string functionName = currentToken().value;
+	ASTFunction* function = new ASTFunction(functionName);
 
-	while (!endOfFile() && isOperator(currentToken().type) && getOperatorPriority(currentToken().type) >= priority) {
-		Token op = currentToken();
-		moveForward();
+	// Function name should be an identifier.
+	consume({ TokenType::IDENTIFIER, functionName, currentLine });
+	consume({ TokenType::LBRACKET, "(", currentLine });
+	consume({ TokenType::RBRACKET, ")", currentLine });
+	consume({ TokenType::LBRACE, "{", currentLine });
 
-		ASTNode* right = parseExpression(getOperatorPriority(op.type) + 1);
-
-		left = new BinaryOperationNode(left, op.value, right);
+	while (currentToken().type != TokenType::RBRACE) {
+		if (endOfFile()) break;
+		function->body.push_back(parseCurrent());
 	}
-
-	return left;
+	consume({ TokenType::RBRACE, "}", currentToken().line });
+	return function;
 }
 
-ASTNode* Parser::parsePrimary() {
+ASTBase* Parser::parseVarDeclaration() {
+	const size_t currentLine = currentToken().line;
+	const std::string varName = currentToken().value;
+	std::string varType;
+
+	consume({ TokenType::IDENTIFIER, varName, currentLine});
+	consume({ TokenType::COLON, ":", currentLine });
+
+	const Token varTypeToken = currentToken();
+	switch (varTypeToken.type) {
+		case TokenType::INT: 
+		case TokenType::FLOAT: 
+		case TokenType::STRING:
+		case TokenType::BOOL:
+			varType = varTypeToken.value;
+			consume(varTypeToken);
+			break;
+		default:
+			throw ZynkError{ 
+				ZynkErrorType::InvalidTypeError,
+				"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
+				&currentLine,
+			};
+	}
+	consume({ TokenType::EQUAL, "=", currentLine });
+	ASTVariableDeclaration* varDeclaration = new ASTVariableDeclaration(
+		varName, varType, parseExpression()
+	);
+	consume({ TokenType::SEMICOLON, ";", currentLine });
+	return varDeclaration;
+}
+
+ASTBase* Parser::parsePrint(bool newLine) {
+	const size_t currentLine = currentToken().line;
+	ASTPrint* print;
+
+	if (newLine) {
+		consume({ TokenType::PRINTLN, "println", currentLine });
+	} else {
+		consume({ TokenType::PRINT, "print", currentLine });
+	}
+	consume({ TokenType::LBRACKET, "(", currentLine });
+
+	switch (currentToken().type) {
+		case TokenType::STRING:
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::BOOL:
+		case TokenType::IDENTIFIER:
+			print = new ASTPrint(parseExpression(), newLine);
+			break;
+		default:
+			throw ZynkError{
+				ZynkErrorType::ExpressionError,
+				"Invalid print expression. Expected value or variable, found: '" + currentToken().value + "' instead.",
+				&currentLine,
+			};
+	}
+	consume({ TokenType::RBRACKET, ")", currentLine });
+	consume({ TokenType::SEMICOLON, ";", currentLine });
+	return print;
+}
+
+ASTBase* Parser::parseExpression() {
 	const Token current = currentToken();
+	ASTBase* primary;
 	moveForward();
 
 	switch (current.type) {
@@ -57,93 +123,33 @@ ASTNode* Parser::parsePrimary() {
 		case TokenType::FLOAT:
 		case TokenType::STRING:
 		case TokenType::BOOL:
-			return new ValueNode(current.value);
+			primary = new ASTValue(current.value);
+			break;
 		case TokenType::IDENTIFIER:
-			return new VariableNode(current.value);
-		default:
-			throw ZynkError{ ZynkErrorType::SyntaxError, "Invalid expression", &current.line };
-	}
-}
-
-ASTNode* Parser::parseFunction() {
-	FunctionNode* function = new FunctionNode;
-	const size_t line = currentToken().line;
-
-	consume({ TokenType::DEF, "def", line });
-	function->name = currentToken().value; // Function name.
-
-	consume({ TokenType::IDENTIFIER, function->name, line });
-	consume({ TokenType::LBRACKET, "(", line });
-	consume({ TokenType::RBRACKET, ")", line });
-	consume({ TokenType::LBRACE, "{", line});
-
-	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
-		function->body.push_back(parseCurrent());
-	}
-	consume({ TokenType::RBRACE, "}", currentToken().line });
-	return function;
-}
-
-ASTNode* Parser::parseVarDeclaration() {
-	VariableDeclarationNode* var = new VariableDeclarationNode{};
-	const size_t currentLine = currentToken().line;
-	var->name = currentToken().value;
-
-	consume({ TokenType::IDENTIFIER, var->name, currentLine});
-	consume({ TokenType::COLON, ":", currentLine });
-
-	const Token varType = currentToken();
-
-	switch (varType.type) {
-		case TokenType::INT: 
-		case TokenType::FLOAT: 
-		case TokenType::STRING:
-		case TokenType::BOOL:
-			var->type = varType.value;
-			consume(varType);
+			primary = new ASTVariable(current.value);
 			break;
 		default:
 			throw ZynkError{ 
-				ZynkErrorType::InvalidTypeError,
-				"Expected: String, bool, float or int. Found: '" + varType.value + "' instead.",
-				&currentLine,
-			};
-	}
-	consume({ TokenType::EQUAL, "=", currentLine });
-	var->value = parseExpression();
-	consume({ TokenType::SEMICOLON, ";", currentLine });
-	return var;
-}
-
-ASTNode* Parser::parsePrint(bool newLine) {
-	PrintNode* print = new PrintNode;
-	const size_t currentLine = currentToken().line;
-	print->newLine = newLine;
-
-	if (newLine) {
-		consume({ TokenType::PRINTLN, "println", currentLine });
-	} else {
-		consume({ TokenType::PRINT, "print", currentLine });
+				ZynkErrorType::ExpressionError, 
+				"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
+				&current.line };
 	}
 
-	consume({ TokenType::LBRACKET, "(", currentLine });
-	switch (currentToken().type) {
-		case TokenType::STRING:
-		case TokenType::INT:
-		case TokenType::FLOAT:
-		case TokenType::BOOL:
-			print->expression = parseExpression();
-			break;
-		default:
-			throw ZynkError{
-				ZynkErrorType::InvalidTypeError,
-				"Invalid print value. Expected: String, bool, float or int.",
-				&currentLine,
-			};
+	while (isOperator(currentToken().type)) {
+		const Token op = currentToken();
+		moveForward();
+
+		if (current.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
+			throw ZynkError( // todo: string concatenation.
+				ZynkErrorType::ExpressionError,
+				"Invalid expression. Cannot perform BinaryOperation on string type.",
+				&current.line
+			);
+		}
+		ASTBase* right = parseExpression();
+		return new ASTBinaryOperation(primary, op.value, right);
 	}
-	consume({ TokenType::RBRACKET, ")", currentLine });
-	consume({ TokenType::SEMICOLON, ";", currentLine });
-	return print;
+	return primary;
 }
 
 bool Parser::endOfFile() const {
@@ -159,19 +165,6 @@ bool Parser::isOperator(TokenType type) const {
 			return true;
 		default:
 			return false;
-	}
-}
-
-int Parser::getOperatorPriority(TokenType type) const {
-	switch (type) {
-		case TokenType::ADD:
-		case TokenType::SUBTRACT:
-			return 1;
-		case TokenType::MULTIPLY:
-		case TokenType::DIVIDE:
-			return 2;
-		default:
-			return 0;
 	}
 }
 
