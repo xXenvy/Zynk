@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 		error.print();
 		return -1;
 	} catch (const std::exception& unknown_error) {
-		// We don't know what kind of error is this, so let's build a PanicError.
+		// Unknown error type, constructing a PanicError.
 		ZynkError{
 			ZynkErrorType::PanicError,
 			unknown_error.what()

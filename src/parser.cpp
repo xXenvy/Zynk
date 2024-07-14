@@ -25,7 +25,7 @@ ASTBase* Parser::parseCurrent() {
 		case TokenType::PRINTLN:
 			return parsePrint(true);
 		default:
-			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented " + current.value, &current.line};
+			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line};
 	}
 }
 

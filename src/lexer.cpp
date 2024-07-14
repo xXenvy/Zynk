@@ -26,10 +26,10 @@ void Lexer::moveForward() {
 Token Lexer::next() {
     while (std::isspace(peek())) moveForward(); // To remove the spaces.
     const char current = peek();
-    const size_t current_line = line;
+    const size_t currentLine = line;
 
     switch (peek()) {
-        case '\0': return Token(TokenType::END_OF_FILE, "EOF", current_line);
+        case '\0': return Token(TokenType::END_OF_FILE, "EOF", currentLine);
         case '"': return string();
         default: {
             if (std::isalpha(current) || current == '_') return identifier();
@@ -39,23 +39,23 @@ Token Lexer::next() {
 
     moveForward();
     switch (current) {
-        case ':': return Token(TokenType::COLON, ":", current_line);
-        case '=': return Token(TokenType::EQUAL, "=", current_line);
-        case '+': return Token(TokenType::ADD, "+", current_line);
-        case '-': return Token(TokenType::SUBTRACT, "-", current_line);
-        case '*': return Token(TokenType::MULTIPLY, "*", current_line);
-        case '/': return Token(TokenType::DIVIDE, "/", current_line);
-        case '{': return Token(TokenType::LBRACE, "{", current_line);
-        case '}': return Token(TokenType::RBRACE, "}", current_line);
-        case ';': return Token(TokenType::SEMICOLON, ";", current_line);
-        case '(': return Token(TokenType::LBRACKET, "(", current_line);
-        case ')': return Token(TokenType::RBRACKET, ")", current_line);
+        case ':': return Token(TokenType::COLON, ":", currentLine);
+        case '=': return Token(TokenType::EQUAL, "=", currentLine);
+        case '+': return Token(TokenType::ADD, "+", currentLine);
+        case '-': return Token(TokenType::SUBTRACT, "-", currentLine);
+        case '*': return Token(TokenType::MULTIPLY, "*", currentLine);
+        case '/': return Token(TokenType::DIVIDE, "/", currentLine);
+        case '{': return Token(TokenType::LBRACE, "{", currentLine);
+        case '}': return Token(TokenType::RBRACE, "}", currentLine);
+        case ';': return Token(TokenType::SEMICOLON, ";", currentLine);
+        case '(': return Token(TokenType::LBRACKET, "(", currentLine);
+        case ')': return Token(TokenType::RBRACKET, ")", currentLine);
         case '!': {
-            if (peek() != '=') return Token(TokenType::UNKNOWN, std::string(1, current), current_line);
+            if (peek() != '=') return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
             moveForward();
-            return Token(TokenType::NOT_EQUAL, "!=", current_line);
+            return Token(TokenType::NOT_EQUAL, "!=", currentLine);
         }
-        default: return Token(TokenType::UNKNOWN, std::string(1, current), current_line);
+        default: return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
     }
 }
 
