@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+
 #include "../src/include/cli.hpp"
+#include "../src/include/errors.hpp"
 
 TEST(CLIArgsTest, FileArgumentShortOption) {
     CLI cli({ "main.zk" });
@@ -48,23 +50,23 @@ TEST(CLIArgsTest, ShouldBeEmpty) {
 
 TEST(CLICheckoutTest, ShouldThrowNoArgumentWasGiven) {
     CLI cli({});
-    EXPECT_THROW(cli.checkout(), std::logic_error);
+    EXPECT_THROW(cli.checkout(), ZynkError);
 }
 
 TEST(CLICheckoutTest, ShouldThrowTooManyArguments) {
     CLI cli({"--file_path main.zk", "--help"});
-    EXPECT_THROW(cli.checkout(), std::logic_error);
+    EXPECT_THROW(cli.checkout(), ZynkError);
 }
 
 TEST(CLIArguments, ShouldBeEmpty) {
-    Arguments args{};
+    Arguments args(0);
     EXPECT_TRUE(args.empty());
 }
 
 TEST(CLIArguments, ShouldNotBeEmpty) {
-    Arguments args{"main.zk", true, true, false};
-    EXPECT_FALSE(args.empty());
+    Arguments args(3, "main.zk", true, true);
 
+    EXPECT_FALSE(args.empty());
     EXPECT_TRUE(args.help);
     EXPECT_TRUE(args.version);
     EXPECT_FALSE(args.init);

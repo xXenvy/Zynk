@@ -11,8 +11,8 @@ int main(int argc, char* argv[]) {
 	CLI cli({ argv + 1, argv + argc });
 	try {
 		cli.checkout();
-	} catch (const std::exception& error) {
-		std::cout << error.what() << std::endl;
+	} catch (const ZynkError& error) {
+		error.print();
 		return -1;
 	}
 	if (cli.args.help) {
@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	ZynkInterpreter interpreter;
+
 	try {
 		const ASTProgram* program = interpreter.interpret_file(cli.args.file_path);
 		delete program;

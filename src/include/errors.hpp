@@ -13,6 +13,7 @@ enum class ZynkErrorType {
     FileOpenError,
     ExpressionError,
     PanicError,
+    CLIError,
 };
 
 struct ZynkError : public std::runtime_error {
@@ -36,6 +37,7 @@ private:
             case ZynkErrorType::FileOpenError: return "FileOpenError";
             case ZynkErrorType::ExpressionError: return "ExpressionError";
             case ZynkErrorType::PanicError: return "PanicError";
+            case ZynkErrorType::CLIError: return "CLIError";
             default: return "UnknownError";
         }
     }

@@ -1,11 +1,12 @@
 #include <iostream>
 #include "include/cli.hpp"
+#include "include/errors.hpp"
 
 bool Arguments::empty() const {
 	return file_path.empty() && !help && !version && !init;
 }
 
-CLI::CLI(const std::vector<std::string>& raw_args) {
+CLI::CLI(const std::vector<std::string>& raw_args) : args(raw_args.size()) {
 	for (const std::string& arg : raw_args) {
 		if (arg.find(".zk", 0) != -1) args.file_path = arg;
 		else if (arg.find("help", 0) != -1) args.help = true;
@@ -16,11 +17,16 @@ CLI::CLI(const std::vector<std::string>& raw_args) {
 
 void CLI::checkout() const {
 	if (args.empty()) {
-		throw std::logic_error("No argument was given. Consider using --help.");
+		throw ZynkError{
+			ZynkErrorType::CLIError,
+			"No argument was given. Consider using --help."
+		};
 	}
-	// Todo: rewrite this.
-	if (!args.file_path.empty() && args.help) {
-		throw std::logic_error("Too many arguments.");
+	if (args.count >= 2) {
+		throw ZynkError{
+			ZynkErrorType::CLIError,
+			"Too many arguments."
+		};
 	}
 }
 

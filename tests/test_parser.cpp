@@ -18,8 +18,7 @@ TEST(ParserTest, parseVariableDeclaration) {
 	const ASTVariableDeclaration* variable = static_cast<ASTVariableDeclaration*>(program->body.front());
 	ASSERT_TRUE(variable->type == "int");
 	ASSERT_TRUE(variable->name == "a");
-	const ASTValue* value = static_cast<ASTValue*>(variable->value);
-	ASSERT_TRUE(value->value == "1");
+	ASSERT_TRUE(static_cast<ASTValue*>(variable->value)->value == "1");
 
 	delete program;
 }
