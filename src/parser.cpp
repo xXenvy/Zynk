@@ -16,16 +16,16 @@ ASTBase* Parser::parseCurrent() {
 	// Parses current token.
 	const Token current = currentToken();
 	switch (current.type) {
-		case TokenType::DEF:
-			return parseFunction();
-		case TokenType::IDENTIFIER:
-			return parseVarDeclaration();
-		case TokenType::PRINT:
-			return parsePrint(false);
-		case TokenType::PRINTLN:
-			return parsePrint(true);
-		default:
-			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line};
+	case TokenType::DEF:
+		return parseFunction();
+	case TokenType::IDENTIFIER:
+		return parseVarDeclaration();
+	case TokenType::PRINT:
+		return parsePrint(false);
+	case TokenType::PRINTLN:
+		return parsePrint(true);
+	default:
+		throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
 	}
 }
 
@@ -55,24 +55,24 @@ ASTBase* Parser::parseVarDeclaration() {
 	const std::string varName = currentToken().value;
 	std::string varType;
 
-	consume({ TokenType::IDENTIFIER, varName, currentLine});
+	consume({ TokenType::IDENTIFIER, varName, currentLine });
 	consume({ TokenType::COLON, ":", currentLine });
 
 	const Token varTypeToken = currentToken();
 	switch (varTypeToken.type) {
-		case TokenType::INT: 
-		case TokenType::FLOAT: 
-		case TokenType::STRING:
-		case TokenType::BOOL:
-			varType = varTypeToken.value;
-			consume(varTypeToken);
-			break;
-		default:
-			throw ZynkError{ 
-				ZynkErrorType::InvalidTypeError,
-				"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
-				&currentLine,
-			};
+	case TokenType::INT:
+	case TokenType::FLOAT:
+	case TokenType::STRING:
+	case TokenType::BOOL:
+		varType = varTypeToken.value;
+		consume(varTypeToken);
+		break;
+	default:
+		throw ZynkError{
+			ZynkErrorType::InvalidTypeError,
+			"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
+			&currentLine,
+		};
 	}
 	consume({ TokenType::EQUAL, "=", currentLine });
 	ASTVariableDeclaration* varDeclaration = new ASTVariableDeclaration(
@@ -88,25 +88,26 @@ ASTBase* Parser::parsePrint(bool newLine) {
 
 	if (newLine) {
 		consume({ TokenType::PRINTLN, "println", currentLine });
-	} else {
+	}
+	else {
 		consume({ TokenType::PRINT, "print", currentLine });
 	}
 	consume({ TokenType::LBRACKET, "(", currentLine });
 
 	switch (currentToken().type) {
-		case TokenType::STRING:
-		case TokenType::INT:
-		case TokenType::FLOAT:
-		case TokenType::BOOL:
-		case TokenType::IDENTIFIER:
-			print = new ASTPrint(parseExpression(), newLine);
-			break;
-		default:
-			throw ZynkError{
-				ZynkErrorType::ExpressionError,
-				"Invalid print expression. Expected value or variable, found: '" + currentToken().value + "' instead.",
-				&currentLine,
-			};
+	case TokenType::STRING:
+	case TokenType::INT:
+	case TokenType::FLOAT:
+	case TokenType::BOOL:
+	case TokenType::IDENTIFIER:
+		print = new ASTPrint(parseExpression(), newLine);
+		break;
+	default:
+		throw ZynkError{
+			ZynkErrorType::ExpressionError,
+			"Invalid print expression. Expected value or variable, found: '" + currentToken().value + "' instead.",
+			&currentLine,
+		};
 	}
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::SEMICOLON, ";", currentLine });
@@ -119,20 +120,20 @@ ASTBase* Parser::parseExpression() {
 	moveForward();
 
 	switch (current.type) {
-		case TokenType::INT:
-		case TokenType::FLOAT:
-		case TokenType::STRING:
-		case TokenType::BOOL:
-			primary = new ASTValue(current.value);
-			break;
-		case TokenType::IDENTIFIER:
-			primary = new ASTVariable(current.value);
-			break;
-		default:
-			throw ZynkError{ 
-				ZynkErrorType::ExpressionError, 
-				"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
-				&current.line };
+	case TokenType::INT:
+	case TokenType::FLOAT:
+	case TokenType::STRING:
+	case TokenType::BOOL:
+		primary = new ASTValue(current.value);
+		break;
+	case TokenType::IDENTIFIER:
+		primary = new ASTVariable(current.value);
+		break;
+	default:
+		throw ZynkError{
+			ZynkErrorType::ExpressionError,
+			"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
+			&current.line };
 	}
 
 	while (isOperator(currentToken().type)) {
@@ -158,13 +159,13 @@ bool Parser::endOfFile() const {
 
 bool Parser::isOperator(TokenType type) const {
 	switch (type) {
-		case TokenType::ADD:
-		case TokenType::SUBTRACT:
-		case TokenType::MULTIPLY:
-		case TokenType::DIVIDE:
-			return true;
-		default:
-			return false;
+	case TokenType::ADD:
+	case TokenType::SUBTRACT:
+	case TokenType::MULTIPLY:
+	case TokenType::DIVIDE:
+		return true;
+	default:
+		return false;
 	}
 }
 
@@ -173,8 +174,8 @@ void Parser::moveForward() {
 }
 
 Token Parser::currentToken() const {
-    if (!endOfFile()) return tokens[position];
-    return { TokenType::END_OF_FILE, "EOF", tokens.back().line};
+	if (!endOfFile()) return tokens[position];
+	return { TokenType::END_OF_FILE, "EOF", tokens.back().line };
 }
 
 Token Parser::consume(Token expected) {
