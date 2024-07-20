@@ -11,16 +11,26 @@ ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name)
         return iterator->second;
     }
     throw ZynkError{
-        ZynkErrorType::VariableNotDefined,
+        ZynkErrorType::NotDefined,
         "Variable '" + name + "' is not defined."
     };
 }
 
-void RuntimeEnvironment::show() {
-    for (const auto& pair : variables) {
-        std::cout << pair.first << std::endl;
-        std::cout << pair.second->type << std::endl;
-        std::cout << static_cast<ASTValue*>(pair.second->value)->value << std::endl;
-        std::cout << std::endl;
+void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* function) {
+    functions[name] = function;
+}
+
+ASTFunction* RuntimeEnvironment::getFunction(const std::string& name) {
+    const auto iterator = functions.find(name);
+    if (iterator != functions.end()) {
+        return iterator->second;
     }
+    throw ZynkError{
+        ZynkErrorType::NotDefined,
+        "Function '" + name + "' is not defined."
+    };
+}
+
+size_t RuntimeEnvironment::size() const {
+    return variables.size();
 }

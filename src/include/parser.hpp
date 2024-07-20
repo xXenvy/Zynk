@@ -18,7 +18,8 @@ private:
 	Token consume(Token expected);
 	Token currentToken() const;
 
-	ASTBase* parseFunction();
+	ASTBase* parseFunctionDeclaration();
+	ASTBase* parseFunctionCall();
 	ASTBase* parseVarDeclaration();
 	ASTBase* parsePrint(bool newLine);
 	ASTBase* parseExpression(int priority);

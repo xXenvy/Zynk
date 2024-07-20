@@ -177,17 +177,17 @@ TEST(LexerTokenizeTest, NotEqualOperator) {
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
-TEST(LexerTokenizeTest, EqualOperator) {
+TEST(LexerTokenizeTest, EqualityOperator) {
 	Lexer lexer("10 == 50;\n\"Test\" == \"ABC\";\n");
 	const std::vector<Token> tokens = lexer.tokenize();
 	int operators = 0;
 
 	for (const Token& token : tokens) {
-		if (token.type == TokenType::EQUAL) operators++;
+		if (token.type == TokenType::EQUALITY) operators++;
 	}
 
-	EXPECT_TRUE(operators == 4);
-	EXPECT_TRUE(tokens.size() == 11);
+	EXPECT_TRUE(operators == 2);
+	EXPECT_TRUE(tokens.size() == 9);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }

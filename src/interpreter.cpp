@@ -27,7 +27,7 @@ void displayAST(ASTBase* node, int indent = 0) {
         }
         break;
     }
-    case ASTType::Function: {
+    case ASTType::FunctionDeclaration: {
         ASTFunction* funcNode = static_cast<ASTFunction*>(node);
         std::cout << "Function: " << funcNode->name << std::endl;
         for (ASTBase* stmt : funcNode->body) {
@@ -85,7 +85,7 @@ const ASTProgram* ZynkInterpreter::interpret(const std::string& source) {
     Evaluator evaluator(env);
     evaluator.evaluate(program);
 
-    displayAST(program);
+    //displayAST(program);
 
     return program; // Consider using shared_ptr
 }

@@ -9,7 +9,7 @@ enum class TokenType {
     INT, FLOAT, STRING, BOOL, // Types.
 
     ADD, SUBTRACT, MULTIPLY, // Operators.
-    DIVIDE, EQUAL, NOT_EQUAL,
+    DIVIDE, EQUAL, NOT_EQUAL, EQUALITY, // Equal is =, Equality is ==
 
     IDENTIFIER, COLON, LBRACE, // Syntax.
     RBRACE, SEMICOLON, LBRACKET,

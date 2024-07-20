@@ -40,7 +40,6 @@ Token Lexer::next() {
     moveForward();
     switch (current) {
         case ':': return Token(TokenType::COLON, ":", currentLine);
-        case '=': return Token(TokenType::EQUAL, "=", currentLine);
         case '+': return Token(TokenType::ADD, "+", currentLine);
         case '-': return Token(TokenType::SUBTRACT, "-", currentLine);
         case '*': return Token(TokenType::MULTIPLY, "*", currentLine);
@@ -50,6 +49,11 @@ Token Lexer::next() {
         case ';': return Token(TokenType::SEMICOLON, ";", currentLine);
         case '(': return Token(TokenType::LBRACKET, "(", currentLine);
         case ')': return Token(TokenType::RBRACKET, ")", currentLine);
+        case '=': {
+            if (peek() != '=') return Token(TokenType::EQUAL, "=", currentLine);
+            moveForward();
+            return Token(TokenType::EQUALITY, "==", currentLine);
+        }
         case '!': {
             if (peek() != '=') return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
             moveForward();

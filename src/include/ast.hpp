@@ -6,7 +6,8 @@
 
 enum class ASTType {
     Program,
-    Function,
+    FunctionDeclaration,
+    FunctionCall,
     VariableDeclaration,
     Print,
     Value,
@@ -33,7 +34,7 @@ struct ASTProgram : public ASTBase {
 
 struct ASTFunction : public ASTBase {
     ASTFunction(const std::string& name) 
-        : ASTBase(ASTType::Function), name(name) {}
+        : ASTBase(ASTType::FunctionDeclaration), name(name) {}
 
     std::string name;
     std::vector<ASTBase*> body;
@@ -43,6 +44,12 @@ struct ASTFunction : public ASTBase {
             delete node;
         }
     }
+};
+
+struct ASTFunctionCall : public ASTBase {
+    ASTFunctionCall(const std::string& name)
+        : ASTBase(ASTType::FunctionCall), name(name) {}
+    std::string name; // Currently we do not support function arguments.
 };
 
 struct ASTPrint : public ASTBase {

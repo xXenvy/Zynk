@@ -41,7 +41,7 @@ TEST(ParserTest, parseMultipleVariableDeclarations) {
 	delete program;
 }
 
-TEST(ParserTest, parseFunction) {
+TEST(ParserTest, parseFunctionDeclaration) {
 	Lexer lexer("def main(){\n    println(10);\n}");
 	const std::vector<Token> tokens = lexer.tokenize();
 
@@ -50,7 +50,7 @@ TEST(ParserTest, parseFunction) {
 
 	ASSERT_TRUE(program->type == ASTType::Program);
 	ASSERT_TRUE(program->body.size() == 1);
-	ASSERT_TRUE(program->body.front()->type == ASTType::Function);
+	ASSERT_TRUE(program->body.front()->type == ASTType::FunctionDeclaration);
 
 	const ASTFunction* function = static_cast<ASTFunction*>(program->body.front());
 	ASSERT_TRUE(function->name == "main");
@@ -75,7 +75,7 @@ TEST(ParserTest, parseEmptyFunction) {
 
 	ASSERT_TRUE(program->type == ASTType::Program);
 	ASSERT_TRUE(program->body.size() == 1);
-	ASSERT_TRUE(program->body.front()->type == ASTType::Function);
+	ASSERT_TRUE(program->body.front()->type == ASTType::FunctionDeclaration);
 
 	const ASTFunction* function = static_cast<ASTFunction*>(program->body.front());
 	ASSERT_TRUE(function->name == "main");

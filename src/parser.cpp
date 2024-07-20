@@ -17,19 +17,22 @@ ASTBase* Parser::parseCurrent() {
 	const Token current = currentToken();
 	switch (current.type) {
 		case TokenType::DEF:
-			return parseFunction();
+			return parseFunctionDeclaration();
 		case TokenType::VARIABLE:
 			return parseVarDeclaration();
 		case TokenType::PRINT:
 			return parsePrint(false);
 		case TokenType::PRINTLN:
 			return parsePrint(true);
+		case TokenType::IDENTIFIER:
+			moveForward();
+			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
 		default:
 			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
 	}
 }
 
-ASTBase* Parser::parseFunction() {
+ASTBase* Parser::parseFunctionDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::DEF, "def", currentLine });
 
@@ -47,6 +50,17 @@ ASTBase* Parser::parseFunction() {
 	}
 	consume({ TokenType::RBRACE, "}", currentToken().line });
 	return function;
+}
+
+ASTBase* Parser::parseFunctionCall() {
+	position--; // We had to jump one position to see if it was a function call.
+	const Token current = currentToken();
+
+	consume({ TokenType::IDENTIFIER, current.value, current.line });
+	consume({ TokenType::LBRACKET, "(", current.line });
+	consume({ TokenType::RBRACKET, ")", current.line });
+	consume({ TokenType::SEMICOLON, ";", current.line });
+	return new ASTFunctionCall(current.value);
 }
 
 ASTBase* Parser::parseVarDeclaration() {
@@ -92,7 +106,6 @@ ASTBase* Parser::parsePrint(bool newLine) {
 	} else {
 		consume({ TokenType::PRINT, "print", currentLine });
 	}
-
 	consume({ TokenType::LBRACKET, "(", currentLine });
 	switch (currentToken().type) {
 		case TokenType::STRING:
@@ -115,15 +128,24 @@ ASTBase* Parser::parsePrint(bool newLine) {
 }
 
 ASTBase* Parser::parseExpression(int priority) {
+	const Token leftToken = currentToken();
 	ASTBase* left = parsePrimaryExpression();
 
 	while (!endOfFile() && isOperator(currentToken().type)) {
 		Token op = currentToken();
 		int opPriority = getPriority(op.type);
-
 		if (opPriority <= priority) break;
-
 		moveForward();
+
+		if (leftToken.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
+			throw ZynkError(
+				ZynkErrorType::ExpressionError,
+				"Invalid expression. Cannot perform BinaryOperation on string type.",
+				&leftToken.line
+			);
+		}
+
+
 		ASTBase* right = parseExpression(opPriority);
 		return new ASTBinaryOperation(left, op.value, right);
 	}
