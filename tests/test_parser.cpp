@@ -5,7 +5,7 @@
 #include "../src/include/errors.hpp"
 
 TEST(ParserTest, parseVariableDeclaration) {
-	Lexer lexer("a: int = 1;");
+	Lexer lexer("var a: int = 1;");
 	const std::vector<Token> tokens = lexer.tokenize();
 	
 	Parser parser(tokens);
@@ -24,7 +24,8 @@ TEST(ParserTest, parseVariableDeclaration) {
 }
 
 TEST(ParserTest, parseMultipleVariableDeclarations) {
-	Lexer lexer("a: int = 1;\nb: float = 1.0;\nc: bool = true;\nd: String = \"Test\";");
+	Lexer lexer("var a: int = 1;\nvar b: float = 1.0;\n"
+		"var c: bool = true; \nvar d: String = \"Test\";");
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);
@@ -85,7 +86,7 @@ TEST(ParserTest, parseEmptyFunction) {
 
 TEST(ParserTest, parseVariableDeclarationWithBinaryOperation) {
 	// 'b' is not defined, but parser doesn't have that context.
-	Lexer lexer("a: float = b + 1.0;");
+	Lexer lexer("var a: float = b + 1.0;");
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);
@@ -109,7 +110,7 @@ TEST(ParserTest, parseVariableDeclarationWithBinaryOperation) {
 
 TEST(ParserTest, parseVariableDeclarationWithComplexExpression) {
 	// 'b' is not defined, but parser doesn't have that context.
-	Lexer lexer("a: float = 1 + 5 * b;");
+	Lexer lexer("var a: float = 1 + 5 * b;");
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);
@@ -179,7 +180,7 @@ TEST(ParserTest, ShouldThrowSyntaxError) {
 }
 
 TEST(ParserTest, ShouldThrowInvalidTypeError) {
-	Lexer lexer("a: abc = 10;"); // Invalid type 'abc'
+	Lexer lexer("var a: abc = 10;"); // Invalid type 'abc'
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);

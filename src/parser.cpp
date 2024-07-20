@@ -18,7 +18,7 @@ ASTBase* Parser::parseCurrent() {
 	switch (current.type) {
 		case TokenType::DEF:
 			return parseFunction();
-		case TokenType::IDENTIFIER:
+		case TokenType::VARIABLE:
 			return parseVarDeclaration();
 		case TokenType::PRINT:
 			return parsePrint(false);
@@ -51,6 +51,8 @@ ASTBase* Parser::parseFunction() {
 
 ASTBase* Parser::parseVarDeclaration() {
 	const size_t currentLine = currentToken().line;
+	consume({ TokenType::VARIABLE, "var", currentLine });
+
 	const std::string varName = currentToken().value;
 	std::string varType;
 

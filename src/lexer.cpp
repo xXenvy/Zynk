@@ -72,6 +72,7 @@ Token Lexer::identifier() {
     if (value == "float") return Token(TokenType::FLOAT, "float", line);
     if (value == "String") return Token(TokenType::STRING, "String", line);
     if (value == "bool") return Token(TokenType::BOOL, "bool", line);
+    if (value == "var") return Token(TokenType::VARIABLE, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 

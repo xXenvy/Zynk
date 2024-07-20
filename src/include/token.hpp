@@ -4,7 +4,7 @@
 #include "string"
 
 enum class TokenType {
-    DEF, PRINTLN, PRINT, // Keywords.
+    DEF, PRINTLN, PRINT, VARIABLE, // Keywords.
 
     INT, FLOAT, STRING, BOOL, // Types.
 
