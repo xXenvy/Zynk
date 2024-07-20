@@ -59,8 +59,9 @@ cmake --build .
 As Zynk progresses towards version 1.0, the following components are planned and required for the interpreter:
 - [x] **Lexer:** Implementing a lexer to tokenize input source code.
 - [x] **Parser:** Developing a parser to parse tokens into an abstract syntax tree (AST).
-- [ ] **Evaluator:** Creating an evaluator to interpret and execute code represented by the AST.
-- [ ] **Runtime:** Implementing a runtime environment responsible for managing execution contexts, memory allocation, and variable scope resolution during program execution.
+- [x] **Evaluator:** Creating an evaluator to interpret and execute code represented by the AST.
+- [x] **Runtime:** Implementing a runtime environment responsible for managing execution contexts, memory allocation, and variable scope resolution during program execution.
+- [ ] **GC:** Implementing a Garbage Collection (GC) system to automatically manage memory, reclaim unused memory.
 - [ ] **Documentation:** Developing thorough documentation that covers usage instructions, language syntax and examples.
 - [ ] **Visual Studio Code Plugin:** Creating a plugin for Visual Studio Code to enhance the development experience for Zynk.
 
