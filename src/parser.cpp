@@ -17,19 +17,22 @@ ASTBase* Parser::parseCurrent() {
 	const Token current = currentToken();
 	switch (current.type) {
 		case TokenType::DEF:
-			return parseFunction();
-		case TokenType::IDENTIFIER:
+			return parseFunctionDeclaration();
+		case TokenType::VARIABLE:
 			return parseVarDeclaration();
 		case TokenType::PRINT:
 			return parsePrint(false);
 		case TokenType::PRINTLN:
 			return parsePrint(true);
+		case TokenType::IDENTIFIER:
+			moveForward();
+			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
 		default:
-			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line};
+			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
 	}
 }
 
-ASTBase* Parser::parseFunction() {
+ASTBase* Parser::parseFunctionDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::DEF, "def", currentLine });
 
@@ -42,33 +45,45 @@ ASTBase* Parser::parseFunction() {
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::LBRACE, "{", currentLine });
 
-	while (currentToken().type != TokenType::RBRACE) {
-		if (endOfFile()) break;
+	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
 		function->body.push_back(parseCurrent());
 	}
 	consume({ TokenType::RBRACE, "}", currentToken().line });
 	return function;
 }
 
+ASTBase* Parser::parseFunctionCall() {
+	position--; // We had to jump one position to see if it was a function call.
+	const Token current = currentToken();
+
+	consume({ TokenType::IDENTIFIER, current.value, current.line });
+	consume({ TokenType::LBRACKET, "(", current.line });
+	consume({ TokenType::RBRACKET, ")", current.line });
+	consume({ TokenType::SEMICOLON, ";", current.line });
+	return new ASTFunctionCall(current.value);
+}
+
 ASTBase* Parser::parseVarDeclaration() {
 	const size_t currentLine = currentToken().line;
+	consume({ TokenType::VARIABLE, "var", currentLine });
+
 	const std::string varName = currentToken().value;
 	std::string varType;
 
-	consume({ TokenType::IDENTIFIER, varName, currentLine});
+	consume({ TokenType::IDENTIFIER, varName, currentLine });
 	consume({ TokenType::COLON, ":", currentLine });
 
 	const Token varTypeToken = currentToken();
 	switch (varTypeToken.type) {
-		case TokenType::INT: 
-		case TokenType::FLOAT: 
+		case TokenType::INT:
+		case TokenType::FLOAT:
 		case TokenType::STRING:
 		case TokenType::BOOL:
 			varType = varTypeToken.value;
 			consume(varTypeToken);
 			break;
 		default:
-			throw ZynkError{ 
+			throw ZynkError{
 				ZynkErrorType::InvalidTypeError,
 				"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
 				&currentLine,
@@ -76,7 +91,7 @@ ASTBase* Parser::parseVarDeclaration() {
 	}
 	consume({ TokenType::EQUAL, "=", currentLine });
 	ASTVariableDeclaration* varDeclaration = new ASTVariableDeclaration(
-		varName, varType, parseExpression()
+		varName, varType, parseExpression(0)
 	);
 	consume({ TokenType::SEMICOLON, ";", currentLine });
 	return varDeclaration;
@@ -92,14 +107,13 @@ ASTBase* Parser::parsePrint(bool newLine) {
 		consume({ TokenType::PRINT, "print", currentLine });
 	}
 	consume({ TokenType::LBRACKET, "(", currentLine });
-
 	switch (currentToken().type) {
 		case TokenType::STRING:
 		case TokenType::INT:
 		case TokenType::FLOAT:
 		case TokenType::BOOL:
 		case TokenType::IDENTIFIER:
-			print = new ASTPrint(parseExpression(), newLine);
+			print = new ASTPrint(parseExpression(0), newLine);
 			break;
 		default:
 			throw ZynkError{
@@ -113,9 +127,33 @@ ASTBase* Parser::parsePrint(bool newLine) {
 	return print;
 }
 
-ASTBase* Parser::parseExpression() {
+ASTBase* Parser::parseExpression(int priority) {
+	const Token leftToken = currentToken();
+	ASTBase* left = parsePrimaryExpression();
+
+	while (!endOfFile() && isOperator(currentToken().type)) {
+		Token op = currentToken();
+		int opPriority = getPriority(op.type);
+		if (opPriority <= priority) break;
+		moveForward();
+
+		if (leftToken.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
+			throw ZynkError(
+				ZynkErrorType::ExpressionError,
+				"Invalid expression. Cannot perform BinaryOperation on string type.",
+				&leftToken.line
+			);
+		}
+
+
+		ASTBase* right = parseExpression(opPriority);
+		return new ASTBinaryOperation(left, op.value, right);
+	}
+	return left;
+}
+
+ASTBase* Parser::parsePrimaryExpression() {
 	const Token current = currentToken();
-	ASTBase* primary;
 	moveForward();
 
 	switch (current.type) {
@@ -123,33 +161,16 @@ ASTBase* Parser::parseExpression() {
 		case TokenType::FLOAT:
 		case TokenType::STRING:
 		case TokenType::BOOL:
-			primary = new ASTValue(current.value);
-			break;
+			return new ASTValue(current.value);
 		case TokenType::IDENTIFIER:
-			primary = new ASTVariable(current.value);
-			break;
+			return new ASTVariable(current.value);
 		default:
-			throw ZynkError{ 
-				ZynkErrorType::ExpressionError, 
-				"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
-				&current.line };
-	}
-
-	while (isOperator(currentToken().type)) {
-		const Token op = currentToken();
-		moveForward();
-
-		if (current.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
-			throw ZynkError( // todo: string concatenation.
+			throw ZynkError{
 				ZynkErrorType::ExpressionError,
-				"Invalid expression. Cannot perform BinaryOperation on string type.",
+				"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
 				&current.line
-			);
-		}
-		ASTBase* right = parseExpression();
-		return new ASTBinaryOperation(primary, op.value, right);
+			};
 	}
-	return primary;
 }
 
 bool Parser::endOfFile() const {
@@ -172,9 +193,22 @@ void Parser::moveForward() {
 	if (!endOfFile()) position++;
 }
 
+int Parser::getPriority(TokenType type) const {
+	switch (type) {
+		case TokenType::MULTIPLY:
+		case TokenType::DIVIDE:
+			return 2;
+		case TokenType::ADD:
+		case TokenType::SUBTRACT:
+			return 1;
+		default:
+			return 0;
+	}
+}
+
 Token Parser::currentToken() const {
-    if (!endOfFile()) return tokens[position];
-    return { TokenType::END_OF_FILE, "EOF", tokens.back().line};
+	if (!endOfFile()) return tokens[position];
+	return { TokenType::END_OF_FILE, "EOF", tokens.back().line };
 }
 
 Token Parser::consume(Token expected) {

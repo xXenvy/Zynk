@@ -5,6 +5,7 @@ set(Sources
     test_lexer.cpp
     test_interpreter.cpp
     test_parser.cpp
+    test_evaluator.cpp
 )
 set(GoogleTestVersion v1.14.0)
 

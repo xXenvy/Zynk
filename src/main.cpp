@@ -25,12 +25,12 @@ int main(int argc, char* argv[]) {
 	}
 	if (cli.args.init) {
 		std::ofstream initfile("main.zk");
-		initfile << "def main() {\n    println(\"Hello Pimpki!\"); \n}\n";
+		initfile << "def main() {\n    println(\"Hello Pimpki!\"); \n}\nmain();";
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
-	ZynkInterpreter interpreter;
 
+	ZynkInterpreter interpreter;
 	try {
 		const ASTProgram* program = interpreter.interpret_file(cli.args.file_path);
 		delete program;
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 		// Unknown error type, constructing a PanicError.
 		ZynkError{
 			ZynkErrorType::PanicError,
-			unknown_error.what()
+			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknown_error.what() + "\".\n"
 		}.print();
 		return -1;
 	}

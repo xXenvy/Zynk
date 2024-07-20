@@ -10,6 +10,7 @@ enum class ZynkErrorType {
     RuntimeError,
     UnknownError,
     InvalidTypeError,
+    NotDefined,
     FileOpenError,
     ExpressionError,
     PanicError,
@@ -38,6 +39,7 @@ private:
             case ZynkErrorType::ExpressionError: return "ExpressionError";
             case ZynkErrorType::PanicError: return "PanicError";
             case ZynkErrorType::CLIError: return "CLIError";
+            case ZynkErrorType::NotDefined: return "NotDefined";
             default: return "UnknownError";
         }
     }
