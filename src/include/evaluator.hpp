@@ -14,8 +14,8 @@ private:
     RuntimeEnvironment env;
 
     std::string evaluateExpression(ASTBase* expression);
-    std::string evaluateBinaryOperation(ASTBinaryOperation* operation);
 
+    void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     void evaluateProgram(ASTProgram* program);
     void evaluateFunction(ASTFunction* function);
     void evaluatePrint(ASTPrint* print);

@@ -10,6 +10,7 @@ private:
 	size_t position = 0;
 
 	void moveForward();
+	int getPriority(TokenType type) const;
 
 	bool endOfFile() const;
 	bool isOperator(TokenType type) const;
@@ -20,7 +21,8 @@ private:
 	ASTBase* parseFunction();
 	ASTBase* parseVarDeclaration();
 	ASTBase* parsePrint(bool newLine);
-	ASTBase* parseExpression();
+	ASTBase* parseExpression(int priority);
+	ASTBase* parsePrimaryExpression();
 public:
 	Parser(const std::vector<Token>& tokens);
 	ASTProgram* parse();

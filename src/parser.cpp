@@ -16,16 +16,16 @@ ASTBase* Parser::parseCurrent() {
 	// Parses current token.
 	const Token current = currentToken();
 	switch (current.type) {
-	case TokenType::DEF:
-		return parseFunction();
-	case TokenType::IDENTIFIER:
-		return parseVarDeclaration();
-	case TokenType::PRINT:
-		return parsePrint(false);
-	case TokenType::PRINTLN:
-		return parsePrint(true);
-	default:
-		throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
+		case TokenType::DEF:
+			return parseFunction();
+		case TokenType::IDENTIFIER:
+			return parseVarDeclaration();
+		case TokenType::PRINT:
+			return parsePrint(false);
+		case TokenType::PRINTLN:
+			return parsePrint(true);
+		default:
+			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
 	}
 }
 
@@ -42,8 +42,7 @@ ASTBase* Parser::parseFunction() {
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::LBRACE, "{", currentLine });
 
-	while (currentToken().type != TokenType::RBRACE) {
-		if (endOfFile()) break;
+	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
 		function->body.push_back(parseCurrent());
 	}
 	consume({ TokenType::RBRACE, "}", currentToken().line });
@@ -60,23 +59,23 @@ ASTBase* Parser::parseVarDeclaration() {
 
 	const Token varTypeToken = currentToken();
 	switch (varTypeToken.type) {
-	case TokenType::INT:
-	case TokenType::FLOAT:
-	case TokenType::STRING:
-	case TokenType::BOOL:
-		varType = varTypeToken.value;
-		consume(varTypeToken);
-		break;
-	default:
-		throw ZynkError{
-			ZynkErrorType::InvalidTypeError,
-			"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
-			&currentLine,
-		};
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::STRING:
+		case TokenType::BOOL:
+			varType = varTypeToken.value;
+			consume(varTypeToken);
+			break;
+		default:
+			throw ZynkError{
+				ZynkErrorType::InvalidTypeError,
+				"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
+				&currentLine,
+			};
 	}
 	consume({ TokenType::EQUAL, "=", currentLine });
 	ASTVariableDeclaration* varDeclaration = new ASTVariableDeclaration(
-		varName, varType, parseExpression()
+		varName, varType, parseExpression(0)
 	);
 	consume({ TokenType::SEMICOLON, ";", currentLine });
 	return varDeclaration;
@@ -88,69 +87,66 @@ ASTBase* Parser::parsePrint(bool newLine) {
 
 	if (newLine) {
 		consume({ TokenType::PRINTLN, "println", currentLine });
-	}
-	else {
+	} else {
 		consume({ TokenType::PRINT, "print", currentLine });
 	}
-	consume({ TokenType::LBRACKET, "(", currentLine });
 
+	consume({ TokenType::LBRACKET, "(", currentLine });
 	switch (currentToken().type) {
-	case TokenType::STRING:
-	case TokenType::INT:
-	case TokenType::FLOAT:
-	case TokenType::BOOL:
-	case TokenType::IDENTIFIER:
-		print = new ASTPrint(parseExpression(), newLine);
-		break;
-	default:
-		throw ZynkError{
-			ZynkErrorType::ExpressionError,
-			"Invalid print expression. Expected value or variable, found: '" + currentToken().value + "' instead.",
-			&currentLine,
-		};
+		case TokenType::STRING:
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::BOOL:
+		case TokenType::IDENTIFIER:
+			print = new ASTPrint(parseExpression(0), newLine);
+			break;
+		default:
+			throw ZynkError{
+				ZynkErrorType::ExpressionError,
+				"Invalid print expression. Expected value or variable, found: '" + currentToken().value + "' instead.",
+				&currentLine,
+			};
 	}
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::SEMICOLON, ";", currentLine });
 	return print;
 }
 
-ASTBase* Parser::parseExpression() {
+ASTBase* Parser::parseExpression(int priority) {
+	ASTBase* left = parsePrimaryExpression();
+
+	while (!endOfFile() && isOperator(currentToken().type)) {
+		Token op = currentToken();
+		int opPriority = getPriority(op.type);
+
+		if (opPriority <= priority) break;
+
+		moveForward();
+		ASTBase* right = parseExpression(opPriority);
+		return new ASTBinaryOperation(left, op.value, right);
+	}
+	return left;
+}
+
+ASTBase* Parser::parsePrimaryExpression() {
 	const Token current = currentToken();
-	ASTBase* primary;
 	moveForward();
 
 	switch (current.type) {
-	case TokenType::INT:
-	case TokenType::FLOAT:
-	case TokenType::STRING:
-	case TokenType::BOOL:
-		primary = new ASTValue(current.value);
-		break;
-	case TokenType::IDENTIFIER:
-		primary = new ASTVariable(current.value);
-		break;
-	default:
-		throw ZynkError{
-			ZynkErrorType::ExpressionError,
-			"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
-			&current.line };
-	}
-
-	while (isOperator(currentToken().type)) {
-		const Token op = currentToken();
-		moveForward();
-
-		if (current.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
-			throw ZynkError( // todo: string concatenation.
+		case TokenType::INT:
+		case TokenType::FLOAT:
+		case TokenType::STRING:
+		case TokenType::BOOL:
+			return new ASTValue(current.value);
+		case TokenType::IDENTIFIER:
+			return new ASTVariable(current.value);
+		default:
+			throw ZynkError{
 				ZynkErrorType::ExpressionError,
-				"Invalid expression. Cannot perform BinaryOperation on string type.",
+				"Invalid expression. Expected value or variable, found: '" + current.value + "' instead.",
 				&current.line
-			);
-		}
-		ASTBase* right = parseExpression();
-		return new ASTBinaryOperation(primary, op.value, right);
+			};
 	}
-	return primary;
 }
 
 bool Parser::endOfFile() const {
@@ -159,18 +155,31 @@ bool Parser::endOfFile() const {
 
 bool Parser::isOperator(TokenType type) const {
 	switch (type) {
-	case TokenType::ADD:
-	case TokenType::SUBTRACT:
-	case TokenType::MULTIPLY:
-	case TokenType::DIVIDE:
-		return true;
-	default:
-		return false;
+		case TokenType::ADD:
+		case TokenType::SUBTRACT:
+		case TokenType::MULTIPLY:
+		case TokenType::DIVIDE:
+			return true;
+		default:
+			return false;
 	}
 }
 
 void Parser::moveForward() {
 	if (!endOfFile()) position++;
+}
+
+int Parser::getPriority(TokenType type) const {
+	switch (type) {
+		case TokenType::MULTIPLY:
+		case TokenType::DIVIDE:
+			return 2;
+		case TokenType::ADD:
+		case TokenType::SUBTRACT:
+			return 1;
+		default:
+			return 0;
+	}
 }
 
 Token Parser::currentToken() const {

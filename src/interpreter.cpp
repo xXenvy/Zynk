@@ -87,7 +87,7 @@ const ASTProgram* ZynkInterpreter::interpret(const std::string& source) {
 
     displayAST(program);
 
-    return program;
+    return program; // Consider using shared_ptr
 }
 
 const ASTProgram* ZynkInterpreter::interpret_file(const std::string& filePath) {
