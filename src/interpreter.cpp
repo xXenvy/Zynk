@@ -75,7 +75,7 @@ void displayAST(std::shared_ptr<ASTBase> node, int indent = 0) {
     }
 }
 
-const std::shared_ptr<ASTProgram> ZynkInterpreter::interpret(const std::string& source) {
+std::shared_ptr<ASTProgram> ZynkInterpreter::interpret(const std::string& source) {
     Lexer lexer(source);
     const std::vector<Token> tokens = lexer.tokenize();
 
@@ -95,7 +95,7 @@ const std::shared_ptr<ASTProgram> ZynkInterpreter::interpret(const std::string& 
     return program; // Consider using shared_ptr
 }
 
-const std::shared_ptr<ASTProgram> ZynkInterpreter::interpret_file(const std::string& filePath) {
+std::shared_ptr<ASTProgram> ZynkInterpreter::interpret_file(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
         throw ZynkError{ ZynkErrorType::FileOpenError, "Failed to open a file " + filePath };

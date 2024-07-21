@@ -1,7 +1,7 @@
 #include "include/runtime.hpp"
 #include "include/errors.hpp"
 
-void RuntimeEnvironment::declareVariable(const std::string& name, std::shared_ptr<ASTVariableDeclaration> variable) {
+void RuntimeEnvironment::declareVariable(const std::string& name, const std::shared_ptr<ASTVariableDeclaration> variable) {
 	variables[name] = variable;
 }
 
@@ -16,7 +16,7 @@ std::shared_ptr<ASTVariableDeclaration> RuntimeEnvironment::getVariable(const st
     };
 }
 
-void RuntimeEnvironment::declareFunction(const std::string& name, std::shared_ptr<ASTFunction> function) {
+void RuntimeEnvironment::declareFunction(const std::string& name, const std::shared_ptr<ASTFunction> function) {
     functions[name] = function;
 }
 

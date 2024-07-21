@@ -17,7 +17,7 @@ enum class ZynkErrorType {
     CLIError,
 };
 
-struct ZynkError : public std::runtime_error {
+struct ZynkError : public std::runtime_error { // Consider using templates for type
     const ZynkErrorType base_type;
     const size_t* line;
 

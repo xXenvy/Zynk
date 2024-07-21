@@ -91,7 +91,7 @@ std::shared_ptr<ASTBase> Parser::parseVariableDeclaration() {
 			};
 	}
 	consume({ TokenType::EQUAL, "=", currentLine });
-	auto varDeclaration = std::make_shared<ASTVariableDeclaration>(
+	const auto varDeclaration = std::make_shared<ASTVariableDeclaration>(
 		varName, varType, parseExpression(0)
 	);
 	consume({ TokenType::SEMICOLON, ";", currentLine });
