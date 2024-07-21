@@ -157,7 +157,7 @@ std::shared_ptr<ASTBase> Parser::parseExpression(int priority) {
 				&leftToken.line
 			);
 		}
-		std::shared_ptr<ASTBase> right = parseExpression(opPriority + 1);
+		std::shared_ptr<ASTBase> right = parseExpression(opPriority);
 		left = std::make_shared<ASTBinaryOperation>(left, op.value, right);
 	}
 	return left;
