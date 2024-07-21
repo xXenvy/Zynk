@@ -3,23 +3,23 @@
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 
-ASTProgram* Parser::parse() {
+std::shared_ptr<ASTProgram> Parser::parse() {
 	// Process to parse ProgramNode from provided tokens.
-	ASTProgram* programTree = new ASTProgram();
+	std::shared_ptr<ASTProgram> programTree = std::make_shared<ASTProgram>();
 	while (!endOfFile()) {
 		programTree->body.push_back(parseCurrent());
 	}
 	return programTree;
 }
 
-ASTBase* Parser::parseCurrent() {
+std::shared_ptr<ASTBase> Parser::parseCurrent() {
 	// Parses current token.
 	const Token current = currentToken();
 	switch (current.type) {
 		case TokenType::DEF:
 			return parseFunctionDeclaration();
 		case TokenType::VARIABLE:
-			return parseVarDeclaration();
+			return parseVariableDeclaration();
 		case TokenType::PRINT:
 			return parsePrint(false);
 		case TokenType::PRINTLN:
@@ -27,17 +27,18 @@ ASTBase* Parser::parseCurrent() {
 		case TokenType::IDENTIFIER:
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
+			if (currentToken().type == TokenType::EQUAL) return parseVariableModify();
 		default:
 			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
 	}
 }
 
-ASTBase* Parser::parseFunctionDeclaration() {
+std::shared_ptr<ASTBase> Parser::parseFunctionDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::DEF, "def", currentLine });
 
 	const std::string functionName = currentToken().value;
-	ASTFunction* function = new ASTFunction(functionName);
+	std::shared_ptr<ASTFunction> function = std::make_shared<ASTFunction>(functionName);
 
 	// Function name should be an identifier.
 	consume({ TokenType::IDENTIFIER, functionName, currentLine });
@@ -52,7 +53,7 @@ ASTBase* Parser::parseFunctionDeclaration() {
 	return function;
 }
 
-ASTBase* Parser::parseFunctionCall() {
+std::shared_ptr<ASTBase> Parser::parseFunctionCall() {
 	position--; // We had to jump one position to see if it was a function call.
 	const Token current = currentToken();
 
@@ -60,10 +61,10 @@ ASTBase* Parser::parseFunctionCall() {
 	consume({ TokenType::LBRACKET, "(", current.line });
 	consume({ TokenType::RBRACKET, ")", current.line });
 	consume({ TokenType::SEMICOLON, ";", current.line });
-	return new ASTFunctionCall(current.value);
+	return std::make_shared<ASTFunctionCall>(current.value);
 }
 
-ASTBase* Parser::parseVarDeclaration() {
+std::shared_ptr<ASTBase> Parser::parseVariableDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::VARIABLE, "var", currentLine });
 
@@ -90,16 +91,28 @@ ASTBase* Parser::parseVarDeclaration() {
 			};
 	}
 	consume({ TokenType::EQUAL, "=", currentLine });
-	ASTVariableDeclaration* varDeclaration = new ASTVariableDeclaration(
+	auto varDeclaration = std::make_shared<ASTVariableDeclaration>(
 		varName, varType, parseExpression(0)
 	);
 	consume({ TokenType::SEMICOLON, ";", currentLine });
 	return varDeclaration;
 }
 
-ASTBase* Parser::parsePrint(bool newLine) {
+std::shared_ptr<ASTBase> Parser::parseVariableModify() {
+	position--; // We had to jump one position to see if it was a var modify.
+	const Token current = currentToken();
+
+	consume({ TokenType::IDENTIFIER, current.value, current.line});
+	consume({ TokenType::EQUAL, "=", current.line });
+	std::shared_ptr<ASTBase> newValue = parseExpression(0);
+	consume({ TokenType::SEMICOLON, ";", current.line });
+
+	return std::make_shared<ASTVariableModify>(current.value, newValue);
+}
+
+std::shared_ptr<ASTBase> Parser::parsePrint(bool newLine) {
 	const size_t currentLine = currentToken().line;
-	ASTPrint* print;
+	std::shared_ptr<ASTPrint> print;
 
 	if (newLine) {
 		consume({ TokenType::PRINTLN, "println", currentLine });
@@ -113,7 +126,7 @@ ASTBase* Parser::parsePrint(bool newLine) {
 		case TokenType::FLOAT:
 		case TokenType::BOOL:
 		case TokenType::IDENTIFIER:
-			print = new ASTPrint(parseExpression(0), newLine);
+			print = std::make_shared<ASTPrint>(parseExpression(0), newLine);
 			break;
 		default:
 			throw ZynkError{
@@ -127,9 +140,9 @@ ASTBase* Parser::parsePrint(bool newLine) {
 	return print;
 }
 
-ASTBase* Parser::parseExpression(int priority) {
+std::shared_ptr<ASTBase> Parser::parseExpression(int priority) {
 	const Token leftToken = currentToken();
-	ASTBase* left = parsePrimaryExpression();
+	std::shared_ptr<ASTBase> left = parsePrimaryExpression();
 
 	while (!endOfFile() && isOperator(currentToken().type)) {
 		Token op = currentToken();
@@ -144,15 +157,13 @@ ASTBase* Parser::parseExpression(int priority) {
 				&leftToken.line
 			);
 		}
-
-
-		ASTBase* right = parseExpression(opPriority);
-		return new ASTBinaryOperation(left, op.value, right);
+		std::shared_ptr<ASTBase> right = parseExpression(opPriority + 1);
+		left = std::make_shared<ASTBinaryOperation>(left, op.value, right);
 	}
 	return left;
 }
 
-ASTBase* Parser::parsePrimaryExpression() {
+std::shared_ptr<ASTBase> Parser::parsePrimaryExpression() {
 	const Token current = currentToken();
 	moveForward();
 
@@ -161,9 +172,9 @@ ASTBase* Parser::parsePrimaryExpression() {
 		case TokenType::FLOAT:
 		case TokenType::STRING:
 		case TokenType::BOOL:
-			return new ASTValue(current.value);
+			return std::make_shared<ASTValue>(current.value);
 		case TokenType::IDENTIFIER:
-			return new ASTVariable(current.value);
+			return std::make_shared<ASTVariable>(current.value);
 		default:
 			throw ZynkError{
 				ZynkErrorType::ExpressionError,

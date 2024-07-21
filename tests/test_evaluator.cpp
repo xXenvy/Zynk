@@ -12,14 +12,13 @@ TEST(EvaluatorTest, VariableInitializationTest) {
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);
-	ASTProgram* program = parser.parse();
+	const auto program = parser.parse();
 
 	RuntimeEnvironment env;
 	Evaluator evaluator(env);
 	evaluator.evaluate(program);
 
 	ASSERT_EQ(evaluator.variablesCount(), 2);
-	delete program;
 }
 
 TEST(EvaluatorTest, VariableAssignmentAndArithmeticTest) {
@@ -28,12 +27,11 @@ TEST(EvaluatorTest, VariableAssignmentAndArithmeticTest) {
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	Parser parser(tokens);
-	ASTProgram* program = parser.parse();
+	const auto program = parser.parse();
 
 	RuntimeEnvironment env;
 	Evaluator evaluator(env);
 	evaluator.evaluate(program);
 
 	ASSERT_EQ(evaluator.variablesCount(), 2);
-	delete program;
 }

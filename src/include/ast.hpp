@@ -3,12 +3,15 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+
 
 enum class ASTType {
     Program,
     FunctionDeclaration,
     FunctionCall,
     VariableDeclaration,
+    VariableModify,
     Print,
     Value,
     Variable,
@@ -18,61 +21,46 @@ enum class ASTType {
 struct ASTBase {
     ASTType type;
     ASTBase(ASTType type) : type(type) {}
+    virtual ~ASTBase() = default;
 };
 
 struct ASTProgram : public ASTBase {
     ASTProgram() : ASTBase(ASTType::Program) {}
-
-    std::vector<ASTBase*> body;
-
-    ~ASTProgram() {
-        for (ASTBase* ast : body) {
-            delete ast;
-        }
-    }
+    std::vector<std::shared_ptr<ASTBase>> body;
 };
 
 struct ASTFunction : public ASTBase {
     ASTFunction(const std::string& name) 
         : ASTBase(ASTType::FunctionDeclaration), name(name) {}
-
     std::string name;
-    std::vector<ASTBase*> body;
-
-    ~ASTFunction() {
-        for (ASTBase* node : body) {
-            delete node;
-        }
-    }
+    std::vector<std::shared_ptr<ASTBase>> body;
 };
 
 struct ASTFunctionCall : public ASTBase {
-    ASTFunctionCall(const std::string& name)
-        : ASTBase(ASTType::FunctionCall), name(name) {}
+    ASTFunctionCall(const std::string& name) : ASTBase(ASTType::FunctionCall), name(name) {}
     std::string name; // Currently we do not support function arguments.
 };
 
 struct ASTPrint : public ASTBase {
-    ASTPrint(ASTBase* expr, bool newLine) : 
+    ASTPrint(std::shared_ptr<ASTBase> expr, bool newLine) :
         ASTBase(ASTType::Print), newLine(newLine), expression(expr) {}
     bool newLine;
-    ASTBase* expression;
-
-    ~ASTPrint() {
-        delete expression;
-    }
+    std::shared_ptr<ASTBase> expression;
 };
 
 struct ASTVariableDeclaration : public ASTBase {
-    ASTVariableDeclaration(const std::string& name, const std::string& type, ASTBase* value) 
+    ASTVariableDeclaration(const std::string& name, const std::string& type, std::shared_ptr<ASTBase> value)
         : ASTBase(ASTType::VariableDeclaration), name(name), type(type), value(value) {}
     std::string name;
     std::string type;
-    ASTBase* value;
+    std::shared_ptr<ASTBase> value;
+};
 
-    ~ASTVariableDeclaration() {
-        delete value;
-    }
+struct ASTVariableModify: public ASTBase {
+    ASTVariableModify(const std::string& name, std::shared_ptr<ASTBase> value)
+        : ASTBase(ASTType::VariableModify), name(name), value(value) {}
+    std::string name;
+    std::shared_ptr<ASTBase> value;
 };
 
 struct ASTValue : public ASTBase {
@@ -86,17 +74,11 @@ struct ASTVariable : public ASTBase {
 };
 
 struct ASTBinaryOperation : public ASTBase {
-    ASTBinaryOperation(ASTBase* left, const std::string& op, ASTBase* right)
+    ASTBinaryOperation(std::shared_ptr<ASTBase> left, const std::string& op, std::shared_ptr<ASTBase> right)
         : ASTBase(ASTType::BinaryOperation), left(left), op(op), right(right) {}
-
-    ASTBase* left;
+    std::shared_ptr<ASTBase> left;
     std::string op;
-    ASTBase* right;
-
-    ~ASTBinaryOperation() {
-        delete left;
-        delete right;
-    }
+    std::shared_ptr<ASTBase> right;
 };
 
 #endif // AST_H

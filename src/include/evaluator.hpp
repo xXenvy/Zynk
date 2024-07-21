@@ -8,17 +8,18 @@
 class Evaluator {
 public:
     Evaluator(RuntimeEnvironment& env);
-    void evaluate(ASTBase* ast);
+    void evaluate(std::shared_ptr<ASTBase> ast);
     size_t variablesCount() const;
 private:
     RuntimeEnvironment env;
 
-    std::string evaluateExpression(ASTBase* expression);
-    void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
-    void evaluateProgram(ASTProgram* program);
-    void evaluateFunctionDeclaration(ASTFunction* function);
-    void evaluateFunctionCall(ASTFunctionCall* functionCall);
-    void evaluatePrint(ASTPrint* print);
+    std::string evaluateExpression(std::shared_ptr<ASTBase> expression);
+    void evaluateVariableDeclaration(std::shared_ptr<ASTVariableDeclaration> variable);
+    void evaluateVariableModify(std::shared_ptr<ASTVariableModify> variableModify);
+    void evaluateProgram(std::shared_ptr<ASTProgram> program);
+    void evaluateFunctionDeclaration(std::shared_ptr<ASTFunction> function);
+    void evaluateFunctionCall(std::shared_ptr<ASTFunctionCall> functionCall);
+    void evaluatePrint(std::shared_ptr<ASTPrint> print);
 };
 
 template <typename T>

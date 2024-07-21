@@ -1,11 +1,11 @@
 #include "include/runtime.hpp"
 #include "include/errors.hpp"
 
-void RuntimeEnvironment::declareVariable(const std::string& name, ASTVariableDeclaration* variable) {
+void RuntimeEnvironment::declareVariable(const std::string& name, std::shared_ptr<ASTVariableDeclaration> variable) {
 	variables[name] = variable;
 }
 
-ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name) {
+std::shared_ptr<ASTVariableDeclaration> RuntimeEnvironment::getVariable(const std::string& name) {
     const auto iterator = variables.find(name);
     if (iterator != variables.end()) {
         return iterator->second;
@@ -16,11 +16,11 @@ ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name)
     };
 }
 
-void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* function) {
+void RuntimeEnvironment::declareFunction(const std::string& name, std::shared_ptr<ASTFunction> function) {
     functions[name] = function;
 }
 
-ASTFunction* RuntimeEnvironment::getFunction(const std::string& name) {
+std::shared_ptr<ASTFunction> RuntimeEnvironment::getFunction(const std::string& name) {
     const auto iterator = functions.find(name);
     if (iterator != functions.end()) {
         return iterator->second;
