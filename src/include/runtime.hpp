@@ -1,25 +1,29 @@
 #ifndef RUNTIME_H
 #define RUNTIME_H
 
-#include "ast.hpp"
+#include "block.hpp"
+#include "gc.hpp"
 
-#include <map>
-#include <string>
-
+#include <memory>
+#include <stack>
 
 class RuntimeEnvironment {
 public:
-	size_t size() const;
+    RuntimeEnvironment();
 
-	void declareFunction(const std::string& name, const std::shared_ptr<ASTFunction> function);
-	std::shared_ptr<ASTFunction> getFunction(const std::string& name);
+    void declareVariable(const std::string& name, const std::shared_ptr<ASTVariableDeclaration> value);
+    std::shared_ptr<ASTVariableDeclaration> getVariable(const std::string& name);
+    void declareFunction(const std::string& name, const std::shared_ptr<ASTFunction> func);
+    std::shared_ptr<ASTFunction> getFunction(const std::string& name);
 
-	void declareVariable(const std::string& name, std::shared_ptr<ASTVariableDeclaration> variable);
-	std::shared_ptr<ASTVariableDeclaration> getVariable(const std::string& name);
+    std::shared_ptr<Block> currentBlock();
+    void collectGarbage();
+    void enterNewBlock();
+    void exitCurrentBlock();
 private:
-	std::map<std::string, std::shared_ptr<ASTVariableDeclaration>> variables;
-	std::map<std::string, std::shared_ptr<ASTFunction>> functions;
+    std::shared_ptr<Block> globalBlock;
+    std::stack<std::shared_ptr<Block>> blockStack;
+    GarbageCollector gc;
 };
-
 
 #endif // RUNTIME_H

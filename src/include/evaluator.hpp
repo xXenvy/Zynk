@@ -3,13 +3,11 @@
 
 #include "runtime.hpp"
 #include "ast.hpp"
-#include <string>
 
 class Evaluator {
 public:
     Evaluator(RuntimeEnvironment& env);
     void evaluate(const std::shared_ptr<ASTBase> ast);
-    size_t variablesCount() const;
 private:
     RuntimeEnvironment env;
 

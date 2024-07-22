@@ -79,19 +79,20 @@ std::shared_ptr<ASTProgram> ZynkInterpreter::interpret(const std::string& source
     Lexer lexer(source);
     const std::vector<Token> tokens = lexer.tokenize();
 
-    for (const Token& token : tokens) {
-        std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
-    }
+    // for (const Token& token : tokens) {
+        // std::cout << "Token(" << static_cast<int>(token.type) << ", \"" << token.value << "\")\n";
+    // }
 
     Parser parser(tokens);
     const std::shared_ptr<ASTProgram> program = parser.parse();
+    // displayAST(program);
     
     RuntimeEnvironment env;
     Evaluator evaluator(env);
     evaluator.evaluate(program);
 
-    displayAST(program);
-
+    // const auto var = env.getVariable("x");
+    // std::cout << std::dynamic_pointer_cast<ASTValue>(var->value)->value << std::endl;
     return program; // Consider using shared_ptr
 }
 
