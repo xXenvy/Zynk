@@ -23,36 +23,18 @@ void GarbageCollector::mark(const std::shared_ptr<GCObject> obj) {
 }
 
 void GarbageCollector::sweep() {
-    std::cout << "GC: Running garbage collection..." << std::endl;
-
     for (auto it = trackingObjects.begin(); it != trackingObjects.end();) {
         if (!(*it)->isMarked()) {
-            const std::shared_ptr<ASTBase> obj = it->get()->value;
-
-            switch (obj->type) {
-                case ASTType::FunctionDeclaration:
-                    std::cout << "GC: Func declaration found: " << std::static_pointer_cast<ASTFunction>(obj)->name << std::endl;
-                    break;
-                case ASTType::VariableDeclaration:
-                    std::cout << "GC: Var declaration found: '" << std::static_pointer_cast<ASTVariableDeclaration>(obj)->name << "' deleting..." << std::endl;
-                    break;
-                default:
-                    std::cout << "GC: Element found! " << static_cast<int>(it->get()->value->type) << std::endl;
-
-            }
-
             it = trackingObjects.erase(it);
-        }
-        else {
-            (*it)->unmark();
+        } else {
             ++it;
         }
     }
 }
 
-void GarbageCollector::collectGarbage(const std::shared_ptr<Block> rootBlock) {
-    markBlock(rootBlock);
-    sweep();
+void GarbageCollector::collectGarbage(const std::shared_ptr<Block> block) {
+    markBlock(block); // Mark the current block to avoid deleting the necessary objects.
+    sweep(); // Delete objects which are not marked.
 }
 
 void GarbageCollector::markBlock(const std::shared_ptr<Block> block) {
@@ -64,8 +46,5 @@ void GarbageCollector::markBlock(const std::shared_ptr<Block> block) {
     for (const auto& funcPair : block->functions) {
         mark(funcPair.second);
     }
-
-    if (block->parentBlock) {
-        markBlock(block->parentBlock);
-    }
+    if (block->parentBlock) markBlock(block->parentBlock);
 }
