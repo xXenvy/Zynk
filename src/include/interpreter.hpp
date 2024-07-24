@@ -6,8 +6,8 @@
 
 class ZynkInterpreter {
 public:
-    const ASTProgram* interpret(const std::string& source);
-    const ASTProgram* interpret_file(const std::string& file_path);
+    void interpret(const std::string& source);
+    void interpret_file(const std::string& file_path);
 };
 
 #endif // INTERPRETER_H

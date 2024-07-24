@@ -7,6 +7,7 @@ set(Sources
 	parser.cpp
 	runtime.cpp
 	evaluator.cpp
+	gc.cpp
 )
 set(Headers
 	include/cli.hpp
@@ -17,6 +18,8 @@ set(Headers
 	include/errors.hpp
 	include/runtime.hpp
 	include/evaluator.hpp
+	include/gc.hpp
+	include/block.hpp
 )
 add_library(ZynkLib ${Sources} ${Headers})
 add_executable(Zynk main.cpp ${Sources} ${Headers})

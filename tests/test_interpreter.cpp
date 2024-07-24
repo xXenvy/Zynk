@@ -2,18 +2,9 @@
 #include "../src/include/interpreter.hpp"
 #include "../src/include/errors.hpp"
 
-TEST(InterpreterTest, Basic) {
-	// For now there is no need to test the interpreter stronger, 
-	// as most things are tested in the lexer anyway.
-	ZynkInterpreter interpreter;
-	const ASTProgram* program = interpreter.interpret("def main123() {}\n");
-
-	EXPECT_TRUE(program->type == ASTType::Program);
-	EXPECT_TRUE(program->body.size() == 1);
-	delete program;
-}
-
 TEST(InterpreterTest, ShouldThrowFileOpenError) {
+	// For now there is no need to test the interpreter stronger, 
+	// as most things are tested in other tests anyway.
     ZynkInterpreter interpreter;
 	try {
 		interpreter.interpret_file("invalidfile.zk");

@@ -10,14 +10,15 @@ enum class ZynkErrorType {
     RuntimeError,
     UnknownError,
     InvalidTypeError,
-    NotDefined,
+    NotDefinedError,
     FileOpenError,
     ExpressionError,
     PanicError,
     CLIError,
+    DuplicateDeclarationError,
 };
 
-struct ZynkError : public std::runtime_error {
+struct ZynkError : public std::runtime_error { // Consider using templates for type
     const ZynkErrorType base_type;
     const size_t* line;
 
@@ -39,7 +40,8 @@ private:
             case ZynkErrorType::ExpressionError: return "ExpressionError";
             case ZynkErrorType::PanicError: return "PanicError";
             case ZynkErrorType::CLIError: return "CLIError";
-            case ZynkErrorType::NotDefined: return "NotDefined";
+            case ZynkErrorType::NotDefinedError: return "NotDefinedError";
+            case ZynkErrorType::DuplicateDeclarationError: return "DuplicateDeclarationError";
             default: return "UnknownError";
         }
     }

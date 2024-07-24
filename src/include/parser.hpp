@@ -18,15 +18,16 @@ private:
 	Token consume(Token expected);
 	Token currentToken() const;
 
-	ASTBase* parseFunctionDeclaration();
-	ASTBase* parseFunctionCall();
-	ASTBase* parseVarDeclaration();
-	ASTBase* parsePrint(bool newLine);
-	ASTBase* parseExpression(int priority);
-	ASTBase* parsePrimaryExpression();
+	std::shared_ptr<ASTBase> parseFunctionDeclaration();
+	std::shared_ptr<ASTBase> parseFunctionCall();
+	std::shared_ptr<ASTBase> parseVariableDeclaration();
+	std::shared_ptr<ASTBase> parseVariableModify();
+	std::shared_ptr<ASTBase> parsePrint(bool newLine);
+	std::shared_ptr<ASTBase> parseExpression(int priority);
+	std::shared_ptr<ASTBase> parsePrimaryExpression();
 public:
 	Parser(const std::vector<Token>& tokens);
-	ASTProgram* parse();
-	ASTBase* parseCurrent();
+	std::shared_ptr<ASTProgram> parse();
+	std::shared_ptr<ASTBase> parseCurrent();
 };
 #endif // PARSER_H

@@ -15,7 +15,6 @@ TEST(LexerTokenizeTest, PrintlnKeyword) {
 			ASSERT_TRUE(keywords == token.line);
 		}
 	}
-
 	EXPECT_TRUE(keywords == 3);
 	EXPECT_TRUE(tokens.size() == 16);
 	EXPECT_TRUE(tokens.front().type == TokenType::PRINTLN);
@@ -30,7 +29,6 @@ TEST(LexerTokenizeTest, PrintKeyword) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::PRINT) keywords++;
 	}
-
 	EXPECT_TRUE(keywords == 3);
 	EXPECT_TRUE(tokens.size() == 16);
 	EXPECT_TRUE(tokens.front().type == TokenType::PRINT);
@@ -83,7 +81,6 @@ TEST(LexerTokenizeTest, IntVariableDefinitions) {
 			type_counter++;
 		}
 	}
-
 	EXPECT_TRUE(tokens.size() == 19);
 	EXPECT_TRUE(type_counter == 3 && tokens.back().line == 3);
 	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
@@ -102,7 +99,6 @@ TEST(LexerTokenizeTest, FloatVariableDefinitions) {
 			type_counter++;
 		}
 	}
-
 	EXPECT_TRUE(tokens.size() == 19);
 	EXPECT_TRUE(type_counter == 3);
 	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
@@ -121,7 +117,6 @@ TEST(LexerTokenizeTest, StringVariableDefinitions) {
 			type_counter++;
 		}
 	}
-
 	EXPECT_TRUE(tokens.size() == 13);
 	EXPECT_TRUE(type_counter == 2);
 	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
@@ -140,7 +135,6 @@ TEST(LexerTokenizeTest, BoolVariableDefinitions) {
 			type_counter++;
 		}
 	}
-
 	EXPECT_TRUE(tokens.size() == 19);
 	EXPECT_TRUE(type_counter == 3);
 	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
@@ -155,7 +149,6 @@ TEST(LexerTokenizeTest, ManySemicolons) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::SEMICOLON) semicolons++;
 	}
-
 	EXPECT_TRUE(semicolons == 12);
 	EXPECT_TRUE(tokens.size() == 13);
 	EXPECT_TRUE(tokens.front().type == TokenType::SEMICOLON);
@@ -170,7 +163,6 @@ TEST(LexerTokenizeTest, NotEqualOperator) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::NOT_EQUAL) operators++;
 	}
-
 	EXPECT_TRUE(operators == 2);
 	EXPECT_TRUE(tokens.size() == 14);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
@@ -185,7 +177,6 @@ TEST(LexerTokenizeTest, EqualityOperator) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::EQUALITY) operators++;
 	}
-
 	EXPECT_TRUE(operators == 2);
 	EXPECT_TRUE(tokens.size() == 9);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
@@ -200,7 +191,6 @@ TEST(LexerTokenizeTest, AddOperator) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::ADD) operators++;
 	}
-
 	EXPECT_TRUE(operators == 2);
 	EXPECT_TRUE(tokens.size() == 9);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
@@ -215,7 +205,6 @@ TEST(LexerTokenizeTest, SubtractOperator) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::SUBTRACT) operators++;
 	}
-
 	EXPECT_TRUE(operators == 2);
 	EXPECT_TRUE(tokens.size() == 9);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
@@ -230,7 +219,6 @@ TEST(LexerTokenizeTest, MultiplyOperator) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::MULTIPLY) operators++;
 	}
-
 	EXPECT_TRUE(operators == 3);
 	EXPECT_TRUE(tokens.size() == 13);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
@@ -245,9 +233,35 @@ TEST(LexerTokenizeTest, DivideOperator) {
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::DIVIDE) operators++;
 	}
-
 	EXPECT_TRUE(operators == 3);
 	EXPECT_TRUE(tokens.size() == 13);
 	EXPECT_TRUE(tokens.front().type == TokenType::INT);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, Brackets) {
+	Lexer lexer("(10);\n{10};");
+	const std::vector<Token> tokens = lexer.tokenize();
+	int lbrackets = 0;
+	int rbrackets = 0;
+
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::LBRACKET || token.type == TokenType::LBRACE) lbrackets++;
+		if (token.type == TokenType::RBRACKET || token.type == TokenType::RBRACE) rbrackets++;
+	}
+	EXPECT_EQ(lbrackets, 2);
+	EXPECT_EQ(rbrackets, 2);
+	EXPECT_EQ(tokens.size(), 9);
+	EXPECT_EQ(tokens.front().type, TokenType::LBRACKET);
+	EXPECT_EQ(tokens.back().type, TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, UnterminatedString) {
+	Lexer lexer("\"Unfinished string;");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_EQ(tokens.size(), 2);
+	EXPECT_EQ(tokens.front().type, TokenType::UNKNOWN);
+	EXPECT_EQ(tokens.front().value, "Unterminated string");
+	EXPECT_EQ(tokens.back().type, TokenType::END_OF_FILE);
 }

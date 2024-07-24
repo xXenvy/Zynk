@@ -1,68 +1,82 @@
 #include "include/evaluator.hpp"
 #include "include/errors.hpp"
+#include <memory>
 
 Evaluator::Evaluator(RuntimeEnvironment& env) : env(env) {};
 
-void Evaluator::evaluate(ASTBase* ast) {
+void Evaluator::evaluate(const std::shared_ptr<ASTBase> ast) {
     switch (ast->type) {
         case ASTType::Program:
-            evaluateProgram(static_cast<ASTProgram*>(ast));
+            evaluateProgram(std::static_pointer_cast<ASTProgram>(ast));
             break;
         case ASTType::FunctionDeclaration:
-            evaluateFunctionDeclaration(static_cast<ASTFunction*>(ast));
+            evaluateFunctionDeclaration(std::static_pointer_cast<ASTFunction>(ast));
             break;
         case ASTType::FunctionCall:
-            evaluateFunctionCall(static_cast<ASTFunctionCall*>(ast));
+            evaluateFunctionCall(std::static_pointer_cast<ASTFunctionCall>(ast));
             break;
         case ASTType::VariableDeclaration:
-            evaluateVariableDeclaration(static_cast<ASTVariableDeclaration*>(ast));
+            evaluateVariableDeclaration(std::static_pointer_cast<ASTVariableDeclaration>(ast));
+            break;
+        case ASTType::VariableModify:
+            evaluateVariableModify(std::static_pointer_cast<ASTVariableModify>(ast));
             break;
         case ASTType::Print:
-            evaluatePrint(static_cast<ASTPrint*>(ast));
+            evaluatePrint(std::static_pointer_cast<ASTPrint>(ast));
             break;
         default:
             throw ZynkError{ ZynkErrorType::RuntimeError, "Unknown AST type." };
     }
 }
 
-void Evaluator::evaluateProgram(ASTProgram* program) {
-    for (ASTBase* child : program->body) {
+void Evaluator::evaluateProgram(const std::shared_ptr<ASTProgram> program) {
+    env.enterNewBlock(); // Main program code block.
+    for (const std::shared_ptr<ASTBase>& child : program->body) {
         evaluate(child);
     }
+    env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
 }
 
-void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
+void Evaluator::evaluateFunctionDeclaration(const std::shared_ptr<ASTFunction> function) {
     env.declareFunction(function->name, function);
 }
 
-void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
-    ASTFunction* func = static_cast<ASTFunction*>(env.getFunction(functionCall->name));
-    for (ASTBase* child : func->body) {
+void Evaluator::evaluateFunctionCall(std::shared_ptr<ASTFunctionCall> functionCall) {
+    const auto func = env.getFunction(functionCall->name);
+
+    env.enterNewBlock();
+    for (std::shared_ptr<ASTBase> child : func->body) {
         evaluate(child);
     }
+    env.exitCurrentBlock();
 }
 
-void Evaluator::evaluatePrint(ASTPrint* print) {
+void Evaluator::evaluatePrint(std::shared_ptr<ASTPrint> print) {
     const std::string value = evaluateExpression(print->expression);
     std::cout << value << (print->newLine ? "\n" : "");
 }
 
-void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
+void Evaluator::evaluateVariableDeclaration(const std::shared_ptr<ASTVariableDeclaration> declaration) {
     env.declareVariable(declaration->name, declaration);
 }
 
-std::string Evaluator::evaluateExpression(ASTBase* expression) {
+void Evaluator::evaluateVariableModify(const std::shared_ptr<ASTVariableModify> variableModify) {
+    // const auto declaration = env.getVariable(variableModify->name);
+    // declaration->value = variableModify->value;
+}
+
+std::string Evaluator::evaluateExpression(const std::shared_ptr<ASTBase> expression) {
     switch (expression->type) {
         case ASTType::Value:
-            return static_cast<ASTValue*>(expression)->value;
+            return std::static_pointer_cast<ASTValue>(expression)->value;
         case ASTType::Variable: {
-            const ASTVariable* var = static_cast<ASTVariable*>(expression);
+            const auto var = std::static_pointer_cast<ASTVariable>(expression);
             return evaluateExpression(env.getVariable(var->name)->value);
         };
         case ASTType::BinaryOperation: {
-            ASTBinaryOperation* operation = static_cast<ASTBinaryOperation*>(expression);
-            std::string left = evaluateExpression(operation->left);
-            std::string right = evaluateExpression(operation->right);
+            const auto operation = std::static_pointer_cast<ASTBinaryOperation>(expression);
+            const std::string left = evaluateExpression(operation->left);
+            const std::string right = evaluateExpression(operation->right);
             try {
                 return calculate<std::string>(left, right, operation->op);
             } catch (const std::invalid_argument) {
@@ -77,30 +91,29 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
     }
 }
 
-size_t Evaluator::variablesCount() const {
-    return env.size();
-}
-
 template <typename T>
-T calculate(T left, T right, const std::string& op) {
+T calculate(const T& left, const T& right, const std::string& op) {
     if (op == "*") return left * right;
-    if (op == "/") return left / right;
     if (op == "-") return left - right;
     if (op == "+") return left + right;
+    if (op == "/") {
+        if (right == 0) throw ZynkError{ ZynkErrorType::RuntimeError, "division by zero" };
+        return left / right;
+    }
     throw ZynkError{ZynkErrorType::RuntimeError, "Invalid operator: " + op + "."};
 }
 
 template <>
-std::string calculate<std::string>(std::string left_value, std::string right_value, const std::string& op) {
+std::string calculate<std::string>(const std::string& left_value, const std::string& right_value, const std::string& op) {
     const bool leftIsFloat = left_value.find('.') != std::string::npos;
     const bool rightIsFloat = right_value.find('.') != std::string::npos;
 
     if (leftIsFloat || rightIsFloat) {
-        float left = std::stof(left_value);
-        float right = std::stof(right_value);
+        const float left = std::stof(left_value);
+        const float right = std::stof(right_value);
         return std::to_string(calculate(left, right, op));
     }
-    int left = std::stoi(left_value);
-    int right = std::stoi(right_value);
+    const int left = std::stoi(left_value);
+    const int right = std::stoi(right_value);
     return std::to_string(calculate(left, right, op));
 }
