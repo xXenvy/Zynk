@@ -45,10 +45,10 @@ cd build
 > Command to build project depends on your system.
 ```shell
 cmake ..
-cmake --build .
+cmake --build . --config Release
 ```
 
-5. Once the compilation is complete, you can run the Zynk interpreter from the `src/Debug` directory:
+5. Once the compilation is complete, you can run the Zynk interpreter from the `src` directory:
 ```shell
 ./Zynk
  ```
@@ -61,7 +61,7 @@ As Zynk progresses towards version 1.0, the following components are planned and
 - [x] **Parser:** Developing a parser to parse tokens into an abstract syntax tree (AST).
 - [x] **Evaluator:** Creating an evaluator to interpret and execute code represented by the AST.
 - [x] **Runtime:** Implementing a runtime environment responsible for managing execution contexts, memory allocation, and variable scope resolution during program execution.
-- [ ] **GC:** Implementing a Garbage Collection (GC) system to automatically manage memory, reclaim unused memory.
+- [x] **GC:** Implementing a Garbage Collection (GC) system to automatically manage memory, reclaim unused memory.
 - [ ] **Documentation:** Developing thorough documentation that covers usage instructions, language syntax and examples.
 - [ ] **Visual Studio Code Plugin:** Creating a plugin for Visual Studio Code to enhance the development experience for Zynk.
 
