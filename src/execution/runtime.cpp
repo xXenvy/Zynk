@@ -1,5 +1,5 @@
+#include "../include/errors.hpp"
 #include "include/runtime.hpp"
-#include "include/errors.hpp"
 #include <cassert>
 
 RuntimeEnvironment::RuntimeEnvironment() : globalBlock(std::make_shared<Block>()) {}

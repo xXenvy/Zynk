@@ -1,8 +1,8 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
+#include "../../parsing/include/ast.hpp"
 #include "runtime.hpp"
-#include "ast.hpp"
 
 class Evaluator {
 public:

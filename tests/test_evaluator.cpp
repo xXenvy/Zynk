@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "../src/include/evaluator.hpp"
-#include "../src/include/runtime.hpp"
-#include "../src/include/parser.hpp"
-#include "../src/include/lexer.hpp"
+#include "../src/execution/include/evaluator.hpp"
+#include "../src/execution/include/runtime.hpp"
+#include "../src/parsing/include/parser.hpp"
+#include "../src/parsing/include/lexer.hpp"
 #include "../src/include/errors.hpp"
 
 TEST(EvaluatorTest, EvaluatePrintStatement) {

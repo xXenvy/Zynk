@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../src/include/parser.hpp"
-#include "../src/include/lexer.hpp"
+#include "../src/parsing/include/parser.hpp"
+#include "../src/parsing/include/lexer.hpp"
 #include "../src/include/errors.hpp"
 
 TEST(ParserTest, parseVariableDeclaration) {

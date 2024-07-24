@@ -1,5 +1,5 @@
+#include "../include/errors.hpp"
 #include "include/parser.hpp"
-#include "include/errors.hpp"
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 

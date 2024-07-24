@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include "../src/include/block.hpp"
-#include "../src/include/ast.hpp"
+
+#include "../src/gc/include/block.hpp"
+#include "../src/parsing/include/ast.hpp"
 
 std::shared_ptr<GCObject> produceGCObject(ASTType astType);
 

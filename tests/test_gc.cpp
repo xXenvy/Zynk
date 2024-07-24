@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "../src/include/gc.hpp"
 #include <vector>
+#include "../src/gc/include/gc.hpp"
 
 std::shared_ptr<GCObject> produceGCObject(ASTType astType) {
     return std::make_shared<GCObject>(GCObject(std::make_shared<ASTBase>(astType)));

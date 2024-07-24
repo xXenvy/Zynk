@@ -1,5 +1,5 @@
+#include "../include/errors.hpp"
 #include "include/evaluator.hpp"
-#include "include/errors.hpp"
 #include <memory>
 
 Evaluator::Evaluator(RuntimeEnvironment& env) : env(env) {};

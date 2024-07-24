@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../src/include/runtime.hpp"
-#include "../src/include/ast.hpp"
+#include "../src/execution/include/runtime.hpp"
+#include "../src/parsing/include/ast.hpp"
 #include "../src/include/errors.hpp"
 
 TEST(RuntimeEnvironmentTest, VariableDeclaration) {
