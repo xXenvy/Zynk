@@ -60,7 +60,7 @@ void Evaluator::evaluateVariableDeclaration(const std::shared_ptr<ASTVariableDec
     env.declareVariable(declaration->name, declaration);
 }
 
-void Evaluator::evaluateVariableModify(const std::shared_ptr<ASTVariableModify> variableModify) {
+void Evaluator::evaluateVariableModify([[maybe_unused]] const std::shared_ptr<ASTVariableModify> variableModify) {
     // const auto declaration = env.getVariable(variableModify->name);
     // declaration->value = variableModify->value;
 }
