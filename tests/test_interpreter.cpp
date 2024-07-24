@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "../src/include/interpreter.hpp"
-#include "../src/include/errors.hpp"
+#include "../src/execution/include/interpreter.hpp"
+#include "../src/common/include/errors.hpp"
 
 TEST(InterpreterTest, ShouldThrowFileOpenError) {
 	// For now there is no need to test the interpreter stronger, 

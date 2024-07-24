@@ -1,11 +1,11 @@
 #include "include/interpreter.hpp"
-#include "include/errors.hpp"
 
-#include "parsing/include/lexer.hpp"
-#include "parsing/include/parser.hpp"
-#include "parsing/include/ast.hpp"
-#include "execution/include/evaluator.hpp"
-#include "execution/include/runtime.hpp"
+#include "../common/include/errors.hpp"
+#include "../parsing/include/lexer.hpp"
+#include "../parsing/include/parser.hpp"
+#include "../parsing/include/ast.hpp"
+#include "../execution/include/evaluator.hpp"
+#include "../execution/include/runtime.hpp"
 
 #include <fstream>
 #include <sstream>

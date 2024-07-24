@@ -4,7 +4,7 @@
 #include "../src/execution/include/runtime.hpp"
 #include "../src/parsing/include/parser.hpp"
 #include "../src/parsing/include/lexer.hpp"
-#include "../src/include/errors.hpp"
+#include "../src/common/include/errors.hpp"
 
 TEST(EvaluatorTest, EvaluatePrintStatement) {
 	const std::string code = "println(\"Hello, World!\");";
