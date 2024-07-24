@@ -5,11 +5,6 @@
 TEST(InterpreterTest, Basic) {
 	// For now there is no need to test the interpreter stronger, 
 	// as most things are tested in the lexer anyway.
-	ZynkInterpreter interpreter;
-	const auto program = interpreter.interpret("def main123() {}\n");
-
-	EXPECT_TRUE(program->type == ASTType::Program);
-	EXPECT_TRUE(program->body.size() == 1);
 }
 
 TEST(InterpreterTest, ShouldThrowFileOpenError) {

@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
 
 	ZynkInterpreter interpreter;
 	try {
-		const auto program = interpreter.interpret_file(cli.args.file_path);
+		interpreter.interpret_file(cli.args.file_path);
 	} catch (const ZynkError& error) {
 		error.print();
 		return -1;

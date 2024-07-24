@@ -26,8 +26,9 @@ private:
 
     std::unordered_set<std::shared_ptr<GCObject>> trackingObjects;
 public:
-    void collectGarbage(const std::shared_ptr<Block> rootScope);
+    void collectGarbage(const std::shared_ptr<Block> protectedBlock);
     void mark(const std::shared_ptr<GCObject> obj);
+    size_t size() const;
 };
 
 #endif // GC_H

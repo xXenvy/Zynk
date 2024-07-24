@@ -13,8 +13,11 @@ public:
 
     void declareVariable(const std::string& name, const std::shared_ptr<ASTVariableDeclaration> value);
     std::shared_ptr<ASTVariableDeclaration> getVariable(const std::string& name);
+    bool isVariableDeclared(const std::string& name);
+
     void declareFunction(const std::string& name, const std::shared_ptr<ASTFunction> func);
     std::shared_ptr<ASTFunction> getFunction(const std::string& name);
+    bool isFunctionDeclared(const std::string& name);
 
     std::shared_ptr<Block> currentBlock();
     void collectGarbage();

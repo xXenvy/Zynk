@@ -48,3 +48,7 @@ void GarbageCollector::markBlock(const std::shared_ptr<Block> block) {
     }
     if (block->parentBlock) markBlock(block->parentBlock);
 }
+
+size_t GarbageCollector::size() const {
+    return trackingObjects.size();
+}

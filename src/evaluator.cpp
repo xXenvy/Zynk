@@ -34,7 +34,7 @@ void Evaluator::evaluateProgram(const std::shared_ptr<ASTProgram> program) {
     for (const std::shared_ptr<ASTBase>& child : program->body) {
         evaluate(child);
     }
-    env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory.
+    env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
 }
 
 void Evaluator::evaluateFunctionDeclaration(const std::shared_ptr<ASTFunction> function) {
