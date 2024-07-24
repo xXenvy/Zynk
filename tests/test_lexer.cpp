@@ -7,7 +7,7 @@
 TEST(LexerTokenizeTest, PrintlnKeyword) {
 	Lexer lexer("println(10);\nprintln(\"TEST\");\nprintln(1.5);");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int keywords = 0;
+	size_t keywords = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::PRINTLN) {
@@ -24,7 +24,7 @@ TEST(LexerTokenizeTest, PrintlnKeyword) {
 TEST(LexerTokenizeTest, PrintKeyword) {
 	Lexer lexer("print(10);\nprint(\"TEST\");\nprint(1.5);");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int keywords = 0;
+	size_t keywords = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::PRINT) keywords++;
@@ -73,7 +73,7 @@ TEST(LexerTokenizeTest, IntVariableDefinitions) {
 	const std::string source = "a: int = 10;\nb: int = 01;\nc: int = 321321321323232;";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
-	int type_counter = 0;
+	size_t type_counter = 0;
 
 	for (const Token& token : tokens) {
 		if (token.value == "int") {
@@ -91,7 +91,7 @@ TEST(LexerTokenizeTest, FloatVariableDefinitions) {
 	const std::string source = "a: float = 10.0;\nb: float = 0.1;\nc: float = 32132132.1323232;";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
-	int type_counter = 0;
+	size_t type_counter = 0;
 
 	for (const Token& token : tokens) {
 		if (token.value == "float") {
@@ -109,7 +109,7 @@ TEST(LexerTokenizeTest, StringVariableDefinitions) {
 	const std::string source = "a: String = \"Test\";\nb: String = \"AB123#@\";\n";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
-	int type_counter = 0;
+	size_t type_counter = 0;
 
 	for (const Token& token : tokens) {
 		if (token.value == "String") {
@@ -127,7 +127,7 @@ TEST(LexerTokenizeTest, BoolVariableDefinitions) {
 	const std::string source = "a: bool = false;\nb: bool = true;\nc: bool = false;";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
-	int type_counter = 0;
+	size_t type_counter = 0;
 
 	for (const Token& token : tokens) {
 		if (token.value == "bool") {
@@ -144,7 +144,7 @@ TEST(LexerTokenizeTest, BoolVariableDefinitions) {
 TEST(LexerTokenizeTest, ManySemicolons) {
 	Lexer lexer(";;;\n;;;\n;;;;;;");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int semicolons = 0;
+	size_t semicolons = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::SEMICOLON) semicolons++;
@@ -158,7 +158,7 @@ TEST(LexerTokenizeTest, ManySemicolons) {
 TEST(LexerTokenizeTest, NotEqualOperator) {
 	Lexer lexer("10 != 50;\n\"Test\" != \"ABC\";\n1 !! 2;");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int operators = 0;
+	size_t operators = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::NOT_EQUAL) operators++;
@@ -172,7 +172,7 @@ TEST(LexerTokenizeTest, NotEqualOperator) {
 TEST(LexerTokenizeTest, EqualityOperator) {
 	Lexer lexer("10 == 50;\n\"Test\" == \"ABC\";\n");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int operators = 0;
+	size_t operators = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::EQUALITY) operators++;
@@ -186,7 +186,7 @@ TEST(LexerTokenizeTest, EqualityOperator) {
 TEST(LexerTokenizeTest, AddOperator) {
 	Lexer lexer("10 + 50;\n5.1 + 5;\n");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int operators = 0;
+	size_t operators = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::ADD) operators++;
@@ -200,7 +200,7 @@ TEST(LexerTokenizeTest, AddOperator) {
 TEST(LexerTokenizeTest, SubtractOperator) {
 	Lexer lexer("10 - 50;\n5.1 - 5;\n");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int operators = 0;
+	size_t operators = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::SUBTRACT) operators++;
@@ -214,7 +214,7 @@ TEST(LexerTokenizeTest, SubtractOperator) {
 TEST(LexerTokenizeTest, MultiplyOperator) {
 	Lexer lexer("5 * 50;\n5.1 * 5;\n1.500 * 5;\n");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int operators = 0;
+	size_t operators = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::MULTIPLY) operators++;
@@ -228,7 +228,7 @@ TEST(LexerTokenizeTest, MultiplyOperator) {
 TEST(LexerTokenizeTest, DivideOperator) {
 	Lexer lexer("50 / 5;\n5 / 5;\n100 / 10;");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int operators = 0;
+	size_t operators = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::DIVIDE) operators++;
@@ -242,8 +242,8 @@ TEST(LexerTokenizeTest, DivideOperator) {
 TEST(LexerTokenizeTest, Brackets) {
 	Lexer lexer("(10);\n{10};");
 	const std::vector<Token> tokens = lexer.tokenize();
-	int lbrackets = 0;
-	int rbrackets = 0;
+	size_t lbrackets = 0;
+	size_t rbrackets = 0;
 
 	for (const Token& token : tokens) {
 		if (token.type == TokenType::LBRACKET || token.type == TokenType::LBRACE) lbrackets++;

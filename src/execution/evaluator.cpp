@@ -79,7 +79,7 @@ std::string Evaluator::evaluateExpression(const std::shared_ptr<ASTBase> express
             const std::string right = evaluateExpression(operation->right);
             try {
                 return calculate<std::string>(left, right, operation->op);
-            } catch (const std::invalid_argument) {
+            } catch (const std::invalid_argument&) {
                 throw ZynkError{ 
                     ZynkErrorType::ExpressionError, 
                     "Invalid expression. Cannot perform BinaryOperation on that type."
