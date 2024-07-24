@@ -2,12 +2,9 @@
 #include "../src/include/interpreter.hpp"
 #include "../src/include/errors.hpp"
 
-TEST(InterpreterTest, Basic) {
-	// For now there is no need to test the interpreter stronger, 
-	// as most things are tested in the lexer anyway.
-}
-
 TEST(InterpreterTest, ShouldThrowFileOpenError) {
+	// For now there is no need to test the interpreter stronger, 
+	// as most things are tested in other tests anyway.
     ZynkInterpreter interpreter;
 	try {
 		interpreter.interpret_file("invalidfile.zk");

@@ -7,6 +7,8 @@ set(Sources
     test_parser.cpp
     test_evaluator.cpp
     test_gc.cpp
+    test_block.cpp
+    test_runtime.cpp
 )
 set(GoogleTestVersion v1.14.0)
 

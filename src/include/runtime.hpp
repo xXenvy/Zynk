@@ -10,6 +10,7 @@
 class RuntimeEnvironment {
 public:
     RuntimeEnvironment();
+    GarbageCollector gc;
 
     void declareVariable(const std::string& name, const std::shared_ptr<ASTVariableDeclaration> value);
     std::shared_ptr<ASTVariableDeclaration> getVariable(const std::string& name);
@@ -26,7 +27,6 @@ public:
 private:
     std::shared_ptr<Block> globalBlock;
     std::stack<std::shared_ptr<Block>> blockStack;
-    GarbageCollector gc;
 };
 
 #endif // RUNTIME_H

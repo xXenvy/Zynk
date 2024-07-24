@@ -94,9 +94,12 @@ std::string Evaluator::evaluateExpression(const std::shared_ptr<ASTBase> express
 template <typename T>
 T calculate(const T& left, const T& right, const std::string& op) {
     if (op == "*") return left * right;
-    if (op == "/") return left / right;
     if (op == "-") return left - right;
     if (op == "+") return left + right;
+    if (op == "/") {
+        if (right == 0) throw ZynkError{ ZynkErrorType::RuntimeError, "division by zero" };
+        return left / right;
+    }
     throw ZynkError{ZynkErrorType::RuntimeError, "Invalid operator: " + op + "."};
 }
 

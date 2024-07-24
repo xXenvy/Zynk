@@ -39,6 +39,7 @@ std::shared_ptr<ASTVariableDeclaration> RuntimeEnvironment::getVariable(const st
 }
 
 bool RuntimeEnvironment::isVariableDeclared(const std::string& name) {
+    if (currentBlock() == nullptr) return false;
     try {
         getVariable(name);
     } catch (const ZynkError) {
@@ -77,6 +78,7 @@ std::shared_ptr<ASTFunction> RuntimeEnvironment::getFunction(const std::string& 
 }
 
 bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) {
+    if (currentBlock() == nullptr) return false;
     try {
         getFunction(name);
     } catch (const ZynkError) {
