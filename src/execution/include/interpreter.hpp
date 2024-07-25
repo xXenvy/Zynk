@@ -2,7 +2,6 @@
 #define INTERPRETER_H
 
 #include <string>
-#include "ast.hpp"
 
 class ZynkInterpreter {
 public:

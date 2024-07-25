@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../src/include/parser.hpp"
-#include "../src/include/lexer.hpp"
-#include "../src/include/errors.hpp"
+#include "../src/parsing/include/parser.hpp"
+#include "../src/parsing/include/lexer.hpp"
+#include "../src/common/include/errors.hpp"
 
 TEST(ParserTest, parseVariableDeclaration) {
 	Lexer lexer("var a: int = 1;");
@@ -33,7 +33,7 @@ TEST(ParserTest, parseMultipleVariableDeclarations) {
 	ASSERT_TRUE(program->type == ASTType::Program);
 	ASSERT_TRUE(program->body.size() == 4);
 
-	for (const std::shared_ptr<ASTBase> var : program->body) {
+	for (const std::shared_ptr<ASTBase>& var : program->body) {
 		ASSERT_EQ(var->type, ASTType::VariableDeclaration);
 	}
 }
@@ -143,7 +143,7 @@ TEST(ParserTest, parsePrintAndPrintlnCalls) {
 	ASSERT_TRUE(program->body.size() == 2);
 	
 	int newLine = 0;
-	for (const auto printBase : program->body) {
+	for (const std::shared_ptr<ASTBase>& printBase : program->body) {
 		const auto print = std::static_pointer_cast<ASTPrint>(printBase);
 		ASSERT_EQ(print->newLine, newLine);
 		newLine++;

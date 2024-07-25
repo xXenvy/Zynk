@@ -8,10 +8,10 @@ bool Arguments::empty() const {
 
 CLI::CLI(const std::vector<std::string>& raw_args) : args(raw_args.size()) {
 	for (const std::string& arg : raw_args) {
-		if (arg.find(".zk", 0) != -1) args.file_path = arg;
-		else if (arg.find("help", 0) != -1) args.help = true;
-		else if (arg.find("version", 0) != -1) args.version = true;
-		else if (arg.find("init", 0) != -1) args.init = true;
+		if (arg.find(".zk", 0) != std::string::npos) args.file_path = arg;
+		else if (arg.find("help", 0) != std::string::npos) args.help = true;
+		else if (arg.find("version", 0) != std::string::npos) args.version = true;
+		else if (arg.find("init", 0) != std::string::npos) args.init = true;
 	}
 }
 

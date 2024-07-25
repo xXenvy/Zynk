@@ -1,5 +1,5 @@
+#include "../common/include/errors.hpp"
 #include "include/parser.hpp"
-#include "include/errors.hpp"
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 
@@ -28,6 +28,7 @@ std::shared_ptr<ASTBase> Parser::parseCurrent() {
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
 			if (currentToken().type == TokenType::EQUAL) return parseVariableModify();
+			[[fallthrough]];
 		default:
 			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
 	}

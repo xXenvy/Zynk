@@ -1,9 +1,9 @@
 ﻿#include <fstream>
 #include <iostream>
 
-#include "include/interpreter.hpp"
-#include "include/cli.hpp"
-#include "include/errors.hpp"
+#include "execution/include/interpreter.hpp"
+#include "common/include/cli.hpp"
+#include "common/include/errors.hpp"
 
 constexpr char const* version = "0.0.1";
 

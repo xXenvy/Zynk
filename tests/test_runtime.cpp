@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../src/include/runtime.hpp"
-#include "../src/include/ast.hpp"
-#include "../src/include/errors.hpp"
+#include "../src/execution/include/runtime.hpp"
+#include "../src/parsing/include/ast.hpp"
+#include "../src/common/include/errors.hpp"
 
 TEST(RuntimeEnvironmentTest, VariableDeclaration) {
     RuntimeEnvironment env;

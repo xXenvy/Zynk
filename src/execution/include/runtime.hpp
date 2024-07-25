@@ -1,8 +1,8 @@
 #ifndef RUNTIME_H
 #define RUNTIME_H
 
-#include "block.hpp"
-#include "gc.hpp"
+#include "../../gc/include/block.hpp"
+#include "../../gc/include/gc.hpp"
 
 #include <memory>
 #include <stack>

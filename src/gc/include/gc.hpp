@@ -1,11 +1,10 @@
 #ifndef GC_H
 #define GC_H
 
+#include "../../parsing/include/ast.hpp"
+#include "block.hpp"
 #include <memory>
 #include <unordered_set>
-
-#include "ast.hpp"
-#include "block.hpp"
 
 class GCObject {
 private:

@@ -1,5 +1,5 @@
+#include "../common/include/errors.hpp"
 #include "include/runtime.hpp"
-#include "include/errors.hpp"
 #include <cassert>
 
 RuntimeEnvironment::RuntimeEnvironment() : globalBlock(std::make_shared<Block>()) {}
@@ -42,7 +42,7 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name) {
     if (currentBlock() == nullptr) return false;
     try {
         getVariable(name);
-    } catch (const ZynkError) {
+    } catch (const ZynkError&) {
         return false;
     }
     return true;
@@ -81,7 +81,7 @@ bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) {
     if (currentBlock() == nullptr) return false;
     try {
         getFunction(name);
-    } catch (const ZynkError) {
+    } catch (const ZynkError&) {
         return false;
     }
     return true;

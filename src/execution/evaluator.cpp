@@ -1,5 +1,5 @@
+#include "../common/include/errors.hpp"
 #include "include/evaluator.hpp"
-#include "include/errors.hpp"
 #include <memory>
 
 Evaluator::Evaluator(RuntimeEnvironment& env) : env(env) {};
@@ -60,7 +60,7 @@ void Evaluator::evaluateVariableDeclaration(const std::shared_ptr<ASTVariableDec
     env.declareVariable(declaration->name, declaration);
 }
 
-void Evaluator::evaluateVariableModify(const std::shared_ptr<ASTVariableModify> variableModify) {
+void Evaluator::evaluateVariableModify([[maybe_unused]] const std::shared_ptr<ASTVariableModify> variableModify) {
     // const auto declaration = env.getVariable(variableModify->name);
     // declaration->value = variableModify->value;
 }
@@ -79,7 +79,7 @@ std::string Evaluator::evaluateExpression(const std::shared_ptr<ASTBase> express
             const std::string right = evaluateExpression(operation->right);
             try {
                 return calculate<std::string>(left, right, operation->op);
-            } catch (const std::invalid_argument) {
+            } catch (const std::invalid_argument&) {
                 throw ZynkError{ 
                     ZynkErrorType::ExpressionError, 
                     "Invalid expression. Cannot perform BinaryOperation on that type."
