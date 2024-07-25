@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(Sources 
 	test_cli.cpp
@@ -10,7 +13,7 @@ set(Sources
     test_block.cpp
     test_runtime.cpp
 )
-set(GoogleTestVersion v1.14.0)
+set(GoogleTestVersion v1.15.0)
 
 include(FetchContent)
 FetchContent_Declare(googletest
