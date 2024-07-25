@@ -1,7 +1,7 @@
 def main() {
 	println("Hello World!");
-	a: int = 1024;
-	b: int = 2048;
+	var a: int = 1024;
+	var b: int = 2048;
 	println(a + b);
 }
 
