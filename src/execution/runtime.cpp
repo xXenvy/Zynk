@@ -2,32 +2,30 @@
 #include "include/runtime.hpp"
 #include <cassert>
 
-RuntimeEnvironment::RuntimeEnvironment() : globalBlock(std::make_shared<Block>()) {}
-
-std::shared_ptr<Block> RuntimeEnvironment::currentBlock() {
+Block* RuntimeEnvironment::currentBlock() {
     if (blockStack.empty()) return nullptr;
-    return blockStack.top();
+    return blockStack.top().get();
 }
 
-void RuntimeEnvironment::declareVariable(const std::string& name, const std::shared_ptr<ASTVariableDeclaration> value) {
-    if (isVariableDeclared(name)) {
+void RuntimeEnvironment::declareVariable(const std::string& name, ASTVariableDeclaration* value) {
+    if (isVariableDeclared(name)) { // todo: check only for current block.
         throw ZynkError{
             ZynkErrorType::DuplicateDeclarationError,
             "Variable '" + name + "' is already declared."
         };
     }
-    std::shared_ptr<Block> block = currentBlock();
+    Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    std::shared_ptr<GCObject> gcObject = std::make_shared<GCObject>(value);
-    block->setVariable(name, gcObject);
-    gc.mark(gcObject);
+    std::unique_ptr<GCObject> gcObject = std::make_unique<GCObject>(value);
+    block->setVariable(name, std::move(gcObject));
+    gc.mark(gcObject.get());
 }
 
-std::shared_ptr<ASTVariableDeclaration> RuntimeEnvironment::getVariable(const std::string& name) {
-    std::shared_ptr<Block> block = currentBlock();
+ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name) {
+    Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-    std::shared_ptr<GCObject> gcObject = block->getVariable(name);
+    GCObject* gcObject = block->getVariable(name);
 
     if (gcObject == nullptr) {
         throw ZynkError{
@@ -35,7 +33,7 @@ std::shared_ptr<ASTVariableDeclaration> RuntimeEnvironment::getVariable(const st
             "Variable named '" + name + "' is not defined."
         };
     }
-    return std::static_pointer_cast<ASTVariableDeclaration>(gcObject->value);
+    return static_cast<ASTVariableDeclaration*>(gcObject->value);
 }
 
 bool RuntimeEnvironment::isVariableDeclared(const std::string& name) {
@@ -48,33 +46,33 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name) {
     return true;
 }
 
-void RuntimeEnvironment::declareFunction(const std::string& name, const std::shared_ptr<ASTFunction> func) {
+void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* func) {
     if (isFunctionDeclared(name)) {
         throw ZynkError{
             ZynkErrorType::DuplicateDeclarationError,
             "Function '" + name + "' is already declared."
         };
     }
-    std::shared_ptr<Block> block = currentBlock();
+    Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    std::shared_ptr<GCObject> gcObject = std::make_shared<GCObject>(func);
-    block->setFunction(name, gcObject);
-    gc.mark(gcObject);
+    std::unique_ptr<GCObject> gcObject = std::make_unique<GCObject>(func);
+    block->setFunction(name, std::move(gcObject));
+    gc.mark(gcObject.get());
 }
 
-std::shared_ptr<ASTFunction> RuntimeEnvironment::getFunction(const std::string& name) {
-    std::shared_ptr<Block> block = currentBlock();
+ASTFunction* RuntimeEnvironment::getFunction(const std::string& name) {
+    Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    std::shared_ptr<GCObject> gcObject = block->getFunction(name);
+    GCObject* gcObject = block->getFunction(name);
     if (gcObject == nullptr) {
         throw ZynkError{
             ZynkErrorType::NotDefinedError,
             "Function named '" + name + "' is not defined."
         };
     }
-    return std::static_pointer_cast<ASTFunction>(gcObject->value);
+    return static_cast<ASTFunction*>(gcObject->value);
 }
 
 bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) {
@@ -92,13 +90,12 @@ void RuntimeEnvironment::collectGarbage() {
 }
 
 void RuntimeEnvironment::enterNewBlock() {
-    std::shared_ptr<Block> newBlock = std::make_shared<Block>(currentBlock());
-    blockStack.push(newBlock);
+    blockStack.push(std::make_unique<Block>(currentBlock()));
 }
 
 void RuntimeEnvironment::exitCurrentBlock() {
     if (blockStack.empty()) return;
-    std::shared_ptr<Block> block = currentBlock();
+    Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
     
     // Unmarking all functions / variables in the current block since we don't need them anymore.

@@ -9,31 +9,31 @@ class GCObject;
 
 class Block {
 public:
-    std::unordered_map<std::string, std::shared_ptr<GCObject>> variables;
-    std::unordered_map<std::string, std::shared_ptr<GCObject>> functions;
-    const std::shared_ptr<Block> parentBlock;
+    std::unordered_map<std::string, std::unique_ptr<GCObject>> variables;
+    std::unordered_map<std::string, std::unique_ptr<GCObject>> functions;
+    Block* parentBlock;
 
-    Block(const std::shared_ptr<Block> parent = nullptr) : parentBlock(parent) {}
+    Block(Block* parent = nullptr) : parentBlock(parent) {}
 
-    void setVariable(const std::string& name, const std::shared_ptr<GCObject> value) {
-        variables[name] = value;
+    void setVariable(const std::string& name, std::unique_ptr<GCObject> value) {
+        variables[name] = std::move(value);
     }
 
-    void setFunction(const std::string& name, const std::shared_ptr<GCObject> func) {
-        functions[name] = func;
+    void setFunction(const std::string& name, std::unique_ptr<GCObject> func) {
+        functions[name] = std::move(func);
     }
 
-    std::shared_ptr<GCObject> getVariable(const std::string& name) {
+    GCObject* getVariable(const std::string& name) {
         if (variables.find(name) != variables.end()) {
-            return variables[name];
+            return variables[name].get();
         }
         if (parentBlock) return parentBlock->getVariable(name);
         return nullptr;
     }
 
-    std::shared_ptr<GCObject> getFunction(const std::string& name) {
+    GCObject* getFunction(const std::string& name) {
         if (functions.find(name) != functions.end()) {
-            return functions[name];
+            return functions[name].get();
         }
         if (parentBlock) return parentBlock->getFunction(name);
         return nullptr;

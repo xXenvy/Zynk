@@ -2,22 +2,8 @@
 #include "include/block.hpp"
 #include <iostream>
 
-GCObject::GCObject(const std::shared_ptr<ASTBase> value) : value(value) {}
-
-void GCObject::mark() {
-    marked = true;
-}
-
-void GCObject::unmark() {
-    marked = false;
-}
-
-bool GCObject::isMarked() const {
-    return marked;
-}
-
-void GarbageCollector::mark(const std::shared_ptr<GCObject> obj) {
-    if (!obj || obj->isMarked()) return;
+void GarbageCollector::mark(GCObject* obj) {
+    if (!obj) return;
     obj->mark();
     trackingObjects.insert(obj);
 }
@@ -32,19 +18,19 @@ void GarbageCollector::sweep() {
     }
 }
 
-void GarbageCollector::collectGarbage(const std::shared_ptr<Block> block) {
+void GarbageCollector::collectGarbage(Block* block) {
     markBlock(block); // Mark the current block to avoid deleting the necessary objects.
     sweep(); // Delete objects which are not marked.
 }
 
-void GarbageCollector::markBlock(const std::shared_ptr<Block> block) {
+void GarbageCollector::markBlock(Block* block) {
     if (!block) return;
 
     for (const auto& varPair : block->variables) {
-        mark(varPair.second);
+        mark(varPair.second.get());
     }
     for (const auto& funcPair : block->functions) {
-        mark(funcPair.second);
+        mark(funcPair.second.get());
     }
     if (block->parentBlock) markBlock(block->parentBlock);
 }
