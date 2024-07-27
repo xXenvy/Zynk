@@ -21,7 +21,7 @@ Zynk is a Turing-complete, interpreted programming language written in C++. This
 
 ## `📖` Documentation
 
-Comprehensive documentation for Zynk is available on our [**Documentation Website**](https://xxenvy.github.io/Zynk/). The documentation includes:
+Comprehensive documentation for Zynk is available on [**Link**](https://xxenvy.github.io/Zynk/). The documentation includes:
 
 - **[Installation Guide](https://xxenvy.github.io/Zynk/installation/):** Detailed instructions for installing Zynk.
 - **[Hello World Tutorial](https://xxenvy.github.io/Zynk/examples/hello_world/):** A step-by-step guide to writing your first Zynk program.
