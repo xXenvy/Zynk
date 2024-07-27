@@ -23,7 +23,7 @@ TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
     gcObjects.push_back(std::move(obj3));
     gcObjects.push_back(std::move(obj4));
 
-    for (const auto& obj : gcObjects) {
+    for (std::unique_ptr<GCObject>& obj : gcObjects) {
         gc.mark(obj.get());
     }
     gc.collectGarbage(nullptr);
@@ -34,7 +34,6 @@ TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
 
         gcObjects.back()->unmark();
         gcObjects.pop_back();
-
         gc.collectGarbage(nullptr);
     }
     gc.collectGarbage(nullptr);
