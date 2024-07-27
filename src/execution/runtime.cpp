@@ -17,7 +17,7 @@ void RuntimeEnvironment::declareVariable(const std::string& name, ASTVariableDec
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    std::unique_ptr<GCObject> gcObject = std::make_unique<GCObject>(value);
+    auto gcObject = std::make_unique<GCObject>(value);
     gc.mark(gcObject.get());
     block->setVariable(name, std::move(gcObject));
 }
@@ -56,7 +56,7 @@ void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* f
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    std::unique_ptr<GCObject> gcObject = std::make_unique<GCObject>(func);
+    auto gcObject = std::make_unique<GCObject>(func);
     gc.mark(gcObject.get());
     block->setFunction(name, std::move(gcObject));
 }
@@ -105,6 +105,8 @@ void RuntimeEnvironment::exitCurrentBlock() {
     for (const auto& funcPair : block->functions) {
         funcPair.second->unmark();
     }
+    // Keep this block until garbage collection is complete, to ensure that the objects in the block are not destroyed prematurely.
+    std::unique_ptr<Block> blockPtr = std::move(blockStack.top());
     blockStack.pop();
     collectGarbage();
 }

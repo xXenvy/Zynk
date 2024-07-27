@@ -6,7 +6,7 @@
 
 TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
     GarbageCollector gc;
-    std::vector<std::unique_ptr<GCObject>> gcObjects;
+    std::vector<GCObject*> gcObjects;
 
     auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
     auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
@@ -18,13 +18,13 @@ TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
     auto obj3 = std::make_unique<GCObject>(ast3.get());
     auto obj4 = std::make_unique<GCObject>(ast4.get());
 
-    gcObjects.push_back(std::move(obj1));
-    gcObjects.push_back(std::move(obj2));
-    gcObjects.push_back(std::move(obj3));
-    gcObjects.push_back(std::move(obj4));
+    gcObjects.push_back(obj1.get());
+    gcObjects.push_back(obj2.get());
+    gcObjects.push_back(obj3.get());
+    gcObjects.push_back(obj4.get());
 
-    for (std::unique_ptr<GCObject>& obj : gcObjects) {
-        gc.mark(obj.get());
+    for (const auto& objptr : gcObjects) {
+        gc.mark(objptr);
     }
     gc.collectGarbage(nullptr);
     ASSERT_EQ(gc.size(), 4);
