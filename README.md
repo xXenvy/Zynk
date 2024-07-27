@@ -16,7 +16,7 @@ Zynk is a Turing-complete, interpreted programming language written in C++. This
 
 ## `🌟` Features
 - **Interpreted Language:** Zynk is an interpreted language, which facilitates quick development and testing cycles.
-- **Touring-Complete:** Zynk is capable of expressing any computable function, adhering to the touring-complete classification.
+- **Turing-Complete:** Zynk is capable of expressing any computable function, adhering to the turing-complete classification.
 - **C++ Backend:** Written in C++, Zynk leverages the performance and capabilities of C++ while providing a user-friendly interface.
 
 ## `📖` Documentation
