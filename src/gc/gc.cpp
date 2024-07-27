@@ -11,7 +11,6 @@ void GarbageCollector::mark(GCObject* obj) {
 void GarbageCollector::sweep() {
     for (auto it = trackingObjects.begin(); it != trackingObjects.end();) {
         if (!(*it)->isMarked()) {
-            delete* it;
             it = trackingObjects.erase(it);
         } else {
             ++it;
