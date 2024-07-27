@@ -5,8 +5,8 @@ To get Zynk up and running, you have two main options: downloading the precompil
 ## 1. Download Precompiled Interpreter (Recommended)
 
 1. Go to the [Releases](https://github.com/xXenvy/Zynk/releases) page on GitHub.
-2. Download the latest release package suitable for your operating system.
-3. Extract the package to your desired location.
+2. Download the latest release of interpreter suitable for your operating system.
+3. Extract the interpreter to your desired location.
 
 ## 2. Building from Source
 
