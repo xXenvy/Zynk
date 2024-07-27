@@ -15,8 +15,8 @@ TEST(BlockTest, SetAndGetVariable) {
     block->setVariable("var1", std::move(obj1));
     block->setVariable("var2", std::move(obj2));
 
-    ASSERT_EQ(block->getVariable("var1"), obj1.get());
-    ASSERT_EQ(block->getVariable("var2"), obj2.get());
+    ASSERT_EQ(block->getVariable("var1")->value, ast1.get());
+    ASSERT_EQ(block->getVariable("var2")->value, ast2.get());
     ASSERT_EQ(block->getVariable("nonExistentVar"), nullptr);
 }
 
@@ -32,8 +32,8 @@ TEST(BlockTest, SetAndGetFunction) {
     block->setFunction("func1", std::move(func1));
     block->setFunction("func2", std::move(func2));
 
-    ASSERT_EQ(block->getFunction("func1"), func1.get());
-    ASSERT_EQ(block->getFunction("func2"), func2.get());
+    ASSERT_EQ(block->getFunction("func1")->value, funcAst1.get());
+    ASSERT_EQ(block->getFunction("func2")->value, funcAst2.get());
     ASSERT_EQ(block->getFunction("nonExistentFunc"), nullptr);
 }
 
@@ -50,8 +50,8 @@ TEST(BlockTest, GetVariableFromParentBlock) {
     parentBlock->setVariable("sharedVar", std::move(parentVar));
     childBlock->setVariable("uniqueVar", std::move(childVar));
 
-    ASSERT_EQ(childBlock->getVariable("sharedVar"), parentVar.get());
-    ASSERT_EQ(childBlock->getVariable("uniqueVar"), childVar.get());
+    ASSERT_EQ(childBlock->getVariable("sharedVar")->value, parentAstVar.get());
+    ASSERT_EQ(childBlock->getVariable("uniqueVar")->value, childAstVar.get());
     ASSERT_EQ(childBlock->getVariable("nonExistentVar"), nullptr);
 }
 
@@ -68,8 +68,8 @@ TEST(BlockTest, GetFunctionFromParentBlock) {
     parentBlock->setFunction("sharedFunc", std::move(parentFunc));
     childBlock->setFunction("uniqueFunc", std::move(childFunc));
 
-    ASSERT_EQ(childBlock->getFunction("sharedFunc"), parentFunc.get());
-    ASSERT_EQ(childBlock->getFunction("uniqueFunc"), childFunc.get());
+    ASSERT_EQ(childBlock->getFunction("sharedFunc")->value, parentFuncAst.get());
+    ASSERT_EQ(childBlock->getFunction("uniqueFunc")->value, childFuncAst.get());
     ASSERT_EQ(childBlock->getFunction("nonExistentFunc"), nullptr);
 }
 
@@ -84,12 +84,12 @@ TEST(BlockTest, OverrideVariableInChildBlock) {
     auto childVar = std::make_unique<GCObject>(childAstVar.get());
 
     parentBlock->setVariable("var", std::move(parentVar));
-    ASSERT_EQ(childBlock->getVariable("var"), parentVar.get());
 
+    ASSERT_EQ(childBlock->getVariable("var")->value, parentAstVar.get());
     childBlock->setVariable("var", std::move(childVar));
 
-    ASSERT_EQ(childBlock->getVariable("var"), childVar.get());
-    ASSERT_EQ(parentBlock->getVariable("var"), parentVar.get());
+    ASSERT_EQ(childBlock->getVariable("var")->value, childAstVar.get());
+    ASSERT_EQ(parentBlock->getVariable("var")->value, parentAstVar.get());
 }
 
 TEST(BlockTest, OverrideFunctionInChildBlock) {
@@ -103,10 +103,9 @@ TEST(BlockTest, OverrideFunctionInChildBlock) {
     auto childFunc = std::make_unique<GCObject>(childFuncAst.get());
 
     parentBlock->setFunction("func", std::move(parentFunc));
-    ASSERT_EQ(childBlock->getFunction("func"), parentFunc.get());
+    ASSERT_EQ(childBlock->getFunction("func")->value, parentFuncAst.get());
 
     childBlock->setFunction("func", std::move(childFunc));
-
-    ASSERT_EQ(childBlock->getFunction("func"), childFunc.get());
-    ASSERT_EQ(parentBlock->getFunction("func"), parentFunc.get());
+    ASSERT_EQ(childBlock->getFunction("func")->value, childFuncAst.get());
+    ASSERT_EQ(parentBlock->getFunction("func")->value, parentFuncAst.get());
 }

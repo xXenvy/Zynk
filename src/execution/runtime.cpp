@@ -18,8 +18,8 @@ void RuntimeEnvironment::declareVariable(const std::string& name, ASTVariableDec
     assert(block != nullptr && "Block should not be nullptr");
 
     std::unique_ptr<GCObject> gcObject = std::make_unique<GCObject>(value);
-    block->setVariable(name, std::move(gcObject));
     gc.mark(gcObject.get());
+    block->setVariable(name, std::move(gcObject));
 }
 
 ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name) {
@@ -57,8 +57,8 @@ void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* f
     assert(block != nullptr && "Block should not be nullptr");
 
     std::unique_ptr<GCObject> gcObject = std::make_unique<GCObject>(func);
-    block->setFunction(name, std::move(gcObject));
     gc.mark(gcObject.get());
+    block->setFunction(name, std::move(gcObject));
 }
 
 ASTFunction* RuntimeEnvironment::getFunction(const std::string& name) {
