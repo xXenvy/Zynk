@@ -1,9 +1,12 @@
 #include "../common/include/errors.hpp"
 #include "include/evaluator.hpp"
 #include <memory>
+#include <cassert>
 
 
 void Evaluator::evaluate(ASTBase* ast) {
+    assert(ast != nullptr && "Ast should not be nullptr");
+
     switch (ast->type) {
         case ASTType::Program:
             evaluateProgram(static_cast<ASTProgram*>(ast));

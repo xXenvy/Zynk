@@ -1,6 +1,7 @@
 #include "include/gc.hpp"
 #include "include/block.hpp"
 #include <iostream>
+#include <cassert>
 
 void GarbageCollector::mark(GCObject* obj) {
     if (!obj) return;
@@ -10,6 +11,7 @@ void GarbageCollector::mark(GCObject* obj) {
 
 void GarbageCollector::sweep() {
     for (auto it = trackingObjects.begin(); it != trackingObjects.end();) {
+        assert(*it != nullptr && "Object should not be nullptr");
         if (!(*it)->isMarked()) {
             it = trackingObjects.erase(it);
         } else {

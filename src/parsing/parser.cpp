@@ -27,7 +27,7 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 		case TokenType::IDENTIFIER:
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
-			if (currentToken().type == TokenType::EQUAL) return parseVariableModify();
+			if (currentToken().type == TokenType::ASSIGN) return parseVariableModify();
 			[[fallthrough]];
 		default:
 			throw ZynkError{ ZynkErrorType::UnknownError, "Notimplemented: " + current.value, &current.line };
@@ -91,7 +91,7 @@ std::unique_ptr<ASTBase> Parser::parseVariableDeclaration() {
 				&currentLine,
 			};
 	}
-	consume({ TokenType::EQUAL, "=", currentLine });
+	consume({ TokenType::ASSIGN, "=", currentLine });
 	auto varDeclaration = std::make_unique<ASTVariableDeclaration>(
 		varName, varType, parseExpression(0)
 	);
@@ -104,7 +104,7 @@ std::unique_ptr<ASTBase> Parser::parseVariableModify() {
 	const Token current = currentToken();
 
 	consume({ TokenType::IDENTIFIER, current.value, current.line});
-	consume({ TokenType::EQUAL, "=", current.line });
+	consume({ TokenType::ASSIGN, "=", current.line });
 	std::unique_ptr<ASTBase> newValue = parseExpression(0);
 	consume({ TokenType::SEMICOLON, ";", current.line });
 
