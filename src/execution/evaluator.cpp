@@ -61,9 +61,11 @@ void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration)
     env.declareVariable(declaration->name, declaration);
 }
 
-void Evaluator::evaluateVariableModify([[maybe_unused]] ASTVariableModify* variableModify) {
-    // const auto declaration = env.getVariable(variableModify->name);
-    // declaration->value = variableModify->value;
+void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
+    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name);
+    ASTValue* newValue = new ASTValue(evaluateExpression(variableModify->value.get()));
+    // We need to calculate the new value of the variable already at this point.
+    declaration->value.reset(newValue);
 }
 
 std::string Evaluator::evaluateExpression(ASTBase* expression) {

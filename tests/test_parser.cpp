@@ -162,6 +162,60 @@ TEST(ParserTest, parsePrintAndPrintlnCalls) {
     }
 }
 
+TEST(ParserTest, parseVariableModify) {
+    Lexer lexer("a = 42;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableModify);
+
+    const auto varModify = static_cast<ASTVariableModify*>(program->body.front().get());
+    ASSERT_EQ(varModify->name, "a");
+
+    const auto newValue = static_cast<ASTValue*>(varModify->value.get());
+    ASSERT_NE(newValue, nullptr);
+    ASSERT_EQ(newValue->value, "42");
+}
+
+TEST(ParserTest, parseVariableModifyWithExpression) {
+    Lexer lexer("x = 5 + y * 3;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableModify);
+
+    const auto varModify = static_cast<ASTVariableModify*>(program->body.front().get());
+    ASSERT_EQ(varModify->name, "x");
+
+    const auto operation = static_cast<ASTBinaryOperation*>(varModify->value.get());
+    ASSERT_NE(operation, nullptr);
+    ASSERT_EQ(operation->op, "+");
+
+    const auto leftValue = static_cast<ASTValue*>(operation->left.get());
+    const auto rightOperation = static_cast<ASTBinaryOperation*>(operation->right.get());
+
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_NE(rightOperation, nullptr);
+    ASSERT_EQ(leftValue->value, "5");
+    ASSERT_EQ(rightOperation->op, "*");
+
+    const auto rightLeftVariable = static_cast<ASTVariable*>(rightOperation->left.get());
+    const auto rightRightValue = static_cast<ASTValue*>(rightOperation->right.get());
+
+    ASSERT_NE(rightLeftVariable, nullptr);
+    ASSERT_NE(rightRightValue, nullptr);
+    ASSERT_EQ(rightLeftVariable->name, "y");
+    ASSERT_EQ(rightRightValue->value, "3");
+}
+
 TEST(ParserTest, ShouldThrowSyntaxError) {
     Lexer lexer("def main()\n}"); // Missing '{'
     const std::vector<Token> tokens = lexer.tokenize();

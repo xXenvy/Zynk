@@ -280,3 +280,52 @@ TEST(EvaluatorTest, EvaluateEmptyProgram) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "");
 }
+
+TEST(EvaluatorTest, EvaluateVariableModifyInteger) {
+    const std::string code = "var a: int = 10;\na = 20;\nprintln(a);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "20\n");
+}
+
+TEST(EvaluatorTest, EvaluateVariableModifyWithExpression) {
+    const std::string code = "var y: int = 5;\ny = y + 10;\nprintln(y);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
+}
+
+TEST(EvaluatorTest, EvaluateVariableModifyMultipleTimes) {
+    const std::string code = R"(
+        var z: int = 1;
+        println(z);
+        z = 2;
+        println(z);
+        z = 3;
+        println(z);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n2\n3\n");
+}
