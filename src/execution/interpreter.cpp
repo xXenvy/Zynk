@@ -17,11 +17,11 @@ void ZynkInterpreter::interpret(const std::string& source) {
 
     // Parsing the tokens into AST objects.
     Parser parser(tokens);
-    const std::shared_ptr<ASTProgram> program = parser.parse();
+    const std::unique_ptr<ASTProgram> program = parser.parse();
     
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-    evaluator.evaluate(program);
+    // Executing the program.
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
 }
 
 void ZynkInterpreter::interpret_file(const std::string& filePath) {

@@ -5,6 +5,7 @@
 	execution/runtime.cpp
 	execution/interpreter.cpp
 	gc/gc.cpp
+	gc/object.cpp
 	common/cli.cpp
 )
 set(Headers
@@ -18,6 +19,7 @@ set(Headers
 	execution/include/interpreter.hpp
 	gc/include/gc.hpp
 	gc/include/block.hpp
+	gc/include/object.hpp
 
 	common/include/cli.hpp
 	common/include/errors.hpp

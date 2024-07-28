@@ -175,7 +175,7 @@ TEST(LexerTokenizeTest, EqualityOperator) {
 	size_t operators = 0;
 
 	for (const Token& token : tokens) {
-		if (token.type == TokenType::EQUALITY) operators++;
+		if (token.type == TokenType::EQUAL) operators++;
 	}
 	EXPECT_TRUE(operators == 2);
 	EXPECT_TRUE(tokens.size() == 9);

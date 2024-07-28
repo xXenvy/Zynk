@@ -50,9 +50,9 @@ Token Lexer::next() {
         case '(': return Token(TokenType::LBRACKET, "(", currentLine);
         case ')': return Token(TokenType::RBRACKET, ")", currentLine);
         case '=': {
-            if (peek() != '=') return Token(TokenType::EQUAL, "=", currentLine);
+            if (peek() != '=') return Token(TokenType::ASSIGN, "=", currentLine);
             moveForward();
-            return Token(TokenType::EQUALITY, "==", currentLine);
+            return Token(TokenType::EQUAL, "==", currentLine);
         }
         case '!': {
             if (peek() != '=') return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);

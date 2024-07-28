@@ -1,57 +1,63 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include "../src/gc/include/gc.hpp"
-
-std::shared_ptr<GCObject> produceGCObject(ASTType astType) {
-    return std::make_shared<GCObject>(GCObject(std::make_shared<ASTBase>(astType)));
-}
+#include "../src/gc/include/block.hpp"
+#include "../src/parsing/include/ast.hpp"
 
 TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
     GarbageCollector gc;
-    std::vector<std::shared_ptr<GCObject>> gcObjects = {
-        produceGCObject(ASTType::Program),
-        produceGCObject(ASTType::FunctionDeclaration),
-        produceGCObject(ASTType::Print),
-        produceGCObject(ASTType::FunctionCall)
-    };
+    std::vector<GCObject*> gcObjects;
 
-    // Mark all objects.
-    for (const auto& obj : gcObjects) {
-        gc.mark(obj);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast3 = std::make_unique<ASTBase>(ASTType::Print);
+    auto ast4 = std::make_unique<ASTBase>(ASTType::FunctionCall);
+
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
+    auto obj3 = std::make_unique<GCObject>(ast3.get());
+    auto obj4 = std::make_unique<GCObject>(ast4.get());
+
+    gcObjects.push_back(obj1.get());
+    gcObjects.push_back(obj2.get());
+    gcObjects.push_back(obj3.get());
+    gcObjects.push_back(obj4.get());
+
+    for (const auto& objptr : gcObjects) {
+        gc.mark(objptr);
     }
-
-    gc.collectGarbage(nullptr); // Initial garbage collection with all objects marked.
+    gc.collectGarbage(nullptr);
+    ASSERT_EQ(gc.size(), 4);
 
     for (int i = 4; i > 0; i--) {
         ASSERT_EQ(gc.size(), i);
 
-        // Unmark the last object in the vector.
         gcObjects.back()->unmark();
         gcObjects.pop_back();
-
-        // Collect garbage after unmarking one object.
         gc.collectGarbage(nullptr);
     }
-
-    gc.collectGarbage(nullptr); // Final garbage collection to ensure the GC is empty.
-    ASSERT_EQ(gc.size(), 0);    // Expect the GC to have no objects left.
+    gc.collectGarbage(nullptr);
+    ASSERT_EQ(gc.size(), 0);
 }
 
 TEST(GarbageCollectorTest, MarkObjectsCorrectly) {
     GarbageCollector gc;
-    auto obj1 = produceGCObject(ASTType::Program);
-    auto obj2 = produceGCObject(ASTType::FunctionDeclaration);
 
-    gc.mark(obj1);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
+
+    gc.mark(obj1.get());
     ASSERT_TRUE(obj1->isMarked());
     ASSERT_EQ(gc.size(), 1);
 
-    gc.mark(obj2);
+    gc.mark(obj2.get());
     ASSERT_TRUE(obj2->isMarked());
     ASSERT_EQ(gc.size(), 2);
 
-    // Try to mark obj1 again (should have no effect on size).
-    gc.mark(obj1);
+    gc.mark(obj1.get());
     ASSERT_TRUE(obj1->isMarked());
     ASSERT_EQ(gc.size(), 2);
 }
@@ -59,53 +65,45 @@ TEST(GarbageCollectorTest, MarkObjectsCorrectly) {
 TEST(GarbageCollectorTest, HandlesNestedBlocksCorrectly) {
     GarbageCollector gc;
 
-    auto block1 = std::make_shared<Block>(); // Parent block
-    auto block2 = std::make_shared<Block>(block1); // Child block
+    auto block1 = std::make_unique<Block>(); // Blok rodzic
+    auto block2 = std::make_unique<Block>(block1.get()); // Blok dziecko
 
-    auto obj1 = produceGCObject(ASTType::Program);
-    auto obj2 = produceGCObject(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
 
-    // Set variables in different blocks.
-    block1->setVariable("var1", obj1);
-    block2->setVariable("var2", obj2);
+    block1->setVariable("var1", std::move(obj1));
+    block2->setVariable("var2", std::move(obj2));
+    gc.collectGarbage(block2.get());
 
-    // Collect garbage with block2 as root.
-    gc.collectGarbage(block2);
-
-    // Check if both objects are marked due to inheritance from block1.
-    ASSERT_TRUE(obj1->isMarked());
-    ASSERT_TRUE(obj2->isMarked());
+    ASSERT_TRUE(block1->getVariable("var1")->isMarked());
+    ASSERT_TRUE(block2->getVariable("var2")->isMarked());
     ASSERT_EQ(gc.size(), 2);
 }
 
 TEST(GarbageCollectorTest, HandlesEmptyBlock) {
     GarbageCollector gc;
-    auto emptyBlock = std::make_shared<Block>();
+    auto emptyBlock = std::make_unique<Block>();
 
-    // Collect garbage on an empty block.
-    gc.collectGarbage(emptyBlock);
-
-    // Ensure no objects are tracked since block is empty.
+    gc.collectGarbage(emptyBlock.get());
     ASSERT_EQ(gc.size(), 0);
 }
 
 TEST(GarbageCollectorTest, HandlesNullBlock) {
     GarbageCollector gc;
 
-    // Collect garbage with a null block.
     gc.collectGarbage(nullptr);
-
-    // Ensure GC is still empty.
     ASSERT_EQ(gc.size(), 0);
 }
 
 TEST(GarbageCollectorTest, RepeatedMarkAndUnmark) {
     GarbageCollector gc;
-    auto obj1 = produceGCObject(ASTType::Program);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
 
-    // Mark and unmark the object multiple times.
     for (int i = 0; i < 5; ++i) {
-        gc.mark(obj1);
+        gc.mark(obj1.get());
         ASSERT_TRUE(obj1->isMarked());
         ASSERT_EQ(gc.size(), 1);
 
@@ -117,13 +115,13 @@ TEST(GarbageCollectorTest, RepeatedMarkAndUnmark) {
 
 TEST(GarbageCollectorTest, CollectGarbageWithSomeMarkedObjects) {
     GarbageCollector gc;
-    auto obj1 = produceGCObject(ASTType::Program);
-    auto obj2 = produceGCObject(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
 
-    // Mark only one object.
-    gc.mark(obj2);
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
 
-    // Collect garbage and check.
+    gc.mark(obj2.get());
     gc.collectGarbage(nullptr);
     ASSERT_EQ(gc.size(), 1);
     ASSERT_TRUE(obj2->isMarked());
@@ -132,102 +130,109 @@ TEST(GarbageCollectorTest, CollectGarbageWithSomeMarkedObjects) {
 
 TEST(GarbageCollectorTest, MarkAndRetainObjectsInNestedBlocks) {
     GarbageCollector gc;
-    auto block1 = std::make_shared<Block>(); // Parent block
-    auto block2 = std::make_shared<Block>(block1); // Child block
 
-    auto obj1 = produceGCObject(ASTType::VariableDeclaration);
-    auto obj2 = produceGCObject(ASTType::FunctionDeclaration);
+    auto block1 = std::make_unique<Block>(); // Blok rodzic
+    auto block2 = std::make_unique<Block>(block1.get()); // Blok dziecko
 
-    block1->setVariable("var", obj1);
-    block2->setFunction("func", obj2);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
 
-    // Mark only obj2.
-    gc.mark(obj2);
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
 
-    gc.collectGarbage(block2);
+    block1->setVariable("var", std::move(obj1));
+    block2->setFunction("func", std::move(obj2));
 
-    // Check if both objects are marked.
-    ASSERT_TRUE(obj1->isMarked());
-    ASSERT_TRUE(obj2->isMarked());
+    gc.mark(block2->getFunction("func"));
+    gc.collectGarbage(block2.get());
+
+    ASSERT_TRUE(block1->getVariable("var")->isMarked());
+    ASSERT_TRUE(block2->getFunction("func")->isMarked());
     ASSERT_EQ(gc.size(), 2);
 }
 
 TEST(GarbageCollectorTest, MarkAllObjectsInHierarchicalBlocks) {
     GarbageCollector gc;
-    auto block1 = std::make_shared<Block>(); // Parent block
-    auto block2 = std::make_shared<Block>(block1); // Child block
 
-    auto obj1 = produceGCObject(ASTType::VariableDeclaration);
-    auto obj2 = produceGCObject(ASTType::VariableDeclaration);
-    auto obj3 = produceGCObject(ASTType::VariableDeclaration);
+    auto block1 = std::make_unique<Block>(); // Blok rodzic
+    auto block2 = std::make_unique<Block>(block1.get()); // Blok dziecko
 
-    block1->setVariable("var1", obj1);
-    block1->setVariable("var2", obj2);
-    block2->setVariable("var3", obj3);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast3 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
 
-    gc.collectGarbage(block2);
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
+    auto obj3 = std::make_unique<GCObject>(ast3.get());
 
-    ASSERT_TRUE(obj1->isMarked());
-    ASSERT_TRUE(obj2->isMarked());
-    ASSERT_TRUE(obj3->isMarked());
+    block1->setVariable("var1", std::move(obj1));
+    block1->setVariable("var2", std::move(obj2));
+    block2->setVariable("var3", std::move(obj3));
+
+    gc.collectGarbage(block2.get());
+    ASSERT_TRUE(block1->getVariable("var1")->isMarked());
+    ASSERT_TRUE(block1->getVariable("var2")->isMarked());
+    ASSERT_TRUE(block2->getVariable("var3")->isMarked());
     ASSERT_EQ(gc.size(), 3);
 }
 
 TEST(GarbageCollectorTest, MarkAllObjectsInComplexStructure) {
     GarbageCollector gc;
-    auto block1 = std::make_shared<Block>();
-    auto block2 = std::make_shared<Block>(block1);
-    auto block3 = std::make_shared<Block>(block2);
+    auto block1 = std::make_unique<Block>();
+    auto block2 = std::make_unique<Block>(block1.get());
+    auto block3 = std::make_unique<Block>(block2.get());
 
-    auto obj1 = produceGCObject(ASTType::VariableDeclaration);
-    auto obj2 = produceGCObject(ASTType::VariableDeclaration);
-    auto obj3 = produceGCObject(ASTType::VariableDeclaration);
-    auto obj4 = produceGCObject(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast3 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast4 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
 
-    block1->setVariable("var1", obj1);
-    block2->setVariable("var2", obj2);
-    block3->setVariable("var3", obj3);
-    block3->setFunction("func1", obj4);
+    auto obj1 = std::make_unique<GCObject>(ast1.get());
+    auto obj2 = std::make_unique<GCObject>(ast2.get());
+    auto obj3 = std::make_unique<GCObject>(ast3.get());
+    auto obj4 = std::make_unique<GCObject>(ast4.get());
 
-    gc.collectGarbage(block3);
+    block1->setVariable("var1", std::move(obj1));
+    block2->setVariable("var2", std::move(obj2));
+    block3->setVariable("var3", std::move(obj3));
+    block3->setFunction("func1", std::move(obj4));
 
-    // Ensure all objects in the hierarchy are marked.
-    ASSERT_TRUE(obj1->isMarked());
-    ASSERT_TRUE(obj2->isMarked());
-    ASSERT_TRUE(obj3->isMarked());
-    ASSERT_TRUE(obj4->isMarked());
+    gc.collectGarbage(block3.get());
+    ASSERT_TRUE(block1->getVariable("var1")->isMarked());
+    ASSERT_TRUE(block2->getVariable("var2")->isMarked());
+    ASSERT_TRUE(block3->getVariable("var3")->isMarked());
+    ASSERT_TRUE(block3->getFunction("func1")->isMarked());
     ASSERT_EQ(gc.size(), 4);
 }
 
 TEST(GarbageCollectorTest, CollectGarbageWithFunctionObjects) {
     GarbageCollector gc;
-    auto block1 = std::make_shared<Block>();
-    auto block2 = std::make_shared<Block>(block1);
 
-    auto func1 = produceGCObject(ASTType::FunctionDeclaration);
-    auto func2 = produceGCObject(ASTType::FunctionDeclaration);
+    auto block1 = std::make_unique<Block>();
+    auto block2 = std::make_unique<Block>(block1.get());
 
-    // Add functions to the blocks
-    block1->setFunction("func1", func1);
-    block2->setFunction("func2", func2);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
 
-    // Mark all objects.
-    gc.collectGarbage(block2);
+    auto func1 = std::make_unique<GCObject>(ast1.get());
+    auto func2 = std::make_unique<GCObject>(ast2.get());
 
-    ASSERT_TRUE(func1->isMarked());
-    ASSERT_TRUE(func2->isMarked());
+    block1->setFunction("func1", std::move(func1));
+    block2->setFunction("func2", std::move(func2));
+
+    gc.collectGarbage(block2.get());
+    ASSERT_TRUE(block1->getFunction("func1")->isMarked());
+    ASSERT_TRUE(block2->getFunction("func2")->isMarked());
     ASSERT_EQ(gc.size(), 2);
 
-    func1->unmark();
+    block1->getFunction("func1")->unmark();
     gc.collectGarbage(nullptr);
 
-    ASSERT_FALSE(func1->isMarked());
-    ASSERT_TRUE(func2->isMarked());
+    ASSERT_FALSE(block1->getFunction("func1")->isMarked());
+    ASSERT_TRUE(block2->getFunction("func2")->isMarked());
     ASSERT_EQ(gc.size(), 1);
 
-    func2->unmark();
+    block2->getFunction("func2")->unmark();
     gc.collectGarbage(nullptr);
-
-    // Ensure that all objects are collected
     ASSERT_EQ(gc.size(), 0);
 }

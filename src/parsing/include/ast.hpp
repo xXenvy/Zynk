@@ -25,14 +25,14 @@ struct ASTBase {
 
 struct ASTProgram : public ASTBase {
     ASTProgram() : ASTBase(ASTType::Program) {}
-    std::vector<std::shared_ptr<ASTBase>> body;
+    std::vector<std::unique_ptr<ASTBase>> body;
 };
 
 struct ASTFunction : public ASTBase {
     ASTFunction(const std::string& name)
         : ASTBase(ASTType::FunctionDeclaration), name(name) {}
     const std::string name;
-    std::vector<std::shared_ptr<ASTBase>> body;
+    std::vector<std::unique_ptr<ASTBase>> body;
 };
 
 struct ASTFunctionCall : public ASTBase {
@@ -41,25 +41,25 @@ struct ASTFunctionCall : public ASTBase {
 };
 
 struct ASTPrint : public ASTBase {
-    ASTPrint(const std::shared_ptr<ASTBase>& expr, bool newLine) :
-        ASTBase(ASTType::Print), newLine(newLine), expression(expr) {}
+    ASTPrint(std::unique_ptr<ASTBase> expr, bool newLine) :
+        ASTBase(ASTType::Print), newLine(newLine), expression(std::move(expr)) {}
     const bool newLine;
-    const std::shared_ptr<ASTBase> expression;
+    std::unique_ptr<ASTBase> expression;
 };
 
 struct ASTVariableDeclaration : public ASTBase {
-    ASTVariableDeclaration(const std::string& name, const std::string& type, const std::shared_ptr<ASTBase>& value)
-        : ASTBase(ASTType::VariableDeclaration), name(name), type(type), value(value) {}
+    ASTVariableDeclaration(const std::string& name, const std::string& type, std::unique_ptr<ASTBase> value)
+        : ASTBase(ASTType::VariableDeclaration), name(name), type(type), value(std::move(value)) {}
     const std::string name;
     const std::string type;
-    std::shared_ptr<ASTBase> value;
+    std::unique_ptr<ASTBase> value;
 };
 
 struct ASTVariableModify : public ASTBase {
-    ASTVariableModify(const std::string& name, const std::shared_ptr<ASTBase>& value)
-        : ASTBase(ASTType::VariableModify), name(name), value(value) {}
+    ASTVariableModify(const std::string& name, std::unique_ptr<ASTBase> value)
+        : ASTBase(ASTType::VariableModify), name(name), value(std::move(value)) {}
     const std::string name;
-    const std::shared_ptr<ASTBase> value;
+    std::unique_ptr<ASTBase> value;
 };
 
 struct ASTValue : public ASTBase {
@@ -73,11 +73,11 @@ struct ASTVariable : public ASTBase {
 };
 
 struct ASTBinaryOperation : public ASTBase {
-    ASTBinaryOperation(const std::shared_ptr<ASTBase>& left, const std::string& op, const std::shared_ptr<ASTBase>& right)
-        : ASTBase(ASTType::BinaryOperation), left(left), op(op), right(right) {}
-    const std::shared_ptr<ASTBase> left;
+    ASTBinaryOperation(std::unique_ptr<ASTBase> left, const std::string& op, std::unique_ptr<ASTBase> right)
+        : ASTBase(ASTType::BinaryOperation), left(std::move(left)), op(op), right(std::move(right)) {}
+    std::unique_ptr<ASTBase> left;
     const std::string op;
-    const std::shared_ptr<ASTBase> right;
+    std::unique_ptr<ASTBase> right;
 };
 
 #endif // AST_H

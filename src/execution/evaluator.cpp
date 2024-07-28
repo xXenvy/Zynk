@@ -1,82 +1,83 @@
 #include "../common/include/errors.hpp"
 #include "include/evaluator.hpp"
 #include <memory>
+#include <cassert>
 
-Evaluator::Evaluator(RuntimeEnvironment& env) : env(env) {};
 
-void Evaluator::evaluate(const std::shared_ptr<ASTBase> ast) {
+void Evaluator::evaluate(ASTBase* ast) {
+    assert(ast != nullptr && "Ast should not be nullptr");
+
     switch (ast->type) {
         case ASTType::Program:
-            evaluateProgram(std::static_pointer_cast<ASTProgram>(ast));
+            evaluateProgram(static_cast<ASTProgram*>(ast));
             break;
         case ASTType::FunctionDeclaration:
-            evaluateFunctionDeclaration(std::static_pointer_cast<ASTFunction>(ast));
+            evaluateFunctionDeclaration(static_cast<ASTFunction*>(ast));
             break;
         case ASTType::FunctionCall:
-            evaluateFunctionCall(std::static_pointer_cast<ASTFunctionCall>(ast));
+            evaluateFunctionCall(static_cast<ASTFunctionCall*>(ast));
             break;
         case ASTType::VariableDeclaration:
-            evaluateVariableDeclaration(std::static_pointer_cast<ASTVariableDeclaration>(ast));
+            evaluateVariableDeclaration(static_cast<ASTVariableDeclaration*>(ast));
             break;
         case ASTType::VariableModify:
-            evaluateVariableModify(std::static_pointer_cast<ASTVariableModify>(ast));
+            evaluateVariableModify(static_cast<ASTVariableModify*>(ast));
             break;
         case ASTType::Print:
-            evaluatePrint(std::static_pointer_cast<ASTPrint>(ast));
+            evaluatePrint(static_cast<ASTPrint*>(ast));
             break;
         default:
             throw ZynkError{ ZynkErrorType::RuntimeError, "Unknown AST type." };
     }
 }
 
-void Evaluator::evaluateProgram(const std::shared_ptr<ASTProgram> program) {
+void Evaluator::evaluateProgram(ASTProgram* program) {
     env.enterNewBlock(); // Main program code block.
-    for (const std::shared_ptr<ASTBase>& child : program->body) {
-        evaluate(child);
+    for (const std::unique_ptr<ASTBase>& child : program->body) {
+        evaluate(child.get());
     }
     env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
 }
 
-void Evaluator::evaluateFunctionDeclaration(const std::shared_ptr<ASTFunction> function) {
+void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
     env.declareFunction(function->name, function);
 }
 
-void Evaluator::evaluateFunctionCall(std::shared_ptr<ASTFunctionCall> functionCall) {
-    const auto func = env.getFunction(functionCall->name);
-
+void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
+    ASTFunction* func = env.getFunction(functionCall->name);
     env.enterNewBlock();
-    for (std::shared_ptr<ASTBase> child : func->body) {
-        evaluate(child);
+    for (const std::unique_ptr<ASTBase>& child : func->body) {
+        evaluate(child.get());
     }
     env.exitCurrentBlock();
 }
 
-void Evaluator::evaluatePrint(std::shared_ptr<ASTPrint> print) {
-    const std::string value = evaluateExpression(print->expression);
+void Evaluator::evaluatePrint(ASTPrint* print) {
+    const std::string value = evaluateExpression(print->expression.get());
     std::cout << value << (print->newLine ? "\n" : "");
 }
 
-void Evaluator::evaluateVariableDeclaration(const std::shared_ptr<ASTVariableDeclaration> declaration) {
+void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     env.declareVariable(declaration->name, declaration);
 }
 
-void Evaluator::evaluateVariableModify([[maybe_unused]] const std::shared_ptr<ASTVariableModify> variableModify) {
+void Evaluator::evaluateVariableModify([[maybe_unused]] ASTVariableModify* variableModify) {
     // const auto declaration = env.getVariable(variableModify->name);
     // declaration->value = variableModify->value;
 }
 
-std::string Evaluator::evaluateExpression(const std::shared_ptr<ASTBase> expression) {
+std::string Evaluator::evaluateExpression(ASTBase* expression) {
     switch (expression->type) {
         case ASTType::Value:
-            return std::static_pointer_cast<ASTValue>(expression)->value;
+            return static_cast<ASTValue*>(expression)->value;
         case ASTType::Variable: {
-            const auto var = std::static_pointer_cast<ASTVariable>(expression);
-            return evaluateExpression(env.getVariable(var->name)->value);
+            const auto var = static_cast<ASTVariable*>(expression);
+            return evaluateExpression(env.getVariable(var->name)->value.get());
         };
         case ASTType::BinaryOperation: {
-            const auto operation = std::static_pointer_cast<ASTBinaryOperation>(expression);
-            const std::string left = evaluateExpression(operation->left);
-            const std::string right = evaluateExpression(operation->right);
+            const auto operation = static_cast<ASTBinaryOperation*>(expression);
+            const std::string left = evaluateExpression(operation->left.get());
+            const std::string right = evaluateExpression(operation->right.get());
             try {
                 return calculate<std::string>(left, right, operation->op);
             } catch (const std::invalid_argument&) {

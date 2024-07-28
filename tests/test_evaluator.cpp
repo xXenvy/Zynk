@@ -13,14 +13,11 @@ TEST(EvaluatorTest, EvaluatePrintStatement) {
 
 	Parser parser(tokens);
 	const auto program = parser.parse();
-
-	RuntimeEnvironment env;
-	Evaluator evaluator(env);
-
-	testing::internal::CaptureStdout();
-	evaluator.evaluate(program);
-	const std::string output = testing::internal::GetCapturedStdout();
-	ASSERT_EQ(output, "Hello, World!\n");
+    
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+	evaluator.evaluate(program.get());
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "Hello, World!\n");
 }
 
 TEST(EvaluatorTest, EvaluateVariableDeclarationAndPrint) {
@@ -31,13 +28,10 @@ TEST(EvaluatorTest, EvaluateVariableDeclarationAndPrint) {
 	Parser parser(tokens);
 	const auto program = parser.parse();
 
-	RuntimeEnvironment env;
-	Evaluator evaluator(env);
-
-	testing::internal::CaptureStdout();
-	evaluator.evaluate(program);
-	std::string output = testing::internal::GetCapturedStdout();
-	ASSERT_EQ(output, "42\n");
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+	evaluator.evaluate(program.get());
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
 }
 
 TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
@@ -47,16 +41,12 @@ TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
 
 	Parser parser(tokens);
 	const auto program = parser.parse();
-
-	RuntimeEnvironment env;
-	Evaluator evaluator(env);
-
-	evaluator.evaluate(program);
-
+       
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+	evaluator.evaluate(program.get());
 	// We do not call the function, so nothing should show up.
-	testing::internal::CaptureStdout();
-	std::string output = testing::internal::GetCapturedStdout();
-	ASSERT_EQ(output, "");
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "");
 }
 
 TEST(EvaluatorTest, EvaluateFunctionCall) {
@@ -73,13 +63,10 @@ TEST(EvaluatorTest, EvaluateFunctionCall) {
 	Parser parser(tokens);
 	const auto program = parser.parse();
 
-	RuntimeEnvironment env;
-	Evaluator evaluator(env);
-
-	testing::internal::CaptureStdout();
-	evaluator.evaluate(program);
-	std::string output = testing::internal::GetCapturedStdout();
-	ASSERT_EQ(output, "Inside function.\n");
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+	evaluator.evaluate(program.get());
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "Inside function.\n");
 }
 
 TEST(EvaluatorTest, EvaluateNestedFunctionCalls) {
@@ -99,14 +86,10 @@ TEST(EvaluatorTest, EvaluateNestedFunctionCalls) {
 	Parser parser(tokens);
 	const auto program = parser.parse();
 
-	RuntimeEnvironment env;
-	Evaluator evaluator(env);
-
-	testing::internal::CaptureStdout();
-	evaluator.evaluate(program);
-	std::string output = testing::internal::GetCapturedStdout();
-
-	ASSERT_EQ(output, "Outer function\nInside inner function\n");
+    testing::internal::CaptureStdout();
+	Evaluator evaluator;
+	evaluator.evaluate(program.get());
+	ASSERT_EQ(testing::internal::GetCapturedStdout(), "Outer function\nInside inner function\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationAddition) {
@@ -117,13 +100,10 @@ TEST(EvaluatorTest, EvaluateBinaryOperationAddition) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "8\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "8\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationMultiply) {
@@ -134,13 +114,10 @@ TEST(EvaluatorTest, EvaluateBinaryOperationMultiply) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "42\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationSubtraction) {
@@ -151,13 +128,10 @@ TEST(EvaluatorTest, EvaluateBinaryOperationSubtraction) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "6\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "6\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationDivision) {
@@ -168,13 +142,10 @@ TEST(EvaluatorTest, EvaluateBinaryOperationDivision) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "3\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "3\n");
 }
 
 TEST(EvaluatorTest, EvaluateUndefinedFunctionCall) {
@@ -185,9 +156,8 @@ TEST(EvaluatorTest, EvaluateUndefinedFunctionCall) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-    ASSERT_THROW(evaluator.evaluate(program), ZynkError);
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateUndefinedVariableUsage) {
@@ -198,9 +168,8 @@ TEST(EvaluatorTest, EvaluateUndefinedVariableUsage) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-    ASSERT_THROW(evaluator.evaluate(program), ZynkError);
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateFloatVariableDeclarationAndPrint) {
@@ -211,13 +180,10 @@ TEST(EvaluatorTest, EvaluateFloatVariableDeclarationAndPrint) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "3.14\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "3.14\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationFloatAddition) {
@@ -228,13 +194,10 @@ TEST(EvaluatorTest, EvaluateBinaryOperationFloatAddition) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "4.000000\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "4.000000\n");
 }
 
 TEST(EvaluatorTest, DuplicateVariableDeclaration) {
@@ -245,9 +208,8 @@ TEST(EvaluatorTest, DuplicateVariableDeclaration) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-    ASSERT_THROW(evaluator.evaluate(program), ZynkError);
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
 
 TEST(EvaluatorTest, DuplicateFunctionDeclaration) {
@@ -261,9 +223,8 @@ TEST(EvaluatorTest, DuplicateFunctionDeclaration) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-    ASSERT_THROW(evaluator.evaluate(program), ZynkError);
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateVariableInExpression) {
@@ -274,13 +235,10 @@ TEST(EvaluatorTest, EvaluateVariableInExpression) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "15\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationFloatMultiplication) {
@@ -291,13 +249,10 @@ TEST(EvaluatorTest, EvaluateBinaryOperationFloatMultiplication) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "5.000000\n");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "5.000000\n");
 }
 
 TEST(EvaluatorTest, EvaluateDivisionByZero) {
@@ -308,9 +263,8 @@ TEST(EvaluatorTest, EvaluateDivisionByZero) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-    ASSERT_THROW(evaluator.evaluate(program), ZynkError);
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateEmptyProgram) {
@@ -321,11 +275,8 @@ TEST(EvaluatorTest, EvaluateEmptyProgram) {
     Parser parser(tokens);
     const auto program = parser.parse();
 
-    RuntimeEnvironment env;
-    Evaluator evaluator(env);
-
     testing::internal::CaptureStdout();
-    evaluator.evaluate(program);
-    std::string output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "");
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "");
 }
