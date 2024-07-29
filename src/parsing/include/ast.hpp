@@ -17,6 +17,13 @@ enum class ASTType {
     BinaryOperation
 };
 
+enum class ASTValueType {
+    String,
+    Integer,
+    Float,
+    Bool
+};
+
 struct ASTBase {
     const ASTType type;
     ASTBase(ASTType type) : type(type) {}
@@ -48,10 +55,10 @@ struct ASTPrint : public ASTBase {
 };
 
 struct ASTVariableDeclaration : public ASTBase {
-    ASTVariableDeclaration(const std::string& name, const std::string& type, std::unique_ptr<ASTBase> value)
+    ASTVariableDeclaration(const std::string& name, const ASTValueType type, std::unique_ptr<ASTBase> value)
         : ASTBase(ASTType::VariableDeclaration), name(name), type(type), value(std::move(value)) {}
     const std::string name;
-    const std::string type;
+    const ASTValueType type;
     std::unique_ptr<ASTBase> value;
 };
 
@@ -63,8 +70,10 @@ struct ASTVariableModify : public ASTBase {
 };
 
 struct ASTValue : public ASTBase {
-    ASTValue(const std::string& value) : ASTBase(ASTType::Value), value(value) {}
+    ASTValue(const std::string& value, const ASTValueType type) 
+        : ASTBase(ASTType::Value), value(value), type(type) {}
     const std::string value;
+    const ASTValueType type;
 };
 
 struct ASTVariable : public ASTBase {

@@ -17,7 +17,7 @@ TEST(ParserTest, parseVariableDeclaration) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
 
-    ASSERT_EQ(var->type, "int");
+    ASSERT_EQ(var->type, ASTValueType::Integer);
     ASSERT_EQ(var->name, "a");
     const auto value = static_cast<ASTValue*>(var->value.get());
     ASSERT_NE(value, nullptr);
@@ -26,7 +26,7 @@ TEST(ParserTest, parseVariableDeclaration) {
 
 TEST(ParserTest, parseMultipleVariableDeclarations) {
     Lexer lexer("var a: int = 1;\nvar b: float = 1.0;\n"
-        "var c: bool = true; \nvar d: String = \"Test\";");
+        "var c: bool = true; \nvar d: string = \"Test\";");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -93,7 +93,7 @@ TEST(ParserTest, parseVariableDeclarationWithBinaryOperation) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, "float");
+    ASSERT_EQ(var->type, ASTValueType::Float);
 
     const auto operation = static_cast<ASTBinaryOperation*>(var->value.get());
     ASSERT_NE(operation, nullptr);
@@ -120,7 +120,7 @@ TEST(ParserTest, parseVariableDeclarationWithComplexExpression) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, "float");
+    ASSERT_EQ(var->type, ASTValueType::Float);
 
     const auto operation = static_cast<ASTBinaryOperation*>(var->value.get());
     ASSERT_NE(operation, nullptr);
@@ -243,7 +243,7 @@ TEST(ParserTest, ShouldThrowInvalidTypeError) {
         FAIL() << "Expected ZynkError thrown.";
     }
     catch (const ZynkError& error) {
-        ASSERT_EQ(error.base_type, ZynkErrorType::InvalidTypeError);
+        ASSERT_EQ(error.base_type, ZynkErrorType::TypeError);
     }
     catch (const std::exception& error) {
         FAIL() << "Unexpected exception type: " << error.what();
@@ -336,7 +336,7 @@ TEST(ParserTest, parseExpressionWithInvalidOperator) {
 }
 
 TEST(ParserTest, parseStringWithMissingClosingQuote) {
-    Lexer lexer("var a: String = \"Unclosed string;");
+    Lexer lexer("var a: string = \"Unclosed string;");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);

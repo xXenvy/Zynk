@@ -7,6 +7,7 @@
 	gc/gc.cpp
 	gc/object.cpp
 	common/cli.cpp
+	typechecker/checker.cpp
 )
 set(Headers
 	parsing/include/lexer.hpp
@@ -21,6 +22,7 @@ set(Headers
 	gc/include/block.hpp
 	gc/include/object.hpp
 
+	typechecker/include/checker.hpp
 	common/include/cli.hpp
 	common/include/errors.hpp
 )

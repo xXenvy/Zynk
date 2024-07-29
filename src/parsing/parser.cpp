@@ -70,7 +70,7 @@ std::unique_ptr<ASTBase> Parser::parseVariableDeclaration() {
 	consume({ TokenType::VARIABLE, "var", currentLine });
 
 	const std::string varName = currentToken().value;
-	std::string varType;
+	ASTValueType varType;
 
 	consume({ TokenType::IDENTIFIER, varName, currentLine });
 	consume({ TokenType::COLON, ":", currentLine });
@@ -78,19 +78,25 @@ std::unique_ptr<ASTBase> Parser::parseVariableDeclaration() {
 	const Token varTypeToken = currentToken();
 	switch (varTypeToken.type) {
 		case TokenType::INT:
+			varType = ASTValueType::Integer;
+			break;
 		case TokenType::FLOAT:
+			varType = ASTValueType::Float;
+			break;
 		case TokenType::STRING:
+			varType = ASTValueType::String;
+			break;
 		case TokenType::BOOL:
-			varType = varTypeToken.value;
-			consume(varTypeToken);
+			varType = ASTValueType::Bool;
 			break;
 		default:
 			throw ZynkError{
-				ZynkErrorType::InvalidTypeError,
-				"Expected: String, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
+				ZynkErrorType::TypeError,
+				"Expected: string, bool, float or int. Found: '" + varTypeToken.value + "' instead.",
 				&currentLine,
 			};
 	}
+	consume(varTypeToken);
 	consume({ TokenType::ASSIGN, "=", currentLine });
 	auto varDeclaration = std::make_unique<ASTVariableDeclaration>(
 		varName, varType, parseExpression(0)
@@ -107,7 +113,6 @@ std::unique_ptr<ASTBase> Parser::parseVariableModify() {
 	consume({ TokenType::ASSIGN, "=", current.line });
 	std::unique_ptr<ASTBase> newValue = parseExpression(0);
 	consume({ TokenType::SEMICOLON, ";", current.line });
-
 	return std::make_unique<ASTVariableModify>(current.value, std::move(newValue));
 }
 
@@ -170,10 +175,13 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 
 	switch (current.type) {
 		case TokenType::INT:
+			return std::make_unique<ASTValue>(current.value, ASTValueType::Integer);
 		case TokenType::FLOAT:
+			return std::make_unique<ASTValue>(current.value, ASTValueType::Float);
 		case TokenType::STRING:
+			return std::make_unique<ASTValue>(current.value, ASTValueType::String);
 		case TokenType::BOOL:
-			return std::make_unique<ASTValue>(current.value);
+			return std::make_unique<ASTValue>(current.value, ASTValueType::Bool);
 		case TokenType::IDENTIFIER:
 			return std::make_unique<ASTVariable>(current.value);
 		default:

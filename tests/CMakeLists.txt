@@ -12,6 +12,7 @@ set(Sources
     test_block.cpp
     test_gc.cpp
     test_runtime.cpp
+    test_typechecker.cpp
 )
 set(GoogleTestVersion v1.15.0)
 

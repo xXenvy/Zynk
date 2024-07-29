@@ -2,13 +2,17 @@
 #define EVALUATOR_H
 
 #include "../../parsing/include/ast.hpp"
+#include "../../typechecker/include/checker.hpp"
 #include "runtime.hpp"
 
 class Evaluator {
 public:
+    Evaluator();
+
     RuntimeEnvironment env;
     void evaluate(ASTBase* ast);
 private:
+    TypeChecker typeChecker;
     std::string evaluateExpression(ASTBase* expression);
     void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     void evaluateVariableModify(ASTVariableModify* variableModify);

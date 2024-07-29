@@ -8,8 +8,8 @@ TEST(RuntimeEnvironmentTest, VariableDeclaration) {
     RuntimeEnvironment env;
     env.enterNewBlock();
 
-    auto varValue = std::make_unique<ASTValue>("10");
-    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", "int", std::move(varValue));
+    auto varValue = std::make_unique<ASTValue>("10", ASTValueType::Integer);
+    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(varValue));
     ASSERT_NO_THROW(env.declareVariable("x", varDeclaration.get()));
 
     auto retrievedVar = env.getVariable("x");
@@ -61,8 +61,8 @@ TEST(RuntimeEnvironmentTest, EnterAndExitBlock) {
     env.enterNewBlock();
     ASSERT_NE(env.currentBlock(), nullptr);
 
-    auto varValue = std::make_unique<ASTValue>("1.5");
-    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", "float", std::move(varValue));
+    auto varValue = std::make_unique<ASTValue>("1.5", ASTValueType::Float);
+    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Float, std::move(varValue));
     env.declareVariable("x", varDeclaration.get());
 
     ASSERT_EQ(env.isVariableDeclared("x"), true);
@@ -81,11 +81,11 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionAfterBlockExit) {
     RuntimeEnvironment env;
     env.enterNewBlock();
 
-    auto varValue1 = std::make_unique<ASTValue>("1.5");
-    auto varDeclaration1 = std::make_unique<ASTVariableDeclaration>("x", "float", std::move(varValue1));
+    auto varValue1 = std::make_unique<ASTValue>("1.5", ASTValueType::Float);
+    auto varDeclaration1 = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Float, std::move(varValue1));
 
-    auto varValue2 = std::make_unique<ASTValue>("5");
-    auto varDeclaration2 = std::make_unique<ASTVariableDeclaration>("z", "int", std::move(varValue2));
+    auto varValue2 = std::make_unique<ASTValue>("5", ASTValueType::Integer);
+    auto varDeclaration2 = std::make_unique<ASTVariableDeclaration>("z", ASTValueType::Integer, std::move(varValue2));
 
     env.declareVariable("var1", varDeclaration1.get());
     env.declareVariable("var2", varDeclaration2.get());
@@ -99,8 +99,8 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
     RuntimeEnvironment env;
     env.enterNewBlock();
 
-    auto varValue = std::make_unique<ASTValue>("Abc");
-    auto globalVar = std::make_unique<ASTVariableDeclaration>("globalVar", "String", std::move(varValue));
+    auto varValue = std::make_unique<ASTValue>("Abc", ASTValueType::String);
+    auto globalVar = std::make_unique<ASTVariableDeclaration>("globalVar", ASTValueType::String, std::move(varValue));
     auto globalFunc = std::make_unique<ASTFunction>("globalFunc");
 
     ASSERT_NO_THROW(env.declareVariable("globalVar", globalVar.get()));
@@ -111,8 +111,8 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
     ASSERT_TRUE(env.isFunctionDeclared("globalFunc"));
 
     env.enterNewBlock();
-    auto innerVarValue = std::make_unique<ASTValue>("Cba");
-    auto innerVar = std::make_unique<ASTVariableDeclaration>("innerVar", "String", std::move(varValue));
+    auto innerVarValue = std::make_unique<ASTValue>("Cba", ASTValueType::String);
+    auto innerVar = std::make_unique<ASTVariableDeclaration>("innerVar", ASTValueType::String, std::move(varValue));
     auto innerFunc = std::make_unique<ASTFunction>("innerFunc");
 
     env.declareVariable("innerVar", innerVar.get());

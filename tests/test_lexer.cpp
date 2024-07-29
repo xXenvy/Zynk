@@ -70,7 +70,7 @@ TEST(LexerTokenizeTest, MultipleFunctionDefinitions) {
 }
 
 TEST(LexerTokenizeTest, IntVariableDefinitions) {
-	const std::string source = "a: int = 10;\nb: int = 01;\nc: int = 321321321323232;";
+	const std::string source = "var a: int = 10;\nvar b: int = 01;\nvar c: int = 321321321323232;";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 	size_t type_counter = 0;
@@ -81,14 +81,14 @@ TEST(LexerTokenizeTest, IntVariableDefinitions) {
 			type_counter++;
 		}
 	}
-	EXPECT_TRUE(tokens.size() == 19);
+	EXPECT_TRUE(tokens.size() == 22);
 	EXPECT_TRUE(type_counter == 3 && tokens.back().line == 3);
-	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens.front().type == TokenType::VARIABLE);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
 TEST(LexerTokenizeTest, FloatVariableDefinitions) {
-	const std::string source = "a: float = 10.0;\nb: float = 0.1;\nc: float = 32132132.1323232;";
+	const std::string source = "var a: float = 10.0;\nvar b: float = 0.1;\nvar c: float = 32132132.1323232;";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 	size_t type_counter = 0;
@@ -99,32 +99,32 @@ TEST(LexerTokenizeTest, FloatVariableDefinitions) {
 			type_counter++;
 		}
 	}
-	EXPECT_TRUE(tokens.size() == 19);
+	EXPECT_TRUE(tokens.size() == 22);
 	EXPECT_TRUE(type_counter == 3);
-	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens.front().type == TokenType::VARIABLE);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
 TEST(LexerTokenizeTest, StringVariableDefinitions) {
-	const std::string source = "a: String = \"Test\";\nb: String = \"AB123#@\";\n";
+	const std::string source = "var a: string = \"Test\";\nvar b: string = \"AB123#@\";\n";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 	size_t type_counter = 0;
 
 	for (const Token& token : tokens) {
-		if (token.value == "String") {
+		if (token.value == "string") {
 			EXPECT_TRUE(token.type == TokenType::STRING);
 			type_counter++;
 		}
 	}
-	EXPECT_TRUE(tokens.size() == 13);
+	EXPECT_TRUE(tokens.size() == 15);
 	EXPECT_TRUE(type_counter == 2);
-	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens.front().type == TokenType::VARIABLE);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
 TEST(LexerTokenizeTest, BoolVariableDefinitions) {
-	const std::string source = "a: bool = false;\nb: bool = true;\nc: bool = false;";
+	const std::string source = "var a: bool = false;\nvar b: bool = true;\nvar c: bool = false;";
 	Lexer lexer(source);
 	const std::vector<Token> tokens = lexer.tokenize();
 	size_t type_counter = 0;
@@ -135,9 +135,9 @@ TEST(LexerTokenizeTest, BoolVariableDefinitions) {
 			type_counter++;
 		}
 	}
-	EXPECT_TRUE(tokens.size() == 19);
+	EXPECT_TRUE(tokens.size() == 22);
 	EXPECT_TRUE(type_counter == 3);
-	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens.front().type == TokenType::VARIABLE);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
 
