@@ -26,7 +26,7 @@ Dive into the specifics of Zynk’s syntax and semantics:
 
 ## 🤝 Contributing
 
-Contributions to Zynk are welcome. Learn how to contribute on [Contribution Guidelines](contributing.md).
+Contributions to Zynk are welcome. Learn how to contribute on [Contributing](contributing.md).
 
 ## 🛠️ Support
 
