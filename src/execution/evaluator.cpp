@@ -26,6 +26,9 @@ void Evaluator::evaluate(ASTBase* ast) {
         case ASTType::Print:
             evaluatePrint(static_cast<ASTPrint*>(ast));
             break;
+        case ASTType::Condition:
+            evaluateCondition(static_cast<ASTCondition*>(ast));
+            break;
         default:
             throw ZynkError{ ZynkErrorType::RuntimeError, "Unknown AST type." };
     }
@@ -69,6 +72,7 @@ void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
 }
 
 std::string Evaluator::evaluateExpression(ASTBase* expression) {
+    if (expression == nullptr) return "null";
     switch (expression->type) {
         case ASTType::Value:
             return static_cast<ASTValue*>(expression)->value;
@@ -80,8 +84,9 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             const auto operation = static_cast<ASTBinaryOperation*>(expression);
             const std::string left = evaluateExpression(operation->left.get());
             const std::string right = evaluateExpression(operation->right.get());
+            std::cout << left << " : " << right << std::endl;
             try {
-                return calculate<std::string>(left, right, operation->op);
+                return calculateString(left, right, operation->op);
             } catch (const std::invalid_argument&) {
                 throw ZynkError{ 
                     ZynkErrorType::ExpressionError, 
@@ -94,29 +99,58 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
     }
 }
 
-template <typename T>
-T calculate(const T& left, const T& right, const std::string& op) {
-    if (op == "*") return left * right;
-    if (op == "-") return left - right;
-    if (op == "+") return left + right;
-    if (op == "/") {
-        if (right == 0) throw ZynkError{ ZynkErrorType::RuntimeError, "division by zero" };
-        return left / right;
+void Evaluator::evaluateCondition(ASTCondition* condition) {
+    const std::string value = evaluateExpression(condition->expression.get());
+    bool result = true;
+    if (value == "0" || value.empty() || value == "null" || value == "false") result = false;
+    if (result) {
+        env.enterNewBlock();
+        for (const std::unique_ptr<ASTBase>& child : condition->body) {
+            evaluate(child.get());
+        }
+        env.exitCurrentBlock();
+    } else {
+        env.enterNewBlock();
+        for (const std::unique_ptr<ASTBase>& child : condition->elseBody) {
+            evaluate(child.get());
+        }
+        env.exitCurrentBlock();
     }
-    throw ZynkError{ZynkErrorType::RuntimeError, "Invalid operator: " + op + "."};
 }
 
-template <>
-std::string calculate<std::string>(const std::string& left_value, const std::string& right_value, const std::string& op) {
+std::string calculate(const float left, const float right, const std::string& op) {
+    if (op == "*") return std::to_string(left * right);
+    if (op == "-") return std::to_string(left - right);
+    if (op == "+") return std::to_string(left + right);
+    if (op == "/") {
+        if (right == 0) throw ZynkError{ ZynkErrorType::RuntimeError, "division by zero" };
+        return std::to_string(left / right);
+    }
+    throw ZynkError{ ZynkErrorType::RuntimeError, "Invalid operator: " + op + "." };
+}
+
+std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
+    // I don't like the way it's done, but I don't know how to do it now.
+    if (op == ">") return left_value > right_value ? "true" : "false";
+    if (op == ">=") return left_value >= right_value ? "true" : "false";
+    if (op == "<") return left_value < right_value ? "true" : "false";
+    if (op == "<=") return left_value <= right_value ? "true" : "false";
+    if (op == "==") return left_value == right_value ? "true" : "false";
+    if (op == "!=") return left_value != right_value ? "true" : "false";
+
     const bool leftIsFloat = left_value.find('.') != std::string::npos;
     const bool rightIsFloat = right_value.find('.') != std::string::npos;
 
+    const float left = std::stof(left_value);
+    const float right = std::stof(right_value);
+    std::string result = calculate(left, right, op);
+
     if (leftIsFloat || rightIsFloat) {
-        const float left = std::stof(left_value);
-        const float right = std::stof(right_value);
-        return std::to_string(calculate(left, right, op));
+        return result;
     }
-    const int left = std::stoi(left_value);
-    const int right = std::stoi(right_value);
-    return std::to_string(calculate(left, right, op));
+    size_t dotPosition = result.find('.');
+    if (dotPosition != std::string::npos) {
+        result = result.substr(0, dotPosition);
+    }
+    return result;
 }

@@ -24,6 +24,8 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 			return parsePrint(false);
 		case TokenType::PRINTLN:
 			return parsePrint(true);
+		case TokenType::CONDITION:
+			return parseIfStatement();
 		case TokenType::IDENTIFIER:
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
@@ -91,6 +93,12 @@ std::unique_ptr<ASTBase> Parser::parseVariableDeclaration() {
 				&currentLine,
 			};
 	}
+	if (currentToken().type == TokenType::SEMICOLON) {
+		consume({ TokenType::SEMICOLON, ";", currentLine });
+		return std::make_unique<ASTVariableDeclaration>(
+			varName, varType, nullptr
+		);
+	}
 	consume({ TokenType::ASSIGN, "=", currentLine });
 	auto varDeclaration = std::make_unique<ASTVariableDeclaration>(
 		varName, varType, parseExpression(0)
@@ -113,29 +121,12 @@ std::unique_ptr<ASTBase> Parser::parseVariableModify() {
 
 std::unique_ptr<ASTBase> Parser::parsePrint(bool newLine) {
 	const size_t currentLine = currentToken().line;
-	std::unique_ptr<ASTPrint> print;
 
-	if (newLine) {
-		consume({ TokenType::PRINTLN, "println", currentLine });
-	} else {
-		consume({ TokenType::PRINT, "print", currentLine });
-	}
+	if (newLine) consume({ TokenType::PRINTLN, "println", currentLine });
+	else consume({ TokenType::PRINT, "print", currentLine });
 	consume({ TokenType::LBRACKET, "(", currentLine });
-	switch (currentToken().type) {
-		case TokenType::STRING:
-		case TokenType::INT:
-		case TokenType::FLOAT:
-		case TokenType::BOOL:
-		case TokenType::IDENTIFIER:
-			print = std::make_unique<ASTPrint>(parseExpression(0), newLine);
-			break;
-		default:
-			throw ZynkError{
-				ZynkErrorType::ExpressionError,
-				"Invalid print expression. Expected value or variable, found: '" + currentToken().value + "' instead.",
-				&currentLine,
-			};
-	}
+
+	auto print = std::make_unique<ASTPrint>(parseExpression(0), newLine);
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::SEMICOLON, ";", currentLine });
 	return print;
@@ -185,6 +176,38 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 	}
 }
 
+std::unique_ptr<ASTBase> Parser::parseIfStatement() {
+	size_t currentLine = currentToken().line;
+	consume({ TokenType::CONDITION, "if", currentLine });
+	consume({ TokenType::LBRACKET, "(", currentLine });
+
+	auto condition = std::make_unique<ASTCondition>(parseExpression(0));
+	consume({ TokenType::RBRACKET, ")", currentLine });
+	bool shortCondition = currentToken().type != TokenType::LBRACE;
+
+	if(!shortCondition) consume({ TokenType::LBRACE, "{", currentLine });
+	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
+		condition->body.push_back(parseCurrent());
+		if (shortCondition) break;
+	}
+
+	if (!shortCondition) consume({ TokenType::RBRACE, "}", currentLine });
+	if (currentToken().type != TokenType::ELSE) return condition;
+	currentLine = currentToken().line;
+
+	// Parsing else block.
+	consume({ TokenType::ELSE, "else", currentLine });
+	bool shortElse = currentToken().type != TokenType::LBRACE;
+
+	if (!shortElse) consume({ TokenType::LBRACE, "{", currentLine });
+	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
+		condition->elseBody.push_back(parseCurrent());
+		if (shortElse) break;
+	}
+	if (!shortElse) consume({ TokenType::RBRACE, "}", currentLine });
+	return condition;
+}
+
 bool Parser::endOfFile() const {
 	return position > tokens.size() || tokens[position].type == TokenType::END_OF_FILE;
 }
@@ -195,6 +218,12 @@ bool Parser::isOperator(TokenType type) const {
 		case TokenType::SUBTRACT:
 		case TokenType::MULTIPLY:
 		case TokenType::DIVIDE:
+		case TokenType::GREATER_THAN:
+		case TokenType::LESS_THAN:
+		case TokenType::GREATER_OR_EQUAL:
+		case TokenType::LESS_OR_EQUAL:
+		case TokenType::EQUAL:
+		case TokenType::NOT_EQUAL:
 			return true;
 		default:
 			return false;
@@ -214,6 +243,7 @@ int Parser::getPriority(TokenType type) const {
 		case TokenType::SUBTRACT:
 			return 1;
 		default:
+			if (isOperator(type)) return 1;
 			return 0;
 	}
 }

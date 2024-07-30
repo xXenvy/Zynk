@@ -49,6 +49,16 @@ Token Lexer::next() {
         case ';': return Token(TokenType::SEMICOLON, ";", currentLine);
         case '(': return Token(TokenType::LBRACKET, "(", currentLine);
         case ')': return Token(TokenType::RBRACKET, ")", currentLine);
+        case '<': {
+            if (peek() != '=') return Token(TokenType::LESS_THAN, "<", currentLine);
+            moveForward();
+            return Token(TokenType::LESS_OR_EQUAL, "<=", currentLine);
+        }
+        case '>': {
+            if (peek() != '=') return Token(TokenType::GREATER_THAN, ">", currentLine);
+            moveForward();
+            return Token(TokenType::GREATER_OR_EQUAL, ">=", currentLine);
+        }
         case '=': {
             if (peek() != '=') return Token(TokenType::ASSIGN, "=", currentLine);
             moveForward();
@@ -72,11 +82,13 @@ Token Lexer::identifier() {
     if (value == "println") return Token(TokenType::PRINTLN, value, line);
     if (value == "print") return Token(TokenType::PRINT, value, line);
     if (value == "true" || value == "false") return Token(TokenType::BOOL, value, line);
-    if (value == "int") return Token(TokenType::INT, "int", line);
-    if (value == "float") return Token(TokenType::FLOAT, "float", line);
-    if (value == "String") return Token(TokenType::STRING, "String", line);
-    if (value == "bool") return Token(TokenType::BOOL, "bool", line);
+    if (value == "int") return Token(TokenType::INT, value, line);
+    if (value == "float") return Token(TokenType::FLOAT, value, line);
+    if (value == "String") return Token(TokenType::STRING, value, line);
+    if (value == "bool") return Token(TokenType::BOOL, value, line);
     if (value == "var") return Token(TokenType::VARIABLE, value, line);
+    if (value == "if") return Token(TokenType::CONDITION, value, line);
+    if (value == "else") return Token(TokenType::ELSE, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 
