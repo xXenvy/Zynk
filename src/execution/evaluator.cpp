@@ -84,7 +84,6 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             const auto operation = static_cast<ASTBinaryOperation*>(expression);
             const std::string left = evaluateExpression(operation->left.get());
             const std::string right = evaluateExpression(operation->right.get());
-            std::cout << left << " : " << right << std::endl;
             try {
                 return calculateString(left, right, operation->op);
             } catch (const std::invalid_argument&) {
@@ -103,19 +102,12 @@ void Evaluator::evaluateCondition(ASTCondition* condition) {
     const std::string value = evaluateExpression(condition->expression.get());
     bool result = true;
     if (value == "0" || value.empty() || value == "null" || value == "false") result = false;
-    if (result) {
-        env.enterNewBlock();
-        for (const std::unique_ptr<ASTBase>& child : condition->body) {
-            evaluate(child.get());
-        }
-        env.exitCurrentBlock();
-    } else {
-        env.enterNewBlock();
-        for (const std::unique_ptr<ASTBase>& child : condition->elseBody) {
-            evaluate(child.get());
-        }
-        env.exitCurrentBlock();
+
+    env.enterNewBlock();
+    for (const std::unique_ptr<ASTBase>& child : result ? condition->body : condition->elseBody) {
+        evaluate(child.get());
     }
+    env.exitCurrentBlock();
 }
 
 std::string calculate(const float left, const float right, const std::string& op) {
@@ -130,7 +122,7 @@ std::string calculate(const float left, const float right, const std::string& op
 }
 
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
-    // I don't like the way it's done, but I don't know how to do it now.
+    // I don't like the way it's done, but I don't know how to do it better now.
     if (op == ">") return left_value > right_value ? "true" : "false";
     if (op == ">=") return left_value >= right_value ? "true" : "false";
     if (op == "<") return left_value < right_value ? "true" : "false";
@@ -145,9 +137,8 @@ std::string calculateString(const std::string& left_value, const std::string& ri
     const float right = std::stof(right_value);
     std::string result = calculate(left, right, op);
 
-    if (leftIsFloat || rightIsFloat) {
-        return result;
-    }
+    if (leftIsFloat || rightIsFloat) return result;
+
     size_t dotPosition = result.find('.');
     if (dotPosition != std::string::npos) {
         result = result.substr(0, dotPosition);
