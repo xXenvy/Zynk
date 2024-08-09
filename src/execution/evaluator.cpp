@@ -7,7 +7,6 @@ Evaluator::Evaluator() : typeChecker(env) {};
 
 void Evaluator::evaluate(ASTBase* ast) {
     assert(ast != nullptr && "Ast should not be nullptr");
-
     switch (ast->type) {
         case ASTType::Program:
             evaluateProgram(static_cast<ASTProgram*>(ast));
@@ -65,6 +64,7 @@ void Evaluator::evaluatePrint(ASTPrint* print) {
 }
 
 std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
+    std::cout << 5 << std::endl;
     std::string input;
     if (read->out.get() != nullptr) {
         std::cout << evaluateExpression(read->out.get());
@@ -76,6 +76,11 @@ std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->type, declaration->value.get());
+        ASTValue* newValue = new ASTValue(
+            evaluateExpression(declaration->value.get()),
+            declaration->type
+        );
+        declaration->value.reset(newValue);
     }
     env.declareVariable(declaration->name, declaration);
 }
