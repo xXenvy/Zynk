@@ -332,3 +332,19 @@ TEST(LexerTokenizeTest, UnknownTokens) {
 	EXPECT_TRUE(tokens.size() == 8);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
+
+TEST(LexerTokenizeTest, ReadLineKeyword) {
+	Lexer lexer("readLine(1)\n;\nreadLine();\nreadLine(\"Input\");");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	size_t readKeywords = 0;
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::READLINE) {
+			readKeywords++;
+		}
+	}
+	EXPECT_TRUE(readKeywords == 3);
+	EXPECT_TRUE(tokens.size() == 15);
+	EXPECT_TRUE(tokens.front().type == TokenType::READLINE);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}

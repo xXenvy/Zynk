@@ -390,3 +390,49 @@ TEST(EvaluatorTest, EvaluateShortIfStatement) {
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
 }
 
+TEST(EvaluatorTest, EvaluateReadStatementWithPrompt) {
+    const std::string code = R"(
+        var input: string = readLine("Enter your name: ");
+        println(input);
+    )";
+    std::istringstream input("Alice\n");
+    std::streambuf* originalCinStreamBuf = std::cin.rdbuf(input.rdbuf());
+    testing::internal::CaptureStdout();
+
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+
+    std::cin.rdbuf(originalCinStreamBuf);
+    std::string captured_output = testing::internal::GetCapturedStdout();
+    ASSERT_TRUE(captured_output.find("Enter your name: ") != std::string::npos);
+    ASSERT_EQ(captured_output.substr(captured_output.find("Alice")), "Alice\n");
+}
+
+TEST(EvaluatorTest, EvaluateReadStatementWithoutPrompt) {
+    const std::string code = R"(
+        var input: string = readLine();
+        println(input);
+    )";
+    std::istringstream input("Bob\n");
+    std::streambuf* originalCinStreamBuf = std::cin.rdbuf(input.rdbuf());
+    testing::internal::CaptureStdout();
+
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+
+    std::cin.rdbuf(originalCinStreamBuf);
+    std::string captured_output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(captured_output, "Bob\n");
+}
