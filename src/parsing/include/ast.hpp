@@ -21,7 +21,8 @@ enum class ASTValueType {
     String,
     Integer,
     Float,
-    Bool
+    Bool,
+    None,
 };
 
 struct ASTBase {
