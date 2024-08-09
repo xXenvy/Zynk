@@ -47,3 +47,13 @@ This example demonstrates defining and calling functions, including nested funct
         displayNumber();
     }
     main();
+
+## Example 4: Reading Input
+
+This example demonstrates how to read input from the user and use it in your program.
+
+    def main() {
+        var name: string = readLine("Enter your name: ");
+        println(name);
+    }
+    main();
