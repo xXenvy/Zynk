@@ -10,3 +10,4 @@ Zynk offers several primitive data types:
 - **Float (`float`)**: Represents numbers with decimals.
 - **Bool (`bool`)**: Represents truth values, true or false (1 and 0).
 - **String (`String`)**: Represents sequences of characters.
+- **Null (`null`)**: Represents null value.
