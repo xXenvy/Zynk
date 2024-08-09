@@ -24,6 +24,8 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 			return parsePrint(false);
 		case TokenType::PRINTLN:
 			return parsePrint(true);
+		case TokenType::READ:
+			return parseRead();
 		case TokenType::CONDITION:
 			return parseIfStatement();
 		case TokenType::IDENTIFIER:
@@ -137,6 +139,22 @@ std::unique_ptr<ASTBase> Parser::parsePrint(bool newLine) {
 	return print;
 }
 
+std::unique_ptr<ASTBase> Parser::parseRead() {
+	const size_t currentLine = currentToken().line;
+	consume({ TokenType::READ, "read", currentLine });
+	consume({ TokenType::LBRACKET, "(", currentLine });
+
+	std::unique_ptr<ASTRead> read;
+	if (currentToken().type == TokenType::RBRACKET) {
+		read = std::make_unique<ASTRead>(nullptr);
+	} else {
+		read = std::make_unique<ASTRead>(parseExpression(0));
+	}
+	consume({ TokenType::RBRACKET, ")", currentLine });
+	consume({ TokenType::SEMICOLON, ";", currentLine });
+	return read;
+}
+
 std::unique_ptr<ASTBase> Parser::parseExpression(int priority) {
 	const Token leftToken = currentToken();
 	std::unique_ptr<ASTBase> left = parsePrimaryExpression();
@@ -177,6 +195,12 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 			return std::make_unique<ASTValue>(current.value, ASTValueType::None);
 		case TokenType::IDENTIFIER:
 			return std::make_unique<ASTVariable>(current.value);
+		case TokenType::READ: {
+			position--;
+			std::unique_ptr<ASTBase> expr = parseRead();
+			position--;
+			return expr;
+		}
 		default:
 			throw ZynkError{
 				ZynkErrorType::ExpressionError,

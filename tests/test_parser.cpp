@@ -216,6 +216,113 @@ TEST(ParserTest, parseVariableModifyWithExpression) {
     ASSERT_EQ(rightRightValue->value, "3");
 }
 
+TEST(ParserTest, parseSimpleIfStatement) {
+    Lexer lexer("if (a > b) println(10);");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Condition);
+
+    const auto condition = static_cast<ASTCondition*>(program->body.front().get());
+    const auto conditionExpression = static_cast<ASTBinaryOperation*>(condition->expression.get());
+
+    ASSERT_NE(condition, nullptr);
+    ASSERT_EQ(condition->body.size(), 1);
+    ASSERT_EQ(conditionExpression->op, ">");
+
+    const auto printStatement = static_cast<ASTPrint*>(condition->body.front().get());
+    const auto printValue = static_cast<ASTValue*>(printStatement->expression.get());
+
+    ASSERT_NE(printStatement, nullptr);
+    ASSERT_EQ(printValue->value, "10");
+}
+
+TEST(ParserTest, parseIfElseStatement) {
+    Lexer lexer("if (x == 5) println(\"x is 5\"); else println(\"x is not 5\");");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Condition);
+
+    const auto condition = static_cast<ASTCondition*>(program->body.front().get());
+    const auto conditionExpression = static_cast<ASTBinaryOperation*>(condition->expression.get());
+
+    ASSERT_NE(condition, nullptr);
+    ASSERT_EQ(conditionExpression->op, "==");
+
+    ASSERT_EQ(condition->body.size(), 1);
+    const auto ifPrint = static_cast<ASTPrint*>(condition->body.front().get());
+    const auto ifPrintValue = static_cast<ASTValue*>(ifPrint->expression.get());
+
+    ASSERT_EQ(ifPrintValue->value, "x is 5");
+
+    ASSERT_EQ(condition->elseBody.size(), 1);
+    const auto elsePrint = static_cast<ASTPrint*>(condition->elseBody.front().get());
+    const auto elsePrintValue = static_cast<ASTValue*>(elsePrint->expression.get());
+    ASSERT_EQ(elsePrintValue->value, "x is not 5");
+}
+
+TEST(ParserTest, parseSimpleReadStatement) {
+    Lexer lexer("read();");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Read);
+
+    const auto read = static_cast<ASTRead*>(program->body.front().get());
+    ASSERT_NE(read, nullptr);
+
+    ASSERT_EQ(read->out, nullptr);
+}
+
+TEST(ParserTest, parseReadStatementWithText) {
+    Lexer lexer("read(\"Enter your name: \");");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Read);
+
+    const auto read = static_cast<ASTRead*>(program->body.front().get());
+    ASSERT_NE(read, nullptr);
+
+    const auto text = static_cast<ASTValue*>(read->out.get());
+    ASSERT_NE(text, nullptr);
+    ASSERT_EQ(text->value, "Enter your name: ");
+}
+
+TEST(ParserTest, parseIfElseStatementWithSyntaxError) {
+    Lexer lexer("if (a > b) { println(10) else { println(20); }");  // Missing semicolon
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    try {
+        parser.parse();
+        FAIL() << "Expected ZynkError thrown.";
+    }
+    catch (const ZynkError& error) {
+        ASSERT_EQ(error.base_type, ZynkErrorType::SyntaxError);
+    }
+    catch (const std::exception& error) {
+        FAIL() << "Unexpected exception type: " << error.what();
+    }
+}
+
 TEST(ParserTest, ShouldThrowSyntaxError) {
     Lexer lexer("def main()\n}"); // Missing '{'
     const std::vector<Token> tokens = lexer.tokenize();
@@ -346,77 +453,6 @@ TEST(ParserTest, parseStringWithMissingClosingQuote) {
     }
     catch (const ZynkError& error) {
         ASSERT_EQ(error.base_type, ZynkErrorType::ExpressionError);
-    }
-    catch (const std::exception& error) {
-        FAIL() << "Unexpected exception type: " << error.what();
-    }
-}
-
-TEST(ParserTest, parseSimpleIfStatement) {
-    Lexer lexer("if (a > b) println(10);");
-    const std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    auto program = parser.parse();
-
-    ASSERT_EQ(program->type, ASTType::Program);
-    ASSERT_EQ(program->body.size(), 1);
-    ASSERT_EQ(program->body.front()->type, ASTType::Condition);
-
-    const auto condition = static_cast<ASTCondition*>(program->body.front().get());
-    const auto conditionExpression = static_cast<ASTBinaryOperation*>(condition->expression.get());
-
-    ASSERT_NE(condition, nullptr);
-    ASSERT_EQ(condition->body.size(), 1);
-    ASSERT_EQ(conditionExpression->op, ">");
-
-    const auto printStatement = static_cast<ASTPrint*>(condition->body.front().get());
-    const auto printValue = static_cast<ASTValue*>(printStatement->expression.get());
-
-    ASSERT_NE(printStatement, nullptr);
-    ASSERT_EQ(printValue->value, "10");
-}
-
-TEST(ParserTest, parseIfElseStatement) {
-    Lexer lexer("if (x == 5) println(\"x is 5\"); else println(\"x is not 5\");");
-    const std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    auto program = parser.parse();
-
-    ASSERT_EQ(program->type, ASTType::Program);
-    ASSERT_EQ(program->body.size(), 1);
-    ASSERT_EQ(program->body.front()->type, ASTType::Condition);
-
-    const auto condition = static_cast<ASTCondition*>(program->body.front().get());
-    const auto conditionExpression = static_cast<ASTBinaryOperation*>(condition->expression.get());
-
-    ASSERT_NE(condition, nullptr);
-    ASSERT_EQ(conditionExpression->op, "==");
-
-    ASSERT_EQ(condition->body.size(), 1);
-    const auto ifPrint = static_cast<ASTPrint*>(condition->body.front().get());
-    const auto ifPrintValue = static_cast<ASTValue*>(ifPrint->expression.get());
-
-    ASSERT_EQ(ifPrintValue->value, "x is 5");
-
-    ASSERT_EQ(condition->elseBody.size(), 1);
-    const auto elsePrint = static_cast<ASTPrint*>(condition->elseBody.front().get());
-    const auto elsePrintValue = static_cast<ASTValue*>(elsePrint->expression.get());
-    ASSERT_EQ(elsePrintValue->value, "x is not 5");
-}
-
-TEST(ParserTest, parseIfElseStatementWithSyntaxError) {
-    Lexer lexer("if (a > b) { println(10) else { println(20); }");  // Missing semicolon
-    const std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    try {
-        parser.parse();
-        FAIL() << "Expected ZynkError thrown.";
-    }
-    catch (const ZynkError& error) {
-        ASSERT_EQ(error.base_type, ZynkErrorType::SyntaxError);
     }
     catch (const std::exception& error) {
         FAIL() << "Unexpected exception type: " << error.what();

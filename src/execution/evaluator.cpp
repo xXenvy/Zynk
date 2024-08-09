@@ -27,6 +27,9 @@ void Evaluator::evaluate(ASTBase* ast) {
         case ASTType::Print:
             evaluatePrint(static_cast<ASTPrint*>(ast));
             break;
+        case ASTType::Read:
+            evaluateRead(static_cast<ASTRead*>(ast));
+            break;
         case ASTType::Condition:
             evaluateCondition(static_cast<ASTCondition*>(ast));
             break;
@@ -61,6 +64,15 @@ void Evaluator::evaluatePrint(ASTPrint* print) {
     std::cout << value << (print->newLine ? "\n" : "");
 }
 
+std::string Evaluator::evaluateRead(ASTRead* read) {
+    std::string input;
+    if (read->out.get() != nullptr) {
+        std::cout << evaluateExpression(read->out.get());
+    }
+    std::getline(std::cin, input);
+    return input;
+}
+
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->type, declaration->value.get());
@@ -72,11 +84,11 @@ void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
     ASTVariableDeclaration* declaration = env.getVariable(variableModify->name);
     typeChecker.checkType(declaration->type, variableModify->value.get());
 
+    // We need to calculate the new value of the variable already at this point.
     ASTValue* newValue = new ASTValue(
         evaluateExpression(variableModify->value.get()),
         declaration->type
     );
-    // We need to calculate the new value of the variable already at this point.
     declaration->value.reset(newValue);
 }
 
@@ -89,6 +101,9 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             const auto var = static_cast<ASTVariable*>(expression);
             return evaluateExpression(env.getVariable(var->name)->value.get());
         };
+        case ASTType::Read: {
+            return evaluateRead(static_cast<ASTRead*>(expression));
+        }
         case ASTType::BinaryOperation: {
             const auto operation = static_cast<ASTBinaryOperation*>(expression);
             const std::string left = evaluateExpression(operation->left.get());

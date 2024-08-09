@@ -86,10 +86,11 @@ Token Lexer::identifier() {
     if (value == "float") return Token(TokenType::FLOAT, value, line);
     if (value == "string") return Token(TokenType::STRING, value, line);
     if (value == "bool") return Token(TokenType::BOOL, value, line);
+    if (value == "null") return Token(TokenType::NONE, value, line);
     if (value == "var") return Token(TokenType::VARIABLE, value, line);
     if (value == "if") return Token(TokenType::CONDITION, value, line);
     if (value == "else") return Token(TokenType::ELSE, value, line);
-    if (value == "null") return Token(TokenType::NONE, value, line);
+    if (value == "read") return Token(TokenType::READ, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 
