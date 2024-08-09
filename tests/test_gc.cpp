@@ -65,8 +65,8 @@ TEST(GarbageCollectorTest, MarkObjectsCorrectly) {
 TEST(GarbageCollectorTest, HandlesNestedBlocksCorrectly) {
     GarbageCollector gc;
 
-    auto block1 = std::make_unique<Block>(); // Blok rodzic
-    auto block2 = std::make_unique<Block>(block1.get()); // Blok dziecko
+    auto block1 = std::make_unique<Block>();
+    auto block2 = std::make_unique<Block>(block1.get());
 
     auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
     auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
@@ -131,8 +131,8 @@ TEST(GarbageCollectorTest, CollectGarbageWithSomeMarkedObjects) {
 TEST(GarbageCollectorTest, MarkAndRetainObjectsInNestedBlocks) {
     GarbageCollector gc;
 
-    auto block1 = std::make_unique<Block>(); // Blok rodzic
-    auto block2 = std::make_unique<Block>(block1.get()); // Blok dziecko
+    auto block1 = std::make_unique<Block>();
+    auto block2 = std::make_unique<Block>(block1.get());
 
     auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
     auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
@@ -154,8 +154,8 @@ TEST(GarbageCollectorTest, MarkAndRetainObjectsInNestedBlocks) {
 TEST(GarbageCollectorTest, MarkAllObjectsInHierarchicalBlocks) {
     GarbageCollector gc;
 
-    auto block1 = std::make_unique<Block>(); // Blok rodzic
-    auto block2 = std::make_unique<Block>(block1.get()); // Blok dziecko
+    auto block1 = std::make_unique<Block>();
+    auto block2 = std::make_unique<Block>(block1.get());
 
     auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
     auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);

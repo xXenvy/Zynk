@@ -89,6 +89,7 @@ Token Lexer::identifier() {
     if (value == "var") return Token(TokenType::VARIABLE, value, line);
     if (value == "if") return Token(TokenType::CONDITION, value, line);
     if (value == "else") return Token(TokenType::ELSE, value, line);
+    if (value == "null") return Token(TokenType::NONE, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 
