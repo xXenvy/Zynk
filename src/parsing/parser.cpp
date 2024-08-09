@@ -24,7 +24,7 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 			return parsePrint(false);
 		case TokenType::PRINTLN:
 			return parsePrint(true);
-		case TokenType::READ:
+		case TokenType::READLINE:
 			return parseRead();
 		case TokenType::CONDITION:
 			return parseIfStatement();
@@ -141,14 +141,14 @@ std::unique_ptr<ASTBase> Parser::parsePrint(bool newLine) {
 
 std::unique_ptr<ASTBase> Parser::parseRead() {
 	const size_t currentLine = currentToken().line;
-	consume({ TokenType::READ, "read", currentLine });
+	consume({ TokenType::READLINE, "read", currentLine });
 	consume({ TokenType::LBRACKET, "(", currentLine });
 
-	std::unique_ptr<ASTRead> read;
+	std::unique_ptr<ASTReadLine> read;
 	if (currentToken().type == TokenType::RBRACKET) {
-		read = std::make_unique<ASTRead>(nullptr);
+		read = std::make_unique<ASTReadLine>(nullptr);
 	} else {
-		read = std::make_unique<ASTRead>(parseExpression(0));
+		read = std::make_unique<ASTReadLine>(parseExpression(0));
 	}
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::SEMICOLON, ";", currentLine });
@@ -195,7 +195,7 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 			return std::make_unique<ASTValue>(current.value, ASTValueType::None);
 		case TokenType::IDENTIFIER:
 			return std::make_unique<ASTVariable>(current.value);
-		case TokenType::READ: {
+		case TokenType::READLINE: {
 			position--;
 			std::unique_ptr<ASTBase> expr = parseRead();
 			position--;

@@ -14,7 +14,7 @@ public:
 private:
     TypeChecker typeChecker;
     std::string evaluateExpression(ASTBase* expression);
-    std::string evaluateRead(ASTRead* read);
+    std::string evaluateReadLine(ASTReadLine* read);
     void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     void evaluateVariableModify(ASTVariableModify* variableModify);
     void evaluateProgram(ASTProgram* program);

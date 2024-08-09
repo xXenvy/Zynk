@@ -270,8 +270,8 @@ TEST(ParserTest, parseIfElseStatement) {
     ASSERT_EQ(elsePrintValue->value, "x is not 5");
 }
 
-TEST(ParserTest, parseSimpleReadStatement) {
-    Lexer lexer("read();");
+TEST(ParserTest, parseSimpleReadLine) {
+    Lexer lexer("readLine();");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -279,16 +279,16 @@ TEST(ParserTest, parseSimpleReadStatement) {
 
     ASSERT_EQ(program->type, ASTType::Program);
     ASSERT_EQ(program->body.size(), 1);
-    ASSERT_EQ(program->body.front()->type, ASTType::Read);
+    ASSERT_EQ(program->body.front()->type, ASTType::ReadLine);
 
-    const auto read = static_cast<ASTRead*>(program->body.front().get());
+    const auto read = static_cast<ASTReadLine*>(program->body.front().get());
     ASSERT_NE(read, nullptr);
 
     ASSERT_EQ(read->out, nullptr);
 }
 
-TEST(ParserTest, parseReadStatementWithText) {
-    Lexer lexer("read(\"Enter your name: \");");
+TEST(ParserTest, parseReadLineWithText) {
+    Lexer lexer("readLine(\"Enter your name: \");");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -296,9 +296,9 @@ TEST(ParserTest, parseReadStatementWithText) {
 
     ASSERT_EQ(program->type, ASTType::Program);
     ASSERT_EQ(program->body.size(), 1);
-    ASSERT_EQ(program->body.front()->type, ASTType::Read);
+    ASSERT_EQ(program->body.front()->type, ASTType::ReadLine);
 
-    const auto read = static_cast<ASTRead*>(program->body.front().get());
+    const auto read = static_cast<ASTReadLine*>(program->body.front().get());
     ASSERT_NE(read, nullptr);
 
     const auto text = static_cast<ASTValue*>(read->out.get());

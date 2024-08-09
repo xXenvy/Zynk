@@ -90,7 +90,7 @@ Token Lexer::identifier() {
     if (value == "var") return Token(TokenType::VARIABLE, value, line);
     if (value == "if") return Token(TokenType::CONDITION, value, line);
     if (value == "else") return Token(TokenType::ELSE, value, line);
-    if (value == "read") return Token(TokenType::READ, value, line);
+    if (value == "readLine") return Token(TokenType::READLINE, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 
