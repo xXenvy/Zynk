@@ -31,15 +31,15 @@ int main(int argc, char* argv[]) {
 	}
 	ZynkInterpreter interpreter;
 	try {
-		interpreter.interpret_file(cli.args.file_path);
+		interpreter.interpretFile(cli.args.file_path);
 	} catch (const ZynkError& error) {
 		error.print();
 		return -1;
-	} catch (const std::exception& unknown_error) {
+	} catch (const std::exception& unknownError) {
 		// Unknown error type, constructing a PanicError.
 		ZynkError{
 			ZynkErrorType::PanicError,
-			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknown_error.what() + "\".\n"
+			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknownError.what() + "\".\n"
 		}.print();
 		return -1;
 	}

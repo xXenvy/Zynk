@@ -6,7 +6,7 @@
 class ZynkInterpreter {
 public:
     void interpret(const std::string& source);
-    void interpret_file(const std::string& file_path);
+    void interpretFile(const std::string& file_path);
 };
 
 #endif // INTERPRETER_H

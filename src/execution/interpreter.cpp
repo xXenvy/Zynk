@@ -24,7 +24,7 @@ void ZynkInterpreter::interpret(const std::string& source) {
     evaluator.evaluate(program.get());
 }
 
-void ZynkInterpreter::interpret_file(const std::string& filePath) {
+void ZynkInterpreter::interpretFile(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
         throw ZynkError{ ZynkErrorType::FileOpenError, "Failed to open a file " + filePath };
