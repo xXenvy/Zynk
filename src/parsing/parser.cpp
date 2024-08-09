@@ -164,6 +164,7 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 		case TokenType::FLOAT:
 		case TokenType::STRING:
 		case TokenType::BOOL:
+		case TokenType::NONE:
 			return std::make_unique<ASTValue>(current.value);
 		case TokenType::IDENTIFIER:
 			return std::make_unique<ASTVariable>(current.value);
