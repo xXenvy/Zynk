@@ -7,7 +7,7 @@ TEST(InterpreterTest, ShouldThrowFileOpenError) {
 	// as most things are tested in other tests anyway.
     ZynkInterpreter interpreter;
 	try {
-		interpreter.interpret_file("invalidfile.zk");
+		interpreter.interpretFile("invalidfile.zk");
 		FAIL() << "Expected ZynkError thrown.";
 	}
 	catch (const ZynkError& error) {
