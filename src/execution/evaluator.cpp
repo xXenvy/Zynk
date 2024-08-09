@@ -62,7 +62,9 @@ void Evaluator::evaluatePrint(ASTPrint* print) {
 }
 
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
-    typeChecker.checkType(declaration->type, declaration->value.get());
+    if (declaration->value.get() != nullptr) {
+        typeChecker.checkType(declaration->type, declaration->value.get());
+    }
     env.declareVariable(declaration->name, declaration);
 }
 
