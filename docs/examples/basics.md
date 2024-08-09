@@ -8,7 +8,7 @@ This example demonstrates the use of variables and basic output functions.
 
     def main() {
         var x: int = 1;
-        var y: String = "elo";
+        var y: string = "elo";
         println(x);
         println(y);
     }

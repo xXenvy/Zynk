@@ -52,7 +52,7 @@ TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
 TEST(EvaluatorTest, EvaluateFunctionCall) {
 	const std::string code = R"(
         def myFunction(){
-			var x: String = "Inside function.";
+			var x: string = "Inside function.";
 			println(x);
 		}
         myFunction();

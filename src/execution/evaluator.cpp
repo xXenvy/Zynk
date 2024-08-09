@@ -3,6 +3,7 @@
 #include <memory>
 #include <cassert>
 
+Evaluator::Evaluator() : typeChecker(env) {};
 
 void Evaluator::evaluate(ASTBase* ast) {
     assert(ast != nullptr && "Ast should not be nullptr");
@@ -61,12 +62,18 @@ void Evaluator::evaluatePrint(ASTPrint* print) {
 }
 
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
+    typeChecker.checkType(declaration->type, declaration->value.get());
     env.declareVariable(declaration->name, declaration);
 }
 
 void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
     ASTVariableDeclaration* declaration = env.getVariable(variableModify->name);
-    ASTValue* newValue = new ASTValue(evaluateExpression(variableModify->value.get()));
+    typeChecker.checkType(declaration->type, variableModify->value.get());
+
+    ASTValue* newValue = new ASTValue(
+        evaluateExpression(variableModify->value.get()),
+        declaration->type
+    );
     // We need to calculate the new value of the variable already at this point.
     declaration->value.reset(newValue);
 }

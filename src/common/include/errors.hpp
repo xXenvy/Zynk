@@ -9,7 +9,7 @@ enum class ZynkErrorType {
     SyntaxError,
     RuntimeError,
     UnknownError,
-    InvalidTypeError,
+    TypeError,
     NotDefinedError,
     FileOpenError,
     ExpressionError,
@@ -35,7 +35,7 @@ private:
         switch (base_type) {
             case ZynkErrorType::SyntaxError: return "SyntaxError";
             case ZynkErrorType::RuntimeError: return "RuntimeError";
-            case ZynkErrorType::InvalidTypeError: return "InvalidTypeError";
+            case ZynkErrorType::TypeError: return "InvalidTypeError";
             case ZynkErrorType::FileOpenError: return "FileOpenError";
             case ZynkErrorType::ExpressionError: return "ExpressionError";
             case ZynkErrorType::PanicError: return "PanicError";
