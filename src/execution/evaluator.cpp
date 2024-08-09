@@ -75,11 +75,11 @@ std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->type, declaration->value.get());
-        ASTValue* newValue = new ASTValue(
+        ASTValue* varValue = new ASTValue(
             evaluateExpression(declaration->value.get()),
             declaration->type
         );
-        declaration->value.reset(newValue);
+        declaration->value.reset(varValue);
     }
     env.declareVariable(declaration->name, declaration);
 }
