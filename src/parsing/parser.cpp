@@ -98,6 +98,7 @@ std::unique_ptr<ASTBase> Parser::parseVariableDeclaration() {
 				&currentLine,
 			};
 	}
+	consume(varTypeToken);
 	if (currentToken().type == TokenType::SEMICOLON) {
 		consume({ TokenType::SEMICOLON, ";", currentLine });
 		return std::make_unique<ASTVariableDeclaration>(
