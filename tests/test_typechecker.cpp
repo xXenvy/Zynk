@@ -153,7 +153,7 @@ TEST(TypeCheckerTest, DetermineTypeMismatchedBinaryOperationNode) {
     ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::String);
 }
 
-TEST(TypeCheckerTest, CheckType_MatchingTypes) {
+TEST(TypeCheckerTest, CheckTypeMatchingTypes) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
@@ -181,7 +181,7 @@ TEST(TypeCheckerTest, CheckTypeBinaryOperation_MatchingTypes) {
     ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Integer, operationNode.get()));
 }
 
-TEST(TypeCheckerTest, CheckType_UndeclaredVariableNode) {
+TEST(TypeCheckerTest, CheckTypeUndeclaredVariableNode) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
     env.enterNewBlock();
@@ -191,7 +191,7 @@ TEST(TypeCheckerTest, CheckType_UndeclaredVariableNode) {
     env.exitCurrentBlock();
 }
 
-TEST(TypeCheckerTest, CheckType_MixedTypesInBinaryOperation) {
+TEST(TypeCheckerTest, CheckTypeMixedTypesInBinaryOperation) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
