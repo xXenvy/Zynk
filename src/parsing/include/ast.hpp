@@ -14,7 +14,8 @@ enum class ASTType {
     Print,
     Value,
     Variable,
-    BinaryOperation
+    BinaryOperation,
+    Condition
 };
 
 enum class ASTValueType {
@@ -88,6 +89,14 @@ struct ASTBinaryOperation : public ASTBase {
     std::unique_ptr<ASTBase> left;
     const std::string op;
     std::unique_ptr<ASTBase> right;
+};
+
+struct ASTCondition : public ASTBase {
+    ASTCondition(std::unique_ptr<ASTBase> expression)
+        : ASTBase(ASTType::Condition), expression(std::move(expression)) {}
+    std::unique_ptr<ASTBase> expression;
+    std::vector<std::unique_ptr<ASTBase>> body;
+    std::vector<std::unique_ptr<ASTBase>> elseBody;
 };
 
 #endif // AST_H
