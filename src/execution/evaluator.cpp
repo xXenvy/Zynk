@@ -64,7 +64,6 @@ void Evaluator::evaluatePrint(ASTPrint* print) {
 }
 
 std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
-    std::cout << 5 << std::endl;
     std::string input;
     if (read->out.get() != nullptr) {
         std::cout << evaluateExpression(read->out.get());
