@@ -329,3 +329,64 @@ TEST(EvaluatorTest, EvaluateVariableModifyMultipleTimes) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n2\n3\n");
 }
+
+TEST(EvaluatorTest, EvaluateIfStatementTrueCondition) {
+    const std::string code = R"(
+        var x: int = 1;
+        if (x) {
+            println("Condition is true");
+        }
+        x = 0;
+        if (x) println("Condition is false");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Condition is true\n");
+}
+
+TEST(EvaluatorTest, EvaluateIfElseStatement) {
+    const std::string code = R"(
+        var x: bool = false;
+        if (x) {
+            println("This should not be printed");
+        } else {
+            println("Condition is false, so this is printed");
+        }
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Condition is false, so this is printed\n");
+}
+
+TEST(EvaluatorTest, EvaluateShortIfStatement) {
+    const std::string code = R"(
+        var x: int = 0;
+        if (x) println(x);
+        else println(x + 1);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
+}
+

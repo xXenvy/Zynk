@@ -4,12 +4,15 @@
 #include "string"
 
 enum class TokenType {
-    DEF, PRINTLN, PRINT, VARIABLE, // Keywords.
+    DEF, PRINTLN, PRINT,
+    VARIABLE, CONDITION, ELSE, // Keywords.
 
-    INT, FLOAT, STRING, BOOL, // Types.
+    INT, FLOAT, STRING, BOOL, NONE, // Types.
 
     ADD, SUBTRACT, MULTIPLY, // Operators.
-    DIVIDE, ASSIGN, NOT_EQUAL, EQUAL, // Assign is =, Equal is ==
+    DIVIDE, ASSIGN, NOT_EQUAL, EQUAL,
+    GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL,
+    LESS_OR_EQUAL,
 
     IDENTIFIER, COLON, LBRACE, // Syntax.
     RBRACE, SEMICOLON, LBRACKET,

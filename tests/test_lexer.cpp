@@ -265,3 +265,70 @@ TEST(LexerTokenizeTest, UnterminatedString) {
 	EXPECT_EQ(tokens.front().value, "Unterminated string");
 	EXPECT_EQ(tokens.back().type, TokenType::END_OF_FILE);
 }
+
+TEST(LexerTokenizeTest, NullKeyword) {
+	Lexer lexer("null");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 2);
+	EXPECT_TRUE(tokens.front().type == TokenType::NONE);
+	EXPECT_TRUE(tokens.front().value == "null");
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, ConditionKeyword) {
+	Lexer lexer("if (x == 10) { print(\"Yes\"); } else { print(\"No\"); }");
+	const std::vector<Token> tokens = lexer.tokenize();
+	size_t conditionals = 0;
+	size_t elses = 0;
+
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::CONDITION) conditionals++;
+		if (token.type == TokenType::ELSE) elses++;
+	}
+	EXPECT_TRUE(conditionals == 1);
+	EXPECT_TRUE(elses == 1);
+	EXPECT_TRUE(tokens.front().type == TokenType::CONDITION);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+	EXPECT_TRUE(tokens.size() == 22);
+}
+
+TEST(LexerTokenizeTest, VariableKeyword) {
+	Lexer lexer("var x = 10;");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 6);
+	EXPECT_TRUE(tokens.front().type == TokenType::VARIABLE);
+	EXPECT_TRUE(tokens.front().value == "var");
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, ComparisonOperators) {
+	Lexer lexer("x < 10; y > 20; a <= b; c >= d;");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	size_t operators = 0;
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::LESS_THAN || token.type == TokenType::GREATER_THAN ||
+			token.type == TokenType::LESS_OR_EQUAL || token.type == TokenType::GREATER_OR_EQUAL) {
+			operators++;
+		}
+	}
+	EXPECT_TRUE(operators == 4);
+	EXPECT_TRUE(tokens.front().type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+	EXPECT_TRUE(tokens.size() == 17);
+}
+
+TEST(LexerTokenizeTest, UnknownTokens) {
+	Lexer lexer("@#$$%^&");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	size_t unknownCount = 0;
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::UNKNOWN) unknownCount++;
+	}
+	EXPECT_TRUE(unknownCount == 7);
+	EXPECT_TRUE(tokens.size() == 8);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
