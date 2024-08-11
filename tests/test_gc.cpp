@@ -8,10 +8,10 @@ TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
     GarbageCollector gc;
     std::vector<GCObject*> gcObjects;
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
-    auto ast3 = std::make_unique<ASTBase>(ASTType::Print);
-    auto ast4 = std::make_unique<ASTBase>(ASTType::FunctionCall);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
+    auto ast3 = std::make_unique<ASTBase>(ASTType::Print, 3);
+    auto ast4 = std::make_unique<ASTBase>(ASTType::FunctionCall, 4);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -43,8 +43,8 @@ TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {
 TEST(GarbageCollectorTest, MarkObjectsCorrectly) {
     GarbageCollector gc;
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -68,8 +68,8 @@ TEST(GarbageCollectorTest, HandlesNestedBlocksCorrectly) {
     auto block1 = std::make_unique<Block>();
     auto block2 = std::make_unique<Block>(block1.get());
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
 
@@ -99,7 +99,7 @@ TEST(GarbageCollectorTest, HandlesNullBlock) {
 
 TEST(GarbageCollectorTest, RepeatedMarkAndUnmark) {
     GarbageCollector gc;
-    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program, 1);
     auto obj1 = std::make_unique<GCObject>(ast1.get());
 
     for (int i = 0; i < 5; ++i) {
@@ -115,8 +115,8 @@ TEST(GarbageCollectorTest, RepeatedMarkAndUnmark) {
 
 TEST(GarbageCollectorTest, CollectGarbageWithSomeMarkedObjects) {
     GarbageCollector gc;
-    auto ast1 = std::make_unique<ASTBase>(ASTType::Program);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::Program, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -134,8 +134,8 @@ TEST(GarbageCollectorTest, MarkAndRetainObjectsInNestedBlocks) {
     auto block1 = std::make_unique<Block>();
     auto block2 = std::make_unique<Block>(block1.get());
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -157,9 +157,9 @@ TEST(GarbageCollectorTest, MarkAllObjectsInHierarchicalBlocks) {
     auto block1 = std::make_unique<Block>();
     auto block2 = std::make_unique<Block>(block1.get());
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast3 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 2);
+    auto ast3 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 3);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -182,10 +182,10 @@ TEST(GarbageCollectorTest, MarkAllObjectsInComplexStructure) {
     auto block2 = std::make_unique<Block>(block1.get());
     auto block3 = std::make_unique<Block>(block2.get());
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast3 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast4 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 2);
+    auto ast3 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 3);
+    auto ast4 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 4);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -211,8 +211,8 @@ TEST(GarbageCollectorTest, CollectGarbageWithFunctionObjects) {
     auto block1 = std::make_unique<Block>();
     auto block2 = std::make_unique<Block>(block1.get());
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto func1 = std::make_unique<GCObject>(ast1.get());
     auto func2 = std::make_unique<GCObject>(ast2.get());

@@ -27,7 +27,7 @@ void ZynkInterpreter::interpret(const std::string& source) {
 void ZynkInterpreter::interpretFile(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw ZynkError{ ZynkErrorType::FileOpenError, "Failed to open a file " + filePath };
+        throw ZynkError(ZynkErrorType::FileOpenError, "Failed to open a file.");
     }
     std::stringstream buffer;
     buffer << file.rdbuf();

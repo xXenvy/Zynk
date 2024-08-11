@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 	try {
 		interpreter.interpretFile(cli.args.file_path);
 	} catch (const ZynkError& error) {
-		error.print();
+		error.print(cli.args.file_path);
 		return -1;
 	} catch (const std::exception& unknownError) {
 		// Unknown error type, constructing a PanicError.

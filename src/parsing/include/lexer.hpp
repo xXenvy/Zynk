@@ -7,6 +7,7 @@
 class Lexer {
 private:
     const std::string source;
+
     size_t position = 0;
     size_t line = 1;
 

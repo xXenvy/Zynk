@@ -2,8 +2,12 @@
 #define ERRORS_H
 
 #include <string>
-#include <vector>
 #include <iostream>
+#include <optional>
+
+#define RESET "\033[0m"
+#define RED "\033[31m"
+#define CYAN "\033[36m"
 
 enum class ZynkErrorType {
     SyntaxError,
@@ -19,24 +23,34 @@ enum class ZynkErrorType {
     TypeCastError
 };
 
-struct ZynkError : public std::runtime_error { // Consider using templates for type
+struct ZynkError : public std::runtime_error {
     const ZynkErrorType base_type;
-    const size_t* line;
+    std::optional<size_t> line;
 
-    ZynkError(ZynkErrorType type, const std::string& message, const size_t* line = nullptr)
+    ZynkError(ZynkErrorType type, const std::string& message, std::optional<size_t> line = std::nullopt)
         : std::runtime_error(message), base_type(type), line(line) {}
 
-    void print() const {
-        std::cerr << "Error[" << toString() << "]: "
-            << (line ? "At line: " + std::to_string(*line) + ". " : "")
-            << what() << std::endl;
+    void print(std::optional<std::string> filepath = std::nullopt) const {
+        std::cout << std::endl;
+        std::cerr << "=== " << RED << "Error Report" << RESET << " ===" << std::endl;
+        std::cerr << CYAN << "-> Type: " << RESET << errorToString() << std::endl;
+        std::cerr << CYAN << "-> Message: " << RESET << what() << std::endl;
+
+        if (filepath.has_value()) {
+            std::cerr << CYAN << "-> File: " << RESET << filepath.value() << std::endl;
+        }
+        if (line.has_value()) {
+            std::cerr << CYAN << "-> Line: " << RESET << line.value() << std::endl;
+        }
+        std::cerr << RESET << "=====================" << std::endl;
     }
+
 private:
-    std::string toString() const {
+    std::string errorToString() const {
         switch (base_type) {
             case ZynkErrorType::SyntaxError: return "SyntaxError";
             case ZynkErrorType::RuntimeError: return "RuntimeError";
-            case ZynkErrorType::TypeError: return "InvalidTypeError";
+            case ZynkErrorType::TypeError: return "TypeError";
             case ZynkErrorType::FileOpenError: return "FileOpenError";
             case ZynkErrorType::ExpressionError: return "ExpressionError";
             case ZynkErrorType::PanicError: return "PanicError";
@@ -49,4 +63,4 @@ private:
     }
 };
 
-#endif
+#endif // ERRORS_H

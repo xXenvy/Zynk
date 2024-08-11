@@ -12,7 +12,7 @@ public:
     GarbageCollector gc;
 
     void declareVariable(const std::string& name, ASTVariableDeclaration* value);
-    ASTVariableDeclaration* getVariable(const std::string& name);
+    ASTVariableDeclaration* getVariable(const std::string& name, const size_t line);
     bool isVariableDeclared(const std::string& name);
 
     void declareFunction(const std::string& name, ASTFunction* func);
