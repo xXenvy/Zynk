@@ -5,6 +5,8 @@ TypeChecker::TypeChecker(RuntimeEnvironment& env) : env(env) {};
 
 ASTValueType TypeChecker::determineType(ASTBase* expression) {
     switch (expression->type) {
+        case ASTType::TypeCast:
+            return static_cast<ASTTypeCast*>(expression)->castType;
         case ASTType::ReadLine:
             return ASTValueType::String;
         case ASTType::Value: {

@@ -436,3 +436,85 @@ TEST(EvaluatorTest, EvaluateReadStatementWithoutPrompt) {
     std::string captured_output = testing::internal::GetCapturedStdout();
     ASSERT_EQ(captured_output, "Bob\n");
 }
+
+TEST(EvaluatorTest, EvaluateStringToIntCast) {
+    const std::string code = "var x: int = int(\"42\");\nprintln(x + 1);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "43\n");
+}
+
+TEST(EvaluatorTest, EvaluateIntToFloatCast) {
+    const std::string code = "var x: float = float(42);\nprintln(x);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "42.000000\n");
+}
+
+TEST(EvaluatorTest, EvaluateFloatToIntCast) {
+    const std::string code = "var x: int = int(42.99);\nprintln(x);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
+}
+
+TEST(EvaluatorTest, EvaluateStringToFloatCast) {
+    const std::string code = "var x: float = float(\"42.50\");\nprintln(x);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "42.500000\n");
+}
+
+TEST(EvaluatorTest, EvaluateStringToBoolCast) {
+    const std::string code = "var x: bool = bool(\"0\");\nprintln(x);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
+}
+
+TEST(EvaluatorTest, EvaluateInvalidStringToIntCast) {
+    const std::string code = "var x: int = int(\"not_a_number\");\nprintln(x);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+    Evaluator evaluator;
+
+    EXPECT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}

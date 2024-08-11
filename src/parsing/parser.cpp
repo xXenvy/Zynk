@@ -181,15 +181,20 @@ std::unique_ptr<ASTBase> Parser::parseExpression(int priority) {
 std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 	const Token current = currentToken();
 	moveForward();
+	const bool isTypeCast = currentToken().type == TokenType::LBRACKET;
 
 	switch (current.type) {
 		case TokenType::INT:
+			if (isTypeCast) return parseTypeCast(TokenType::INT);
 			return std::make_unique<ASTValue>(current.value, ASTValueType::Integer);
 		case TokenType::FLOAT:
+			if (isTypeCast) return parseTypeCast(TokenType::FLOAT);
 			return std::make_unique<ASTValue>(current.value, ASTValueType::Float);
 		case TokenType::STRING:
+			if (isTypeCast) return parseTypeCast(TokenType::STRING);
 			return std::make_unique<ASTValue>(current.value, ASTValueType::String);
 		case TokenType::BOOL:
+			if (isTypeCast) return parseTypeCast(TokenType::BOOL);
 			return std::make_unique<ASTValue>(current.value, ASTValueType::Bool);
 		case TokenType::NONE:
 			return std::make_unique<ASTValue>(current.value, ASTValueType::None);
@@ -240,6 +245,36 @@ std::unique_ptr<ASTBase> Parser::parseIfStatement() {
 	}
 	if (!shortElse) consume({ TokenType::RBRACE, "}", currentLine });
 	return condition;
+}
+
+std::unique_ptr<ASTBase> Parser::parseTypeCast(TokenType type) {
+	const size_t currentLine = currentToken().line;
+	consume({ TokenType::LBRACKET, "(", currentLine });
+	std::unique_ptr<ASTBase> value = parseExpression(0);
+	consume({ TokenType::RBRACKET, ")", currentLine });
+
+	ASTValueType castType;
+	switch (type) {
+		case TokenType::INT:
+			castType = ASTValueType::Integer;
+			break;
+		case TokenType::FLOAT:
+			castType = ASTValueType::Float;
+			break;
+		case TokenType::STRING:
+			castType = ASTValueType::String;
+			break;
+		case TokenType::BOOL:
+			castType = ASTValueType::Bool;
+			break;
+		default:
+			throw ZynkError{
+				ZynkErrorType::SyntaxError,
+				"Invalid type cast. Expected 'int', 'float', 'string', or 'bool', but found an unrecognized type.",
+				&currentLine
+			};
+	}
+	return std::make_unique<ASTTypeCast>(std::move(value), castType);
 }
 
 bool Parser::endOfFile() const {

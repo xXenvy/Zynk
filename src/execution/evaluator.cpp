@@ -96,6 +96,54 @@ void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
     declaration->value.reset(newValue);
 }
 
+std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
+    std::string base = evaluateExpression(typeCast->value.get());
+
+    switch (typeCast->castType) {
+        case ASTValueType::Integer:
+            try {
+                return std::to_string(std::stoi(base));
+            } catch (const std::invalid_argument&) {
+                throw ZynkError{ 
+                    ZynkErrorType::TypeCastError, 
+                    "Invalid argument: unable to convert the provided value to an integer." 
+                };
+            }
+        case ASTValueType::Float:
+            try {
+                return std::to_string(std::stof(base));
+            } catch (const std::invalid_argument&) {
+                throw ZynkError{
+                    ZynkErrorType::TypeCastError,
+                    "Invalid argument. Unable to convert the provided value to an float."
+                };
+            }
+        case ASTValueType::String:
+            return base; // Expressions by default are always strings.
+        case ASTValueType::Bool: {
+            if (base == "0" || base.empty() || base == "null" || base == "false") {
+                return "false";
+            }
+            return "true";
+        }
+        default: {
+            // This should never happen, but whatever
+            throw ZynkError{ ZynkErrorType::RuntimeError, "Invalid type cast." };
+        }
+    }
+}
+
+void Evaluator::evaluateCondition(ASTCondition* condition) {
+    const std::string value = evaluateExpression(condition->expression.get());
+    bool isFalse = value == "0" || value.empty() || value == "null" || value == "false";
+
+    env.enterNewBlock();
+    for (const std::unique_ptr<ASTBase>& child : isFalse ? condition->elseBody : condition->body) {
+        evaluate(child.get());
+    }
+    env.exitCurrentBlock();
+}
+
 std::string Evaluator::evaluateExpression(ASTBase* expression) {
     if (expression == nullptr) return "null";
     switch (expression->type) {
@@ -107,35 +155,31 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
         };
         case ASTType::ReadLine: {
             return evaluateReadLine(static_cast<ASTReadLine*>(expression));
-        }
+        };
+        case ASTType::TypeCast: {
+            return evaluateTypeCast(static_cast<ASTTypeCast*>(expression));
+        };
         case ASTType::BinaryOperation: {
             const auto operation = static_cast<ASTBinaryOperation*>(expression);
+            int valueTypes[2] = {
+                static_cast<int>(typeChecker.determineType(operation->left.get())),
+                static_cast<int>(typeChecker.determineType(operation->right.get()))
+            };
+            for (int valueType : valueTypes) {
+                if (valueType != 1 && valueType != 2) {
+                    throw ZynkError{
+                        ZynkErrorType::ExpressionError,
+                        "Invalid expression. Cannot perform BinaryOperation on that type."
+                    };
+                }
+            }
             const std::string left = evaluateExpression(operation->left.get());
             const std::string right = evaluateExpression(operation->right.get());
-            try {
-                return calculateString(left, right, operation->op);
-            } catch (const std::invalid_argument&) {
-                throw ZynkError{ 
-                    ZynkErrorType::ExpressionError, 
-                    "Invalid expression. Cannot perform BinaryOperation on that type."
-                };
-            }
+            return calculateString(left, right, operation->op);
         };
         default:
             throw ZynkError{ZynkErrorType::RuntimeError, "Invalid expression."};
     }
-}
-
-void Evaluator::evaluateCondition(ASTCondition* condition) {
-    const std::string value = evaluateExpression(condition->expression.get());
-    bool result = true;
-    if (value == "0" || value.empty() || value == "null" || value == "false") result = false;
-
-    env.enterNewBlock();
-    for (const std::unique_ptr<ASTBase>& child : result ? condition->body : condition->elseBody) {
-        evaluate(child.get());
-    }
-    env.exitCurrentBlock();
 }
 
 std::string calculate(const float left, const float right, const std::string& op) {
