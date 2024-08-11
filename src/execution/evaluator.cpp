@@ -93,7 +93,6 @@ void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
     ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line);
     typeChecker.checkType(declaration->varType, variableModify->value.get());
 
-    // We need to calculate the new value of the variable already at this point.
     ASTValue* newValue = new ASTValue(
         evaluateExpression(variableModify->value.get()),
         declaration->varType,
@@ -215,7 +214,7 @@ std::string calculate(const float left, const float right, const std::string& op
 }
 
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
-    // I don't like the way it's done, but I don't know how to do it better now.
+    // I don't like the way it's done, but I don't know how to do it better right now.
     if (op == ">") return left_value > right_value ? "true" : "false";
     if (op == ">=") return left_value >= right_value ? "true" : "false";
     if (op == "<") return left_value < right_value ? "true" : "false";
