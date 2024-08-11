@@ -425,6 +425,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-5-type-casting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 5: Type Casting
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -524,6 +533,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-5-type-casting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 5: Type Casting
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -586,6 +604,23 @@ main();
 <pre><code>def main() {
     var name: string = readLine("Enter your name: ");
     println(name);
+}
+main();
+</code></pre>
+<h2 id="example-5-type-casting">Example 5: Type Casting</h2>
+<p>This example demonstrates how to use type casting in Zynk. Type casting allows you to convert values between different types.</p>
+<pre><code>def main() {
+    var intValue: int = 5;
+    var floatValue: float = float(intValue);
+    var stringValue: string = string(floatValue);
+
+    println(intValue);
+    println(floatValue);
+    println(stringValue);
+
+    var stringInput: string = "42";
+    var castedInt: int = int(stringInput);
+    println(castedInt + 5);
 }
 main();
 </code></pre>
