@@ -16,7 +16,8 @@ enum class ASTType {
     Value,
     Variable,
     BinaryOperation,
-    Condition
+    Condition,
+    TypeCast
 };
 
 enum class ASTValueType {
@@ -104,6 +105,13 @@ struct ASTReadLine : public ASTBase {
     ASTReadLine(std::unique_ptr<ASTBase> out) 
         : ASTBase(ASTType::ReadLine), out(std::move(out)) {}
     std::unique_ptr<ASTBase> out;
+};
+
+struct ASTTypeCast : public ASTBase {
+    ASTTypeCast(std::unique_ptr<ASTBase> value, const ASTValueType type)
+        : ASTBase(ASTType::TypeCast), value(std::move(value)), castType(type) {}
+    std::unique_ptr<ASTBase> value;
+    const ASTValueType castType;
 };
 
 #endif // AST_H

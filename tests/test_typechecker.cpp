@@ -202,3 +202,30 @@ TEST(TypeCheckerTest, CheckTypeMixedTypesInBinaryOperation) {
 
     ASSERT_THROW(typeChecker.checkType(ASTValueType::Integer, operationNode.get()), ZynkError);
 }
+
+TEST(TypeCheckerTest, DetermineTypeCastFromFloatToInt) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto valueNodeFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float);
+    auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeFloat), ASTValueType::Integer);
+    ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Integer);
+}
+
+TEST(TypeCheckerTest, DetermineTypeCastFromStringToFloat) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto valueNodeString = std::make_unique<ASTValue>("3.14", ASTValueType::String);
+    auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeString), ASTValueType::Float);
+    ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Float);
+}
+
+TEST(TypeCheckerTest, DetermineTypeCastFromIntToBool) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto valueNodeInt = std::make_unique<ASTValue>("1", ASTValueType::Integer);
+    auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeInt), ASTValueType::Bool);
+    ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Bool);
+}

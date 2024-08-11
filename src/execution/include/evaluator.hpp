@@ -13,8 +13,11 @@ public:
     void evaluate(ASTBase* ast);
 private:
     TypeChecker typeChecker;
+
     std::string evaluateExpression(ASTBase* expression);
     std::string evaluateReadLine(ASTReadLine* read);
+    std::string evaluateTypeCast(ASTTypeCast* typeCast);
+
     void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     void evaluateVariableModify(ASTVariableModify* variableModify);
     void evaluateProgram(ASTProgram* program);

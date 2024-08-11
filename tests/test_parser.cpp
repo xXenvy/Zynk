@@ -306,6 +306,102 @@ TEST(ParserTest, parseReadLineWithText) {
     ASSERT_EQ(text->value, "Enter your name: ");
 }
 
+TEST(ParserTest, parseTypeCastFromStringToInt) {
+    Lexer lexer("var a: int = int(\"123\");");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "a");
+    ASSERT_EQ(var->type, ASTValueType::Integer);
+
+    const auto cast = static_cast<ASTTypeCast*>(var->value.get());
+    ASSERT_NE(cast, nullptr);
+    ASSERT_EQ(cast->castType, ASTValueType::Integer);
+
+    const auto castValue = static_cast<ASTValue*>(cast->value.get());
+    ASSERT_NE(castValue, nullptr);
+    ASSERT_EQ(castValue->value, "123");
+}
+
+TEST(ParserTest, parseTypeCastFromIntToString) {
+    Lexer lexer("var a: string = string(123);");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "a");
+    ASSERT_EQ(var->type, ASTValueType::String);
+
+    const auto cast = static_cast<ASTTypeCast*>(var->value.get());
+    ASSERT_NE(cast, nullptr);
+    ASSERT_EQ(cast->castType, ASTValueType::String);
+
+    const auto castValue = static_cast<ASTValue*>(cast->value.get());
+    ASSERT_NE(castValue, nullptr);
+    ASSERT_EQ(castValue->value, "123");
+}
+
+TEST(ParserTest, parseTypeCastFromStringToFloat) {
+    Lexer lexer("var a: float = float(\"123.45\");");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "a");
+    ASSERT_EQ(var->type, ASTValueType::Float);
+
+    const auto cast = static_cast<ASTTypeCast*>(var->value.get());
+    ASSERT_NE(cast, nullptr);
+    ASSERT_EQ(cast->castType, ASTValueType::Float);
+
+    const auto castValue = static_cast<ASTValue*>(cast->value.get());
+    ASSERT_NE(castValue, nullptr);
+    ASSERT_EQ(castValue->value, "123.45");
+}
+
+TEST(ParserTest, parseTypeCastFromBoolToString) {
+    Lexer lexer("var a: string = string(true);");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "a");
+    ASSERT_EQ(var->type, ASTValueType::String);
+
+    const auto cast = static_cast<ASTTypeCast*>(var->value.get());
+    ASSERT_NE(cast, nullptr);
+    ASSERT_EQ(cast->castType, ASTValueType::String);
+
+    const auto castValue = static_cast<ASTValue*>(cast->value.get());
+    ASSERT_NE(castValue, nullptr);
+    ASSERT_EQ(castValue->value, "true");
+}
+
 TEST(ParserTest, parseIfElseStatementWithSyntaxError) {
     Lexer lexer("if (a > b) { println(10) else { println(20); }");  // Missing semicolon
     const std::vector<Token> tokens = lexer.tokenize();

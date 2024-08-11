@@ -16,6 +16,7 @@ enum class ZynkErrorType {
     PanicError,
     CLIError,
     DuplicateDeclarationError,
+    TypeCastError
 };
 
 struct ZynkError : public std::runtime_error { // Consider using templates for type
@@ -42,6 +43,7 @@ private:
             case ZynkErrorType::CLIError: return "CLIError";
             case ZynkErrorType::NotDefinedError: return "NotDefinedError";
             case ZynkErrorType::DuplicateDeclarationError: return "DuplicateDeclarationError";
+            case ZynkErrorType::TypeCastError: return "TypeCastError";
             default: return "UnknownError";
         }
     }

@@ -57,3 +57,22 @@ This example demonstrates how to read input from the user and use it in your pro
         println(name);
     }
     main();
+
+## Example 5: Type Casting
+
+This example demonstrates how to use type casting in Zynk. Type casting allows you to convert values between different types.
+
+    def main() {
+        var intValue: int = 5;
+        var floatValue: float = float(intValue);
+        var stringValue: string = string(floatValue);
+        
+        println(intValue);
+        println(floatValue);
+        println(stringValue);
+        
+        var stringInput: string = "42";
+        var castedInt: int = int(stringInput);
+        println(castedInt + 5);
+    }
+    main();
