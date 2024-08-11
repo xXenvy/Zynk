@@ -52,7 +52,8 @@ void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* f
     if (isFunctionDeclared(name)) {
         throw ZynkError{
             ZynkErrorType::DuplicateDeclarationError,
-            "Function '" + name + "' is already declared."
+            "Function '" + name + "' is already declared.",
+            func->line
         };
     }
     Block* block = currentBlock();
@@ -63,15 +64,16 @@ void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* f
     block->setFunction(name, std::move(gcObject));
 }
 
-ASTFunction* RuntimeEnvironment::getFunction(const std::string& name) {
+ASTFunction* RuntimeEnvironment::getFunction(const std::string& name, const size_t line) {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-
     GCObject* gcObject = block->getFunction(name);
+
     if (gcObject == nullptr) {
         throw ZynkError{
             ZynkErrorType::NotDefinedError,
-            "Function named '" + name + "' is not defined."
+            "Function named '" + name + "' is not defined.",
+            line
         };
     }
     return static_cast<ASTFunction*>(gcObject->value);
@@ -80,7 +82,7 @@ ASTFunction* RuntimeEnvironment::getFunction(const std::string& name) {
 bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) {
     if (currentBlock() == nullptr) return false;
     try {
-        getFunction(name);
+        getFunction(name, 1);
     } catch (const ZynkError&) {
         return false;
     }

@@ -16,7 +16,7 @@ public:
     bool isVariableDeclared(const std::string& name);
 
     void declareFunction(const std::string& name, ASTFunction* func);
-    ASTFunction* getFunction(const std::string& name);
+    ASTFunction* getFunction(const std::string& name, const size_t line);
     bool isFunctionDeclared(const std::string& name);
 
     Block* currentBlock();

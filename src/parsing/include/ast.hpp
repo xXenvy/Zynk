@@ -62,9 +62,9 @@ struct ASTPrint : public ASTBase {
 
 struct ASTVariableDeclaration : public ASTBase {
     ASTVariableDeclaration(const std::string& name, ASTValueType type, std::unique_ptr<ASTBase> value, size_t line)
-        : ASTBase(ASTType::VariableDeclaration, line), name(name), type(type), value(std::move(value)) {}
+        : ASTBase(ASTType::VariableDeclaration, line), name(name), varType(type), value(std::move(value)) {}
     const std::string name;
-    const ASTValueType type;
+    const ASTValueType varType;
     std::unique_ptr<ASTBase> value;
 };
 
@@ -77,9 +77,9 @@ struct ASTVariableModify : public ASTBase {
 
 struct ASTValue : public ASTBase {
     ASTValue(const std::string& value, ASTValueType type, size_t line)
-        : ASTBase(ASTType::Value, line), value(value), type(type) {}
+        : ASTBase(ASTType::Value, line), value(value), valueType(type) {}
     const std::string value;
-    const ASTValueType type;
+    const ASTValueType valueType;
 };
 
 struct ASTVariable : public ASTBase {

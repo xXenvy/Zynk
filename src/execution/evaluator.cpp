@@ -54,7 +54,7 @@ void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
 }
 
 void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
-    ASTFunction* func = env.getFunction(functionCall->name);
+    ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
     env.enterNewBlock();
     for (const std::unique_ptr<ASTBase>& child : func->body) {
         evaluate(child.get());
@@ -78,10 +78,10 @@ std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
 
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
-        typeChecker.checkType(declaration->type, declaration->value.get());
+        typeChecker.checkType(declaration->varType, declaration->value.get());
         ASTValue* varValue = new ASTValue(
             evaluateExpression(declaration->value.get()),
-            declaration->type,
+            declaration->varType,
             declaration->line
         );
         declaration->value.reset(varValue);
@@ -91,12 +91,12 @@ void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration)
 
 void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
     ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line);
-    typeChecker.checkType(declaration->type, variableModify->value.get());
+    typeChecker.checkType(declaration->varType, variableModify->value.get());
 
     // We need to calculate the new value of the variable already at this point.
     ASTValue* newValue = new ASTValue(
         evaluateExpression(variableModify->value.get()),
-        declaration->type,
+        declaration->varType,
         declaration->line
     );
     declaration->value.reset(newValue);
@@ -181,7 +181,7 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
                 if (valueType != ASTValueType::Integer && valueType != ASTValueType::Float) {
                     throw ZynkError(
                         ZynkErrorType::ExpressionError,
-                        "Cannot perform BinaryOperation on '" + typeChecker.typeToString(valueType) + "'type.",
+                        "Cannot perform BinaryOperation on '" + typeChecker.typeToString(valueType) + "' type.",
                         operation->line
                     );
                 }

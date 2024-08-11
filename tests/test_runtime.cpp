@@ -27,7 +27,7 @@ TEST(RuntimeEnvironmentTest, FunctionDeclaration) {
     auto funcDeclaration = std::make_unique<ASTFunction>("myFunction", 20);
     ASSERT_NO_THROW(env.declareFunction("myFunction", funcDeclaration.get()));
 
-    auto retrievedFunc = env.getFunction("myFunction");
+    auto retrievedFunc = env.getFunction("myFunction", 20);
     ASSERT_EQ(retrievedFunc->name, "myFunction");
     ASSERT_EQ(retrievedFunc->body.size(), 0);
 
@@ -49,7 +49,7 @@ TEST(RuntimeEnvironmentTest, FunctionNotDefinedError) {
     RuntimeEnvironment env;
     env.enterNewBlock();
 
-    ASSERT_THROW(env.getFunction("undefinedFunc"), ZynkError);
+    ASSERT_THROW(env.getFunction("undefinedFunc", 10), ZynkError);
     ASSERT_EQ(env.isFunctionDeclared("undefinedFunc"), false);
     env.exitCurrentBlock();
 }
