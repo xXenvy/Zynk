@@ -187,6 +187,26 @@ std::unique_ptr<ASTBase> Parser::parseExpression(int priority) {
 std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 	const Token current = currentToken();
 	const size_t currentLine = current.line;
+
+	// Handles case for negative number.
+	if (current.type == TokenType::SUBTRACT) {
+		moveForward();
+		const Token numberToken = currentToken();
+
+		if (numberToken.type == TokenType::INT || numberToken.type == TokenType::FLOAT) {
+			moveForward();
+			return std::make_unique<ASTValue>(
+				"-" + numberToken.value,
+				numberToken.type == TokenType::INT ? ASTValueType::Integer : ASTValueType::Float,
+				currentLine
+			);
+		}
+		throw ZynkError(
+			ZynkErrorType::SyntaxError,
+			"Expected a number after '-' for negative value.",
+			currentLine
+		);
+	}
 	moveForward();
 	const bool isTypeCast = currentToken().type == TokenType::LBRACKET;
 

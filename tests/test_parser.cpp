@@ -402,8 +402,76 @@ TEST(ParserTest, parseTypeCastFromBoolToString) {
     ASSERT_EQ(castValue->value, "true");
 }
 
+TEST(ParserTest, parseNegativeNumber) {
+    Lexer lexer("var a: int = -5;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "a");
+    ASSERT_EQ(var->varType, ASTValueType::Integer);
+
+    const auto value = static_cast<ASTValue*>(var->value.get());
+    ASSERT_NE(value, nullptr);
+    ASSERT_EQ(value->value, "-5");
+    ASSERT_EQ(value->valueType, ASTValueType::Integer);
+}
+
+TEST(ParserTest, parseBinaryOperationWithNegativeNumber) {
+    Lexer lexer("var a: int = -1 + -5;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "a");
+    ASSERT_EQ(var->varType, ASTValueType::Integer);
+
+    const auto binOp = static_cast<ASTBinaryOperation*>(var->value.get());
+    ASSERT_NE(binOp, nullptr);
+    ASSERT_EQ(binOp->op, "+");
+
+    const auto leftValue = static_cast<ASTValue*>(binOp->left.get());
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_EQ(leftValue->value, "-1");
+    ASSERT_EQ(leftValue->valueType, ASTValueType::Integer);
+
+    const auto rightValue = static_cast<ASTValue*>(binOp->right.get());
+    ASSERT_NE(rightValue, nullptr);
+    ASSERT_EQ(rightValue->value, "-5");
+    ASSERT_EQ(rightValue->valueType, ASTValueType::Integer);
+}
+
+TEST(ParserTest, parseNegativeBoolThrowsException) {
+    Lexer lexer("var a: bool = -true;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    try {
+        auto program = parser.parse();
+        FAIL() << "Expected ZynkError but none was thrown";
+    }
+    catch (const ZynkError& e) {
+        ASSERT_EQ(e.base_type, ZynkErrorType::SyntaxError);
+    }
+    catch (...) {
+        FAIL() << "Expected ZynkError, but caught different exception";
+    }
+}
+
 TEST(ParserTest, parseIfElseStatementWithSyntaxError) {
-    Lexer lexer("if (a > b) { println(10) else { println(20); }");  // Missing semicolon
+    Lexer lexer("if (a > b) { println(10) else { println(20); }"); // Missing semicolon
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
