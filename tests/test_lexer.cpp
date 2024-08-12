@@ -348,3 +348,33 @@ TEST(LexerTokenizeTest, ReadLineKeyword) {
 	EXPECT_TRUE(tokens.front().type == TokenType::READLINE);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
+
+TEST(LexerTokenizeTest, CommentAtEndOfFile) {
+	Lexer lexer("var x: int = 10; // Comment at end of file");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 8);
+	EXPECT_TRUE(tokens[0].type == TokenType::VARIABLE);
+	EXPECT_TRUE(tokens[1].type == TokenType::IDENTIFIER);
+	EXPECT_TRUE(tokens[2].type == TokenType::COLON);
+	EXPECT_TRUE(tokens[3].type == TokenType::INT);
+	EXPECT_TRUE(tokens[4].type == TokenType::ASSIGN);
+	EXPECT_TRUE(tokens[5].type == TokenType::INT);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, CommentVarDeclararation) {
+	Lexer lexer("// var x: int = 10;");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 1);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, MultipleComments) {
+	Lexer lexer("// Test comment\n1 + 1;\n// Test comment 2.");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 5);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}

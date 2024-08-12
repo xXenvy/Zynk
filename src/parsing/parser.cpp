@@ -28,14 +28,17 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 			return parseRead();
 		case TokenType::CONDITION:
 			return parseIfStatement();
-		case TokenType::IDENTIFIER:
+		case TokenType::END_OF_FILE:
+			return nullptr;
+		case TokenType::IDENTIFIER: {
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
 			if (currentToken().type == TokenType::ASSIGN) return parseVariableModify();
 			[[fallthrough]];
+		}
 		default:
 			throw ZynkError(
-				ZynkErrorType::UnknownError,
+				ZynkErrorType::SyntaxError,
 				"Unexpected token: '" + current.value + "'.", 
 				current.line
 			);

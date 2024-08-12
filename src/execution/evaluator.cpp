@@ -44,7 +44,7 @@ void Evaluator::evaluate(ASTBase* ast) {
 void Evaluator::evaluateProgram(ASTProgram* program) {
     env.enterNewBlock(); // Main program code block.
     for (const std::unique_ptr<ASTBase>& child : program->body) {
-        evaluate(child.get());
+        if(child.get() != nullptr) evaluate(child.get());
     }
     env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
 }
