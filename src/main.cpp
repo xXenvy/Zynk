@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 		// Unknown error type, constructing a PanicError.
 		ZynkError{
 			ZynkErrorType::PanicError,
-			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknownError.what() + "\".\n"
+			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknownError.what() + "\"."
 		}.print();
 		return -1;
 	}

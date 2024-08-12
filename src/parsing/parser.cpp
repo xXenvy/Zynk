@@ -36,7 +36,8 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 		default:
 			throw ZynkError(
 				ZynkErrorType::UnknownError,
-				"Unexpected token: '" + current.value + "'.", current.line
+				"Unexpected token: '" + current.value + "'.", 
+				current.line
 			);
 	}
 }
