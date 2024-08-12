@@ -536,3 +536,59 @@ TEST(EvaluatorTest, EvaluateCommentedPrintStatement) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "5\n");
 }
+
+TEST(EvaluatorTest, EvaluateNegativeInteger) {
+    const std::string code = "println(-42);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "-42\n");
+}
+
+TEST(EvaluatorTest, EvaluateNegativeFloat) {
+    const std::string code = "println(-3.14);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "-3.14\n");
+}
+
+TEST(EvaluatorTest, EvaluateAdditionWithNegativeInteger) {
+    const std::string code = "println(10 + -4);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "6\n");
+}
+
+TEST(EvaluatorTest, EvaluateMultiplicationWithNegativeInteger) {
+    const std::string code = "println(-5.5 * 3);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "-16.500000\n");
+}
