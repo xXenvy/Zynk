@@ -30,86 +30,89 @@ enum class ASTValueType {
 
 struct ASTBase {
     const ASTType type;
-    ASTBase(ASTType type) : type(type) {}
-    virtual ~ASTBase() = default;
+    const size_t line;
+
+    ASTBase(ASTType type, size_t line) : type(type), line(line) {}
 };
 
 struct ASTProgram : public ASTBase {
-    ASTProgram() : ASTBase(ASTType::Program) {}
+    ASTProgram(const size_t line) : ASTBase(ASTType::Program, line) {}
     std::vector<std::unique_ptr<ASTBase>> body;
 };
 
 struct ASTFunction : public ASTBase {
-    ASTFunction(const std::string& name)
-        : ASTBase(ASTType::FunctionDeclaration), name(name) {}
+    ASTFunction(const std::string& name, size_t line)
+        : ASTBase(ASTType::FunctionDeclaration, line), name(name) {}
     const std::string name;
     std::vector<std::unique_ptr<ASTBase>> body;
 };
 
 struct ASTFunctionCall : public ASTBase {
-    ASTFunctionCall(const std::string& name) : ASTBase(ASTType::FunctionCall), name(name) {}
+    ASTFunctionCall(const std::string& name, size_t line)
+        : ASTBase(ASTType::FunctionCall, line), name(name) {}
     const std::string name; // Currently we do not support function arguments.
 };
 
 struct ASTPrint : public ASTBase {
-    ASTPrint(std::unique_ptr<ASTBase> expr, bool newLine) :
-        ASTBase(ASTType::Print), newLine(newLine), expression(std::move(expr)) {}
+    ASTPrint(std::unique_ptr<ASTBase> expr, bool newLine, size_t line)
+        : ASTBase(ASTType::Print, line), newLine(newLine), expression(std::move(expr)) {}
     const bool newLine;
     std::unique_ptr<ASTBase> expression;
 };
 
 struct ASTVariableDeclaration : public ASTBase {
-    ASTVariableDeclaration(const std::string& name, const ASTValueType type, std::unique_ptr<ASTBase> value)
-        : ASTBase(ASTType::VariableDeclaration), name(name), type(type), value(std::move(value)) {}
+    ASTVariableDeclaration(const std::string& name, ASTValueType type, std::unique_ptr<ASTBase> value, size_t line)
+        : ASTBase(ASTType::VariableDeclaration, line), name(name), varType(type), value(std::move(value)) {}
     const std::string name;
-    const ASTValueType type;
+    const ASTValueType varType;
     std::unique_ptr<ASTBase> value;
 };
 
 struct ASTVariableModify : public ASTBase {
-    ASTVariableModify(const std::string& name, std::unique_ptr<ASTBase> value)
-        : ASTBase(ASTType::VariableModify), name(name), value(std::move(value)) {}
+    ASTVariableModify(const std::string& name, std::unique_ptr<ASTBase> value, size_t line)
+        : ASTBase(ASTType::VariableModify, line), name(name), value(std::move(value)) {}
     const std::string name;
     std::unique_ptr<ASTBase> value;
 };
 
 struct ASTValue : public ASTBase {
-    ASTValue(const std::string& value, const ASTValueType type) 
-        : ASTBase(ASTType::Value), value(value), type(type) {}
+    ASTValue(const std::string& value, ASTValueType type, size_t line)
+        : ASTBase(ASTType::Value, line), value(value), valueType(type) {}
     const std::string value;
-    const ASTValueType type;
+    const ASTValueType valueType;
 };
 
 struct ASTVariable : public ASTBase {
-    ASTVariable(const std::string& name) : ASTBase(ASTType::Variable), name(name) {}
+    ASTVariable(const std::string& name, size_t line)
+        : ASTBase(ASTType::Variable, line), name(name) {}
     const std::string name;
 };
 
 struct ASTBinaryOperation : public ASTBase {
-    ASTBinaryOperation(std::unique_ptr<ASTBase> left, const std::string& op, std::unique_ptr<ASTBase> right)
-        : ASTBase(ASTType::BinaryOperation), left(std::move(left)), op(op), right(std::move(right)) {}
+    ASTBinaryOperation(std::unique_ptr<ASTBase> left, const std::string& op, std::unique_ptr<ASTBase> right, size_t line)
+        : ASTBase(ASTType::BinaryOperation, line), left(std::move(left)), op(op), right(std::move(right)) {}
     std::unique_ptr<ASTBase> left;
     const std::string op;
     std::unique_ptr<ASTBase> right;
 };
 
 struct ASTCondition : public ASTBase {
-    ASTCondition(std::unique_ptr<ASTBase> expression)
-        : ASTBase(ASTType::Condition), expression(std::move(expression)) {}
+    ASTCondition(std::unique_ptr<ASTBase> expression, size_t line)
+        : ASTBase(ASTType::Condition, line), expression(std::move(expression)) {}
     std::unique_ptr<ASTBase> expression;
     std::vector<std::unique_ptr<ASTBase>> body;
     std::vector<std::unique_ptr<ASTBase>> elseBody;
 };
 
 struct ASTReadLine : public ASTBase {
-    ASTReadLine(std::unique_ptr<ASTBase> out) 
-        : ASTBase(ASTType::ReadLine), out(std::move(out)) {}
+    ASTReadLine(std::unique_ptr<ASTBase> out, size_t line)
+        : ASTBase(ASTType::ReadLine, line), out(std::move(out)) {}
     std::unique_ptr<ASTBase> out;
 };
 
 struct ASTTypeCast : public ASTBase {
-    ASTTypeCast(std::unique_ptr<ASTBase> value, const ASTValueType type)
-        : ASTBase(ASTType::TypeCast), value(std::move(value)), castType(type) {}
+    ASTTypeCast(std::unique_ptr<ASTBase> value, ASTValueType type, size_t line)
+        : ASTBase(ASTType::TypeCast, line), value(std::move(value)), castType(type) {}
     std::unique_ptr<ASTBase> value;
     const ASTValueType castType;
 };

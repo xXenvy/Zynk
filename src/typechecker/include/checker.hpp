@@ -9,9 +9,9 @@ public:
     TypeChecker(RuntimeEnvironment& env);
     void checkType(const ASTValueType& declared, ASTBase* value);
     ASTValueType determineType(ASTBase* expression);
+    std::string typeToString(const ASTValueType& type);
 private:
     RuntimeEnvironment& env;
-    std::string typeToString(const ASTValueType& type);
     bool isNumber(const ASTValueType& type);
 };
 

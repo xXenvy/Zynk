@@ -17,7 +17,7 @@ TEST(ParserTest, parseVariableDeclaration) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
 
-    ASSERT_EQ(var->type, ASTValueType::Integer);
+    ASSERT_EQ(var->varType, ASTValueType::Integer);
     ASSERT_EQ(var->name, "a");
     const auto value = static_cast<ASTValue*>(var->value.get());
     ASSERT_NE(value, nullptr);
@@ -93,7 +93,7 @@ TEST(ParserTest, parseVariableDeclarationWithBinaryOperation) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, ASTValueType::Float);
+    ASSERT_EQ(var->varType, ASTValueType::Float);
 
     const auto operation = static_cast<ASTBinaryOperation*>(var->value.get());
     ASSERT_NE(operation, nullptr);
@@ -120,7 +120,7 @@ TEST(ParserTest, parseVariableDeclarationWithComplexExpression) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, ASTValueType::Float);
+    ASSERT_EQ(var->varType, ASTValueType::Float);
 
     const auto operation = static_cast<ASTBinaryOperation*>(var->value.get());
     ASSERT_NE(operation, nullptr);
@@ -319,7 +319,7 @@ TEST(ParserTest, parseTypeCastFromStringToInt) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, ASTValueType::Integer);
+    ASSERT_EQ(var->varType, ASTValueType::Integer);
 
     const auto cast = static_cast<ASTTypeCast*>(var->value.get());
     ASSERT_NE(cast, nullptr);
@@ -343,7 +343,7 @@ TEST(ParserTest, parseTypeCastFromIntToString) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, ASTValueType::String);
+    ASSERT_EQ(var->varType, ASTValueType::String);
 
     const auto cast = static_cast<ASTTypeCast*>(var->value.get());
     ASSERT_NE(cast, nullptr);
@@ -367,7 +367,7 @@ TEST(ParserTest, parseTypeCastFromStringToFloat) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, ASTValueType::Float);
+    ASSERT_EQ(var->varType, ASTValueType::Float);
 
     const auto cast = static_cast<ASTTypeCast*>(var->value.get());
     ASSERT_NE(cast, nullptr);
@@ -391,7 +391,7 @@ TEST(ParserTest, parseTypeCastFromBoolToString) {
 
     const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
     ASSERT_EQ(var->name, "a");
-    ASSERT_EQ(var->type, ASTValueType::String);
+    ASSERT_EQ(var->varType, ASTValueType::String);
 
     const auto cast = static_cast<ASTTypeCast*>(var->value.get());
     ASSERT_NE(cast, nullptr);

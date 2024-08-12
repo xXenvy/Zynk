@@ -6,8 +6,8 @@
 TEST(BlockTest, SetAndGetVariable) {
     auto block = std::make_unique<Block>();
 
-    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto ast1 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 1);
+    auto ast2 = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 2);
 
     auto obj1 = std::make_unique<GCObject>(ast1.get());
     auto obj2 = std::make_unique<GCObject>(ast2.get());
@@ -23,8 +23,8 @@ TEST(BlockTest, SetAndGetVariable) {
 TEST(BlockTest, SetAndGetFunction) {
     auto block = std::make_unique<Block>();
 
-    auto funcAst1 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
-    auto funcAst2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto funcAst1 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 1);
+    auto funcAst2 = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto func1 = std::make_unique<GCObject>(funcAst1.get());
     auto func2 = std::make_unique<GCObject>(funcAst2.get());
@@ -41,8 +41,8 @@ TEST(BlockTest, GetVariableFromParentBlock) {
     auto parentBlock = std::make_unique<Block>();
     auto childBlock = std::make_unique<Block>(parentBlock.get());
 
-    auto parentAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto childAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto parentAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 1);
+    auto childAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 2);
 
     auto parentVar = std::make_unique<GCObject>(parentAstVar.get());
     auto childVar = std::make_unique<GCObject>(childAstVar.get());
@@ -59,8 +59,8 @@ TEST(BlockTest, GetFunctionFromParentBlock) {
     auto parentBlock = std::make_unique<Block>();
     auto childBlock = std::make_unique<Block>(parentBlock.get());
 
-    auto parentFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
-    auto childFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto parentFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 1);
+    auto childFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto parentFunc = std::make_unique<GCObject>(parentFuncAst.get());
     auto childFunc = std::make_unique<GCObject>(childFuncAst.get());
@@ -77,8 +77,8 @@ TEST(BlockTest, OverrideVariableInChildBlock) {
     auto parentBlock = std::make_unique<Block>();
     auto childBlock = std::make_unique<Block>(parentBlock.get());
 
-    auto parentAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
-    auto childAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration);
+    auto parentAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 1);
+    auto childAstVar = std::make_unique<ASTBase>(ASTType::VariableDeclaration, 2);
 
     auto parentVar = std::make_unique<GCObject>(parentAstVar.get());
     auto childVar = std::make_unique<GCObject>(childAstVar.get());
@@ -96,8 +96,8 @@ TEST(BlockTest, OverrideFunctionInChildBlock) {
     auto parentBlock = std::make_unique<Block>();
     auto childBlock = std::make_unique<Block>(parentBlock.get());
 
-    auto parentFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
-    auto childFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration);
+    auto parentFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 1);
+    auto childFuncAst = std::make_unique<ASTBase>(ASTType::FunctionDeclaration, 2);
 
     auto parentFunc = std::make_unique<GCObject>(parentFuncAst.get());
     auto childFunc = std::make_unique<GCObject>(childFuncAst.get());

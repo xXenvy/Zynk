@@ -33,13 +33,13 @@ int main(int argc, char* argv[]) {
 	try {
 		interpreter.interpretFile(cli.args.file_path);
 	} catch (const ZynkError& error) {
-		error.print();
+		error.print(cli.args.file_path);
 		return -1;
 	} catch (const std::exception& unknownError) {
 		// Unknown error type, constructing a PanicError.
 		ZynkError{
 			ZynkErrorType::PanicError,
-			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknownError.what() + "\".\n"
+			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknownError.what() + "\"."
 		}.print();
 		return -1;
 	}

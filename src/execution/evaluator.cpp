@@ -33,7 +33,11 @@ void Evaluator::evaluate(ASTBase* ast) {
             evaluateCondition(static_cast<ASTCondition*>(ast));
             break;
         default:
-            throw ZynkError{ ZynkErrorType::RuntimeError, "Unknown AST type." };
+            throw ZynkError(
+                ZynkErrorType::RuntimeError,
+                "Unknown AST type encountered during evaluation.",
+                ast->line
+            );
     }
 }
 
@@ -50,7 +54,7 @@ void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
 }
 
 void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
-    ASTFunction* func = env.getFunction(functionCall->name);
+    ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
     env.enterNewBlock();
     for (const std::unique_ptr<ASTBase>& child : func->body) {
         evaluate(child.get());
@@ -74,10 +78,11 @@ std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
 
 void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
-        typeChecker.checkType(declaration->type, declaration->value.get());
+        typeChecker.checkType(declaration->varType, declaration->value.get());
         ASTValue* varValue = new ASTValue(
             evaluateExpression(declaration->value.get()),
-            declaration->type
+            declaration->varType,
+            declaration->line
         );
         declaration->value.reset(varValue);
     }
@@ -85,13 +90,13 @@ void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration)
 }
 
 void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
-    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name);
-    typeChecker.checkType(declaration->type, variableModify->value.get());
+    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line);
+    typeChecker.checkType(declaration->varType, variableModify->value.get());
 
-    // We need to calculate the new value of the variable already at this point.
     ASTValue* newValue = new ASTValue(
         evaluateExpression(variableModify->value.get()),
-        declaration->type
+        declaration->varType,
+        declaration->line
     );
     declaration->value.reset(newValue);
 }
@@ -104,19 +109,21 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
             try {
                 return std::to_string(std::stoi(base));
             } catch (const std::invalid_argument&) {
-                throw ZynkError{ 
+                throw ZynkError(
                     ZynkErrorType::TypeCastError, 
-                    "Invalid argument: unable to convert the provided value to an integer." 
-                };
+                    "Invalid argument: unable to convert the provided value to an integer.",
+                    typeCast->line
+                );
             }
         case ASTValueType::Float:
             try {
                 return std::to_string(std::stof(base));
             } catch (const std::invalid_argument&) {
-                throw ZynkError{
+                throw ZynkError(
                     ZynkErrorType::TypeCastError,
-                    "Invalid argument. Unable to convert the provided value to an float."
-                };
+                    "Invalid argument. Unable to convert the provided value to an float.",
+                    typeCast->line
+                );
             }
         case ASTValueType::String:
             return base; // Expressions by default are always strings.
@@ -128,7 +135,11 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
         }
         default: {
             // This should never happen, but whatever
-            throw ZynkError{ ZynkErrorType::RuntimeError, "Invalid type cast." };
+            throw ZynkError(
+                ZynkErrorType::RuntimeError, 
+                "Invalid type cast encountered.",
+                typeCast->line
+            );
         }
     }
 }
@@ -151,7 +162,7 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return static_cast<ASTValue*>(expression)->value;
         case ASTType::Variable: {
             const auto var = static_cast<ASTVariable*>(expression);
-            return evaluateExpression(env.getVariable(var->name)->value.get());
+            return evaluateExpression(env.getVariable(var->name, var->line)->value.get());
         };
         case ASTType::ReadLine: {
             return evaluateReadLine(static_cast<ASTReadLine*>(expression));
@@ -161,24 +172,33 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
         };
         case ASTType::BinaryOperation: {
             const auto operation = static_cast<ASTBinaryOperation*>(expression);
-            int valueTypes[2] = {
-                static_cast<int>(typeChecker.determineType(operation->left.get())),
-                static_cast<int>(typeChecker.determineType(operation->right.get()))
+            ASTValueType valueTypes[2] = {
+                typeChecker.determineType(operation->left.get()),
+                typeChecker.determineType(operation->right.get())
             };
-            for (int valueType : valueTypes) {
-                if (valueType != 1 && valueType != 2) {
-                    throw ZynkError{
+            for (ASTValueType& valueType : valueTypes) {
+                if (valueType != ASTValueType::Integer && valueType != ASTValueType::Float) {
+                    throw ZynkError(
                         ZynkErrorType::ExpressionError,
-                        "Invalid expression. Cannot perform BinaryOperation on that type."
-                    };
+                        "Cannot perform BinaryOperation on '" + typeChecker.typeToString(valueType) + "' type.",
+                        operation->line
+                    );
                 }
             }
             const std::string left = evaluateExpression(operation->left.get());
             const std::string right = evaluateExpression(operation->right.get());
-            return calculateString(left, right, operation->op);
+            try {
+                return calculateString(left, right, operation->op);
+            } catch (const ZynkError& err) {
+                throw ZynkError(err.base_type, err.what(), operation->line);
+            }
         };
         default:
-            throw ZynkError{ZynkErrorType::RuntimeError, "Invalid expression."};
+            throw ZynkError(
+                ZynkErrorType::RuntimeError,
+                "Invalid expression type encountered during evaluation.",
+                expression->line
+            );
     }
 }
 
@@ -187,14 +207,14 @@ std::string calculate(const float left, const float right, const std::string& op
     if (op == "-") return std::to_string(left - right);
     if (op == "+") return std::to_string(left + right);
     if (op == "/") {
-        if (right == 0) throw ZynkError{ ZynkErrorType::RuntimeError, "division by zero" };
+        if (right == 0) throw ZynkError(ZynkErrorType::RuntimeError, "Division by zero." );
         return std::to_string(left / right);
     }
-    throw ZynkError{ ZynkErrorType::RuntimeError, "Invalid operator: " + op + "." };
+    throw ZynkError(ZynkErrorType::RuntimeError, "Invalid operator: " + op + ".");
 }
 
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
-    // I don't like the way it's done, but I don't know how to do it better now.
+    // I don't like the way it's done, but I don't know how to do it better right now.
     if (op == ">") return left_value > right_value ? "true" : "false";
     if (op == ">=") return left_value >= right_value ? "true" : "false";
     if (op == "<") return left_value < right_value ? "true" : "false";
