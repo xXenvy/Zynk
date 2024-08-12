@@ -43,12 +43,21 @@ Token Lexer::next() {
         case '+': return Token(TokenType::ADD, "+", currentLine);
         case '-': return Token(TokenType::SUBTRACT, "-", currentLine);
         case '*': return Token(TokenType::MULTIPLY, "*", currentLine);
-        case '/': return Token(TokenType::DIVIDE, "/", currentLine);
         case '{': return Token(TokenType::LBRACE, "{", currentLine);
         case '}': return Token(TokenType::RBRACE, "}", currentLine);
         case ';': return Token(TokenType::SEMICOLON, ";", currentLine);
         case '(': return Token(TokenType::LBRACKET, "(", currentLine);
         case ')': return Token(TokenType::RBRACKET, ")", currentLine);
+        case '/': {
+            if (peek() != '/') return Token(TokenType::DIVIDE, "/", currentLine);
+
+            // So basically if this is comment, we want to ignore rest of the current line.
+            // We are moving to the next line, and then continue parsing.
+            while (currentLine == line && peek() != '\0') {
+                moveForward();
+            }
+            return next();
+        }
         case '<': {
             if (peek() != '=') return Token(TokenType::LESS_THAN, "<", currentLine);
             moveForward();

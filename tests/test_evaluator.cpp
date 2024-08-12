@@ -518,3 +518,21 @@ TEST(EvaluatorTest, EvaluateInvalidStringToIntCast) {
 
     EXPECT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
+
+TEST(EvaluatorTest, EvaluateCommentedPrintStatement) {
+    const std::string code = R"(
+        // println(\"This should not be printed\");
+        var x: int = 5;
+        println(x);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "5\n");
+}

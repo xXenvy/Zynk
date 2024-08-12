@@ -6,7 +6,7 @@
 enum class TokenType {
     DEF, PRINTLN, PRINT,
     VARIABLE, CONDITION, ELSE, 
-    READLINE, // Keywords.
+    READLINE, COMMENT, // Keywords.
 
     INT, FLOAT, STRING, BOOL, NONE, // Types.
 
