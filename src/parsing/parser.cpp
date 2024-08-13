@@ -172,17 +172,32 @@ std::unique_ptr<ASTBase> Parser::parseExpression(int priority) {
 		if (opPriority <= priority) break;
 		moveForward();
 
-		if (leftToken.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
-			throw ZynkError(
-				ZynkErrorType::ExpressionError,
-				"Binary operations are not allowed with strings.",
-				leftToken.line
-			);
-		}
 		std::unique_ptr<ASTBase> right = parseExpression(opPriority);
-		left = std::make_unique<ASTBinaryOperation>(
-			std::move(left), op.value, std::move(right), op.line
-		);
+		switch (op.type) {
+			case TokenType::OR:
+				left = std::make_unique<ASTOrOperation>(
+					std::move(left), std::move(right), op.line
+				);
+				break;
+			case TokenType::AND:
+				left = std::make_unique<ASTAndOperation>(
+					std::move(left), std::move(right), op.line
+				);
+				break;
+			default: {
+				if (leftToken.type == TokenType::STRING || currentToken().type == TokenType::STRING) {
+					throw ZynkError(
+						ZynkErrorType::ExpressionError,
+						"Binary operations are not allowed with strings.",
+						leftToken.line
+					);
+				}
+				left = std::make_unique<ASTBinaryOperation>(
+					std::move(left), op.value, std::move(right), op.line
+				);
+				break;
+			}
+		}
 	}
 	return left;
 }
@@ -323,6 +338,8 @@ bool Parser::isOperator(TokenType type) const {
 		case TokenType::LESS_OR_EQUAL:
 		case TokenType::EQUAL:
 		case TokenType::NOT_EQUAL:
+		case TokenType::OR:
+		case TokenType::AND:
 			return true;
 		default:
 			return false;
@@ -338,9 +355,6 @@ int Parser::getPriority(TokenType type) const {
 		case TokenType::MULTIPLY:
 		case TokenType::DIVIDE:
 			return 2;
-		case TokenType::ADD:
-		case TokenType::SUBTRACT:
-			return 1;
 		default:
 			if (isOperator(type)) return 1;
 			return 0;

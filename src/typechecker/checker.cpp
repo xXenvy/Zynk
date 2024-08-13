@@ -29,8 +29,38 @@ ASTValueType TypeChecker::determineType(ASTBase* expression) {
             }
             return ASTValueType::Integer;
         }
+        case ASTType::OrOperation: {
+            ASTOrOperation* operation = static_cast<ASTOrOperation*>(expression);
+            ASTValueType leftType = determineType(operation->left.get());
+            ASTValueType rightType = determineType(operation->right.get());
+            if (leftType != rightType) {
+                throw ZynkError(
+                    ZynkErrorType::TypeError,
+                    "Operands of the 'or' operation in variable declarations must be of the same type.",
+                    operation->line
+                );
+            }
+            return leftType;
+        }
+        case ASTType::AndOperation: {
+            ASTAndOperation* operation = static_cast<ASTAndOperation*>(expression);
+            ASTValueType leftType = determineType(operation->left.get());
+            ASTValueType rightType = determineType(operation->right.get());
+            if (leftType != rightType) {
+                throw ZynkError(
+                    ZynkErrorType::TypeError,
+                    "Operands of the 'and' operation in variable declarations must be of the same type.",
+                    operation->line
+                );
+            }
+            return leftType;
+        }
         default:
-            throw ZynkError{ ZynkErrorType::TypeError, "Cannot determine type for given AST type." };
+            throw ZynkError(
+                ZynkErrorType::TypeError, 
+                "Cannot determine type for given AST type.",
+                expression->line
+            );
         }
 }
 
@@ -40,7 +70,8 @@ void TypeChecker::checkType(const ASTValueType& declared, ASTBase* value) {
         throw ZynkError{
             ZynkErrorType::TypeError,
             "Type mismatch. Declared type is " + typeToString(declared) + 
-            ", but assigned value is of type " + typeToString(valueType) + "."
+            ", but assigned value is of type " + typeToString(valueType) + ".",
+            value->line
         };
     }
 }

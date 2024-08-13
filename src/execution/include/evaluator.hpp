@@ -27,6 +27,7 @@ private:
     void evaluateCondition(ASTCondition* condition);
 };
 
+inline bool stringToBool(const std::string& value);
 std::string calculate(const float left, const float right, const std::string& op);
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op);
 

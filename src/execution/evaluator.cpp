@@ -128,7 +128,7 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
         case ASTValueType::String:
             return base; // Expressions by default are always strings.
         case ASTValueType::Bool: {
-            if (base == "0" || base.empty() || base == "null" || base == "false") {
+            if (!stringToBool(base)) {
                 return "false";
             }
             return "true";
@@ -146,10 +146,9 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
 
 void Evaluator::evaluateCondition(ASTCondition* condition) {
     const std::string value = evaluateExpression(condition->expression.get());
-    bool isFalse = value == "0" || value.empty() || value == "null" || value == "false";
 
     env.enterNewBlock();
-    for (const std::unique_ptr<ASTBase>& child : isFalse ? condition->elseBody : condition->body) {
+    for (const std::unique_ptr<ASTBase>& child : stringToBool(value) ? condition->body : condition->elseBody) {
         evaluate(child.get());
     }
     env.exitCurrentBlock();
@@ -193,6 +192,20 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
                 throw ZynkError(err.base_type, err.what(), operation->line);
             }
         };
+        case ASTType::OrOperation: {
+            const auto operation = static_cast<ASTOrOperation*>(expression);
+            const std::string left = evaluateExpression(operation->left.get());
+            const std::string right = evaluateExpression(operation->right.get());
+            if (stringToBool(left)) return left;
+            return right;
+        };
+        case ASTType::AndOperation: {
+            const auto operation = static_cast<ASTAndOperation*>(expression);
+            const std::string left = evaluateExpression(operation->left.get());
+            const std::string right = evaluateExpression(operation->right.get());
+            if (!stringToBool(left)) return left;
+            return right;
+        };
         default:
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
@@ -221,6 +234,12 @@ std::string calculateString(const std::string& left_value, const std::string& ri
     if (op == "<=") return left_value <= right_value ? "true" : "false";
     if (op == "==") return left_value == right_value ? "true" : "false";
     if (op == "!=") return left_value != right_value ? "true" : "false";
+    if (op == "or") {
+        return (stringToBool(left_value) == true || stringToBool(right_value) == true) ? "true" : "false";
+    }
+    if (op == "and") {
+        return (stringToBool(left_value) == true && stringToBool(right_value) == true) ? "true" : "false";
+    }
 
     const bool leftIsFloat = left_value.find('.') != std::string::npos;
     const bool rightIsFloat = right_value.find('.') != std::string::npos;
@@ -236,4 +255,8 @@ std::string calculateString(const std::string& left_value, const std::string& ri
         result = result.substr(0, dotPosition);
     }
     return result;
+}
+
+inline bool stringToBool(const std::string& value) {
+    return value != "0" && !value.empty() && value != "null" && value != "false";
 }
