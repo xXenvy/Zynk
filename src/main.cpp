@@ -1,5 +1,6 @@
 ﻿#include <fstream>
 #include <iostream>
+#include <csignal>
 
 #include "execution/include/interpreter.hpp"
 #include "common/include/cli.hpp"
@@ -7,7 +8,27 @@
 
 constexpr char const* version = "0.0.1";
 
+static void handleSignal(int signal) {
+	switch (signal) {
+		case SIGINT:
+			std::cerr << "Program interrupted by user (SIGINT)." << std::endl;
+			std::exit(EXIT_SUCCESS);
+			break;
+		case SIGSEGV:
+			std::cerr << "Segmentation fault encountered (SIGSEGV)." << std::endl;
+			std::exit(EXIT_FAILURE);
+			break;
+		default:
+			std::cerr << "Unhandled signal received: " << signal << std::endl;
+			std::exit(EXIT_FAILURE);
+			break;
+	}
+}
+
 int main(int argc, char* argv[]) {
+	std::signal(SIGINT, handleSignal);
+	std::signal(SIGSEGV, handleSignal);
+
 	CLI cli({ argv + 1, argv + argc });
 	try {
 		cli.checkout();
@@ -29,6 +50,7 @@ int main(int argc, char* argv[]) {
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
+
 	ZynkInterpreter interpreter;
 	try {
 		interpreter.interpretFile(cli.args.file_path);
@@ -37,10 +59,10 @@ int main(int argc, char* argv[]) {
 		return -1;
 	} catch (const std::exception& unknownError) {
 		// Unknown error type, constructing a PanicError.
-		ZynkError{
+		ZynkError(
 			ZynkErrorType::PanicError,
 			std::string("The interpreter unexpectedly panicked. Additional info: \"") + unknownError.what() + "\"."
-		}.print();
+		).print(cli.args.file_path);
 		return -1;
 	}
 }

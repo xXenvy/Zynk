@@ -378,3 +378,35 @@ TEST(LexerTokenizeTest, MultipleComments) {
 	EXPECT_TRUE(tokens.size() == 5);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
+
+TEST(LexerTokenizeTest, LogicalAndOperator) {
+	Lexer lexer("true && false;\n1 && 0;");
+	const std::vector<Token> tokens = lexer.tokenize();
+	size_t andCount = 0;
+
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::AND) {
+			andCount++;
+		}
+	}
+	EXPECT_TRUE(andCount == 2);
+	EXPECT_TRUE(tokens.size() == 9);
+	EXPECT_TRUE(tokens.front().type == TokenType::BOOL);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, LogicalOrOperator) {
+	Lexer lexer("true || false;\n1 || 0;");
+	const std::vector<Token> tokens = lexer.tokenize();
+	size_t orCount = 0;
+
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::OR) {
+			orCount++;
+		}
+	}
+	EXPECT_TRUE(orCount == 2);
+	EXPECT_TRUE(tokens.size() == 9);
+	EXPECT_TRUE(tokens.front().type == TokenType::BOOL);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}

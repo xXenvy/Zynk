@@ -17,7 +17,9 @@ enum class ASTType {
     Variable,
     BinaryOperation,
     Condition,
-    TypeCast
+    TypeCast,
+    AndOperation,
+    OrOperation
 };
 
 enum class ASTValueType {
@@ -115,6 +117,20 @@ struct ASTTypeCast : public ASTBase {
         : ASTBase(ASTType::TypeCast, line), value(std::move(value)), castType(type) {}
     std::unique_ptr<ASTBase> value;
     const ASTValueType castType;
+};
+
+struct ASTAndOperation : public ASTBase {
+    ASTAndOperation(std::unique_ptr<ASTBase> left, std::unique_ptr<ASTBase> right, size_t line)
+        : ASTBase(ASTType::AndOperation, line), left(std::move(left)), right(std::move(right)) {}
+    std::unique_ptr<ASTBase> left;
+    std::unique_ptr<ASTBase> right;
+};
+
+struct ASTOrOperation : public ASTBase {
+    ASTOrOperation(std::unique_ptr<ASTBase> left, std::unique_ptr<ASTBase> right, size_t line)
+        : ASTBase(ASTType::OrOperation, line), left(std::move(left)), right(std::move(right)) {}
+    std::unique_ptr<ASTBase> left;
+    std::unique_ptr<ASTBase> right;
 };
 
 #endif // AST_H

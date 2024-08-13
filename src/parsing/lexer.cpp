@@ -78,6 +78,16 @@ Token Lexer::next() {
             moveForward();
             return Token(TokenType::NOT_EQUAL, "!=", currentLine);
         }
+        case '|': {
+            if(peek() != '|') return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
+            moveForward();
+            return Token(TokenType::OR, "or", currentLine);
+        }
+        case '&': {
+            if (peek() != '&') return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
+            moveForward();
+            return Token(TokenType::AND, "and", currentLine);
+        }
         default: return Token(TokenType::UNKNOWN, std::string(1, current), currentLine);
     }
 }
@@ -100,6 +110,8 @@ Token Lexer::identifier() {
     if (value == "if") return Token(TokenType::CONDITION, value, line);
     if (value == "else") return Token(TokenType::ELSE, value, line);
     if (value == "readLine") return Token(TokenType::READLINE, value, line);
+    if (value == "or") return Token(TokenType::OR, value, line);
+    if (value == "and") return Token(TokenType::AND, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 

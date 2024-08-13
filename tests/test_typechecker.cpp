@@ -231,3 +231,99 @@ TEST(TypeCheckerTest, DetermineTypeCastFromIntToBool) {
     auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeInt), ASTValueType::Bool, 1);
     ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Bool);
 }
+
+TEST(TypeCheckerTest, DetermineTypeAndOperationNode) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    auto operationNode = std::make_unique<ASTAndOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::Bool);
+}
+
+TEST(TypeCheckerTest, DetermineTypeOrOperationNode) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    auto operationNode = std::make_unique<ASTOrOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::Bool);
+}
+
+TEST(TypeCheckerTest, DetermineTypeMismatchedAndOperationNode) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
+    auto operationNode = std::make_unique<ASTAndOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_THROW(typeChecker.determineType(operationNode.get()), ZynkError);
+}
+
+TEST(TypeCheckerTest, DetermineTypeMismatchedOrOperationNode) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
+    auto operationNode = std::make_unique<ASTOrOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_THROW(typeChecker.determineType(operationNode.get()), ZynkError);
+}
+
+TEST(TypeCheckerTest, CheckTypeAndOperation) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    auto operationNode = std::make_unique<ASTAndOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()));
+}
+
+TEST(TypeCheckerTest, CheckTypeOrOperation) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto operationNode = std::make_unique<ASTOrOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()));
+}
+
+TEST(TypeCheckerTest, CheckTypeMismatchedAndOperation) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
+    auto operationNode = std::make_unique<ASTAndOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()), ZynkError);
+}
+
+TEST(TypeCheckerTest, CheckTypeMismatchedOrOperation) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto rightValue = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
+    auto operationNode = std::make_unique<ASTOrOperation>(
+        std::move(leftValue), std::move(rightValue), 1
+    );
+    ASSERT_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()), ZynkError);
+}

@@ -453,6 +453,60 @@ TEST(ParserTest, parseBinaryOperationWithNegativeNumber) {
     ASSERT_EQ(rightValue->valueType, ASTValueType::Integer);
 }
 
+TEST(ParserTest, parseAndOperation) {
+    Lexer lexer("var result: bool = true && false;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "result");
+    ASSERT_EQ(var->varType, ASTValueType::Bool);
+
+    const auto operation = static_cast<ASTAndOperation*>(var->value.get());
+    ASSERT_NE(operation, nullptr);
+
+    const auto leftValue = static_cast<ASTValue*>(operation->left.get());
+    const auto rightValue = static_cast<ASTValue*>(operation->right.get());
+
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_NE(rightValue, nullptr);
+    ASSERT_EQ(leftValue->value, "true");
+    ASSERT_EQ(rightValue->value, "false");
+}
+
+TEST(ParserTest, parseOrOperation) {
+    Lexer lexer("var result: bool = true || false;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "result");
+    ASSERT_EQ(var->varType, ASTValueType::Bool);
+
+    const auto operation = static_cast<ASTOrOperation*>(var->value.get());
+    ASSERT_NE(operation, nullptr);
+
+    const auto leftValue = static_cast<ASTValue*>(operation->left.get());
+    const auto rightValue = static_cast<ASTValue*>(operation->right.get());
+
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_NE(rightValue, nullptr);
+    ASSERT_EQ(leftValue->value, "true");
+    ASSERT_EQ(rightValue->value, "false");
+}
+
 TEST(ParserTest, parseNegativeBoolThrowsException) {
     Lexer lexer("var a: bool = -true;");
     const std::vector<Token> tokens = lexer.tokenize();

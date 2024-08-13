@@ -76,3 +76,20 @@ This example demonstrates how to use type casting in Zynk. Type casting allows y
         println(castedInt + 5);
     }
     main();
+
+## Example 6: Logical Operators (AND, OR)
+
+This example demonstrates the use of logical operators `AND` and `OR` in Zynk.
+
+
+    def main() {
+        var a: bool = true;
+        var b: bool = false;
+        var c: bool = a and b;
+        var d: bool = a or b;
+
+        if(c && d) {
+            println("Both c and d are true.");
+        }
+    }
+    main();

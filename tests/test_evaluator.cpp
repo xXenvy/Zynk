@@ -592,3 +592,59 @@ TEST(EvaluatorTest, EvaluateMultiplicationWithNegativeInteger) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "-16.500000\n");
 }
+
+TEST(EvaluatorTest, EvaluateLogicalAndTrueTrue) {
+    const std::string code = "println(true && true);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
+}
+
+TEST(EvaluatorTest, EvaluateLogicalAndTrueFalse) {
+    const std::string code = "println(true && false);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
+}
+
+TEST(EvaluatorTest, EvaluateLogicalOrTrueFalse) {
+    const std::string code = "println(true || false);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
+}
+
+TEST(EvaluatorTest, EvaluateLogicalOrFalseFalse) {
+    const std::string code = "println(false || false);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
+}
