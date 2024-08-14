@@ -434,6 +434,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-6-logical-operators-and-or" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 6: Logical Operators (AND, OR)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -542,6 +551,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-6-logical-operators-and-or" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 6: Logical Operators (AND, OR)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -602,7 +620,7 @@ main();
 <h2 id="example-4-reading-input">Example 4: Reading Input</h2>
 <p>This example demonstrates how to read input from the user and use it in your program.</p>
 <pre><code>def main() {
-    var name: string = readLine("Enter your name: ");
+    var name: string = readInput("Enter your name: ");
     println(name);
 }
 main();
@@ -621,6 +639,20 @@ main();
     var stringInput: string = "42";
     var castedInt: int = int(stringInput);
     println(castedInt + 5);
+}
+main();
+</code></pre>
+<h2 id="example-6-logical-operators-and-or">Example 6: Logical Operators (AND, OR)</h2>
+<p>This example demonstrates the use of logical operators <code>AND</code> and <code>OR</code> in Zynk.</p>
+<pre><code>def main() {
+    var a: bool = true;
+    var b: bool = false;
+    var c: bool = a and b;
+    var d: bool = a or b;
+
+    if(c &amp;&amp; d) {
+        println("Both c and d are true.");
+    }
 }
 main();
 </code></pre>
