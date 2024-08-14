@@ -101,7 +101,7 @@ This example demonstrates how to use f-strings to create formatted strings in Zy
     def main() {
         var name: string = "Alice";
         var age: int = 30;
-        var height: float = 5.9;
+        var height: float = 185;
 
         // Using f-string to create a formatted string
         var message: string = f"Name: {name}, Age: {age}, Height: {height}";
