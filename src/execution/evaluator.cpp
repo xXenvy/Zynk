@@ -130,7 +130,7 @@ std::string Evaluator::evaluateFString(ASTFString* fString) {
         if (braceClose == std::string::npos) {
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
-                "Unmatched '{' in f-string.",
+                "Unclosed '{' in f-string.",
                 fString->line
             );
         }
@@ -219,16 +219,16 @@ std::string Evaluator::evaluateAndOperation(ASTAndOperation* operation) {
     return right;
 }
 
-std::string Evaluator::evaluateExpression(const std::string& expression, size_t line) {
+std::string Evaluator::evaluateExpression(const std::string& expression, size_t realLine) {
     Lexer lexer(expression);
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
     const auto astExpression = parser.parseExpression(0);
 
-    // We set the line number manually here because the parser doesn’t know where
-    // this expression came from. Without this, error messages would be wrong.
-    astExpression.get()->line = line;
+    // We set the line number manually here, because the parser doesn't know where
+    // this expression came from. Without this, line in error message would be wrong.
+    astExpression.get()->line = realLine;
     return evaluateExpression(astExpression.get());
 }
 

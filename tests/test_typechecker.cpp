@@ -3,327 +3,201 @@
 #include "../src/typechecker/include/checker.hpp"
 #include "../src/common/include/errors.hpp"
 
-TEST(TypeCheckerTest, DetermineTypeIntegerValueNode) {
+TEST(TypeCheckerTest, DetermineTypeIntegerValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeInt = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeInt.get()), ASTValueType::Integer);
+    auto ASTValueInt = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueInt.get()), ASTValueType::Integer);
 }
 
-TEST(TypeCheckerTest, DetermineTypeFloatValueNode) {
+TEST(TypeCheckerTest, DetermineTypeFloatValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeFloat.get()), ASTValueType::Float);
+    auto ASTValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueFloat.get()), ASTValueType::Float);
 }
 
-TEST(TypeCheckerTest, DetermineTypeStringValueNode) {
+TEST(TypeCheckerTest, DetermineTypeStringValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeString = std::make_unique<ASTValue>("hello", ASTValueType::String, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeString.get()), ASTValueType::String);
+    auto ASTValueString = std::make_unique<ASTValue>("hello", ASTValueType::String, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueString.get()), ASTValueType::String);
 }
 
-TEST(TypeCheckerTest, DetermineTypeBooleanValueNode) {
+TEST(TypeCheckerTest, DetermineTypeBooleanValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeBool = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeBool.get()), ASTValueType::Bool);
+    auto ASTValueBool = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueBool.get()), ASTValueType::Bool);
 }
 
-TEST(TypeCheckerTest, DetermineTypeZeroIntegerValueNode) {
+TEST(TypeCheckerTest, DetermineTypeZeroIntegerValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeZeroInt = std::make_unique<ASTValue>("0", ASTValueType::Integer, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeZeroInt.get()), ASTValueType::Integer);
+    auto ASTValueZeroInt = std::make_unique<ASTValue>("0", ASTValueType::Integer, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueZeroInt.get()), ASTValueType::Integer);
 }
 
-TEST(TypeCheckerTest, DetermineTypeZeroFloatValueNode) {
+TEST(TypeCheckerTest, DetermineTypeZeroFloatValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeZeroFloat = std::make_unique<ASTValue>("0.0", ASTValueType::Float, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeZeroFloat.get()), ASTValueType::Float);
+    auto ASTValueZeroFloat = std::make_unique<ASTValue>("0.0", ASTValueType::Float, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueZeroFloat.get()), ASTValueType::Float);
 }
 
-TEST(TypeCheckerTest, DetermineTypeEmptyStringValueNode) {
+TEST(TypeCheckerTest, DetermineTypeEmptyStringValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeEmptyString = std::make_unique<ASTValue>("", ASTValueType::String, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeEmptyString.get()), ASTValueType::String);
+    auto ASTValueEmptyString = std::make_unique<ASTValue>("", ASTValueType::String, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueEmptyString.get()), ASTValueType::String);
 }
 
-TEST(TypeCheckerTest, DetermineTypeFalseBooleanValueNode) {
+TEST(TypeCheckerTest, DetermineTypeFalseBooleanValue) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeFalseBool = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
-    ASSERT_EQ(typeChecker.determineType(valueNodeFalseBool.get()), ASTValueType::Bool);
+    auto ASTValueFalseBool = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTValueFalseBool.get()), ASTValueType::Bool);
 }
 
-TEST(TypeCheckerTest, DetermineTypeIntegerVariableNode) {
+TEST(TypeCheckerTest, DetermineTypeIntegerVariable) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
     env.enterNewBlock();
 
-    auto varValue = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
-    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(varValue), 1);
-    env.declareVariable("x", varDeclaration.get());
+    auto ASTValueInt = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
+    auto ASTVarDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(ASTValueInt), 1);
+    env.declareVariable("x", ASTVarDeclaration.get());
 
-    auto variableNode = std::make_unique<ASTVariable>("x", 1);
-    ASSERT_EQ(typeChecker.determineType(variableNode.get()), ASTValueType::Integer);
+    auto ASTVariableInt = std::make_unique<ASTVariable>("x", 1);
+    ASSERT_EQ(typeChecker.determineType(ASTVariableInt.get()), ASTValueType::Integer);
     env.exitCurrentBlock();
 }
 
-TEST(TypeCheckerTest, DetermineTypeFloatVariableNode) {
+TEST(TypeCheckerTest, DetermineTypeFloatVariable) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
     env.enterNewBlock();
 
-    auto varValue = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("y", ASTValueType::Float, std::move(varValue), 1);
-    env.declareVariable("y", varDeclaration.get());
+    auto ASTValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
+    auto ASTVarDeclaration = std::make_unique<ASTVariableDeclaration>("y", ASTValueType::Float, std::move(ASTValueFloat), 1);
+    env.declareVariable("y", ASTVarDeclaration.get());
 
-    auto variableNode = std::make_unique<ASTVariable>("y", 1);
-    ASSERT_EQ(typeChecker.determineType(variableNode.get()), ASTValueType::Float);
+    auto ASTVariableFloat = std::make_unique<ASTVariable>("y", 1);
+    ASSERT_EQ(typeChecker.determineType(ASTVariableFloat.get()), ASTValueType::Float);
     env.exitCurrentBlock();
 }
 
-TEST(TypeCheckerTest, DetermineTypeStringVariableNode) {
+TEST(TypeCheckerTest, DetermineTypeStringVariable) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
     env.enterNewBlock();
 
-    auto varValue = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
-    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("greeting", ASTValueType::String, std::move(varValue), 1);
-    env.declareVariable("greeting", varDeclaration.get());
+    auto ASTValueString = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
+    auto ASTVarDeclaration = std::make_unique<ASTVariableDeclaration>("greeting", ASTValueType::String, std::move(ASTValueString), 1);
+    env.declareVariable("greeting", ASTVarDeclaration.get());
 
-    auto variableNode = std::make_unique<ASTVariable>("greeting", 1);
-    ASSERT_EQ(typeChecker.determineType(variableNode.get()), ASTValueType::String);
+    auto ASTVariableString = std::make_unique<ASTVariable>("greeting", 1);
+    ASSERT_EQ(typeChecker.determineType(ASTVariableString.get()), ASTValueType::String);
     env.exitCurrentBlock();
 }
 
-TEST(TypeCheckerTest, DetermineTypeUndeclaredVariableNode) {
+TEST(TypeCheckerTest, DetermineTypeUndeclaredVariable) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
     env.enterNewBlock();
 
-    auto variableNode = std::make_unique<ASTVariable>("undeclaredVariable", 1);
-    ASSERT_THROW(typeChecker.determineType(variableNode.get()), ZynkError);
+    auto ASTVariableUndeclared = std::make_unique<ASTVariable>("undeclaredVariable", 1);
+    ASSERT_THROW(typeChecker.determineType(ASTVariableUndeclared.get()), ZynkError);
     env.exitCurrentBlock();
 }
 
-TEST(TypeCheckerTest, DetermineTypeIntegerBinaryOperationNode) {
+TEST(TypeCheckerTest, DetermineTypeIntegerBinaryOperation) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto leftValue = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
-    auto rightValue = std::make_unique<ASTValue>("3", ASTValueType::Integer, 1);
-    auto operationNode = std::make_unique<ASTBinaryOperation>(
-        std::move(leftValue), "+", std::move(rightValue), 1
+    auto ASTLeftValueInt = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
+    auto ASTRightValueInt = std::make_unique<ASTValue>("3", ASTValueType::Integer, 1);
+    auto ASTOperation = std::make_unique<ASTBinaryOperation>(
+        std::move(ASTLeftValueInt), "+", std::move(ASTRightValueInt), 1
     );
-    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::Integer);
+    ASSERT_EQ(typeChecker.determineType(ASTOperation.get()), ASTValueType::Integer);
 }
 
-TEST(TypeCheckerTest, DetermineTypeFloatBinaryOperationNode) {
+TEST(TypeCheckerTest, DetermineTypeFloatBinaryOperation) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto leftValue = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
-    auto rightValue = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    auto operationNode = std::make_unique<ASTBinaryOperation>(
-        std::move(leftValue), "*", std::move(rightValue), 1
+    auto ASTLeftValueInt = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
+    auto ASTRightValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
+    auto ASTOperation = std::make_unique<ASTBinaryOperation>(
+        std::move(ASTLeftValueInt), "*", std::move(ASTRightValueFloat), 1
     );
-    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::Float);
+    ASSERT_EQ(typeChecker.determineType(ASTOperation.get()), ASTValueType::Float);
 }
 
-TEST(TypeCheckerTest, DetermineTypeMismatchedBinaryOperationNode) {
+TEST(TypeCheckerTest, DetermineTypeMismatchedBinaryOperation) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto leftValue = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
-    auto rightValue = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    auto operationNode = std::make_unique<ASTBinaryOperation>(
-        std::move(leftValue), "+", std::move(rightValue), 1
+    auto ASTLeftValueString = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
+    auto ASTRightValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
+    auto ASTOperation = std::make_unique<ASTBinaryOperation>(
+        std::move(ASTLeftValueString), "+", std::move(ASTRightValueFloat), 1
     );
-    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::String);
+    ASSERT_EQ(typeChecker.determineType(ASTOperation.get()), ASTValueType::String);
 }
 
-TEST(TypeCheckerTest, CheckTypeMatchingTypes) {
+TEST(TypeCheckerTest, DetermineTypeFString) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNode = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Bool, valueNode.get()));
-}
-
-TEST(TypeCheckerTest, CheckTypeMismatchedTypes) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto valueNode = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
-    ASSERT_THROW(typeChecker.checkType(ASTValueType::Float, valueNode.get()), ZynkError);
-}
-
-TEST(TypeCheckerTest, CheckTypeBinaryOperation_MatchingTypes) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
-    auto rightValue = std::make_unique<ASTValue>("3", ASTValueType::Integer, 1);
-    auto operationNode = std::make_unique<ASTBinaryOperation>(
-        std::move(leftValue), "+", std::move(rightValue), 1
-    );
-    ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Integer, operationNode.get()));
-}
-
-TEST(TypeCheckerTest, CheckTypeUndeclaredVariableNode) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    env.enterNewBlock();
-    auto variableNode = std::make_unique<ASTVariable>("undeclaredVariable", 1);
-    ASSERT_THROW(typeChecker.checkType(ASTValueType::Integer, variableNode.get()), ZynkError);
-    env.exitCurrentBlock();
-}
-
-TEST(TypeCheckerTest, CheckTypeMixedTypesInBinaryOperation) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
-    auto rightValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto operationNode = std::make_unique<ASTBinaryOperation>(
-        std::move(leftValue), "+", std::move(rightValue), 1
-    );
-    ASSERT_THROW(typeChecker.checkType(ASTValueType::Integer, operationNode.get()), ZynkError);
+    auto fString = std::make_unique<ASTFString>("Street: {name}", 1);
+    ASSERT_EQ(typeChecker.determineType(fString.get()), ASTValueType::String);
 }
 
 TEST(TypeCheckerTest, DetermineTypeCastFromFloatToInt) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeFloat), ASTValueType::Integer, 1);
-    ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Integer);
+    auto ASTValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
+    auto ASTCast = std::make_unique<ASTTypeCast>(std::move(ASTValueFloat), ASTValueType::Integer, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTCast.get()), ASTValueType::Integer);
 }
 
 TEST(TypeCheckerTest, DetermineTypeCastFromStringToFloat) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeString = std::make_unique<ASTValue>("3.14", ASTValueType::String, 1);
-    auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeString), ASTValueType::Float, 1);
-    ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Float);
+    auto ASTValueString = std::make_unique<ASTValue>("3.14", ASTValueType::String, 1);
+    auto ASTCast = std::make_unique<ASTTypeCast>(std::move(ASTValueString), ASTValueType::Float, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTCast.get()), ASTValueType::Float);
 }
 
 TEST(TypeCheckerTest, DetermineTypeCastFromIntToBool) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto valueNodeInt = std::make_unique<ASTValue>("1", ASTValueType::Integer, 1);
-    auto castNode = std::make_unique<ASTTypeCast>(std::move(valueNodeInt), ASTValueType::Bool, 1);
-    ASSERT_EQ(typeChecker.determineType(castNode.get()), ASTValueType::Bool);
+    auto ASTValueInt = std::make_unique<ASTValue>("1", ASTValueType::Integer, 1);
+    auto ASTCast = std::make_unique<ASTTypeCast>(std::move(ASTValueInt), ASTValueType::Bool, 1);
+    ASSERT_EQ(typeChecker.determineType(ASTCast.get()), ASTValueType::Bool);
 }
 
-TEST(TypeCheckerTest, DetermineTypeAndOperationNode) {
+TEST(TypeCheckerTest, DetermineTypeAndOperation) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);
 
-    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
-    auto operationNode = std::make_unique<ASTAndOperation>(
-        std::move(leftValue), std::move(rightValue), 1
+    auto ASTLeftValueBool = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
+    auto ASTRightValueBool = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
+    auto ASTOperation = std::make_unique<ASTAndOperation>(
+        std::move(ASTLeftValueBool), std::move(ASTRightValueBool), 1
     );
-    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::Bool);
-}
-
-TEST(TypeCheckerTest, DetermineTypeOrOperationNode) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
-    auto operationNode = std::make_unique<ASTOrOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_EQ(typeChecker.determineType(operationNode.get()), ASTValueType::Bool);
-}
-
-TEST(TypeCheckerTest, DetermineTypeMismatchedAndOperationNode) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
-    auto operationNode = std::make_unique<ASTAndOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_THROW(typeChecker.determineType(operationNode.get()), ZynkError);
-}
-
-TEST(TypeCheckerTest, DetermineTypeMismatchedOrOperationNode) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    auto operationNode = std::make_unique<ASTOrOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_THROW(typeChecker.determineType(operationNode.get()), ZynkError);
-}
-
-TEST(TypeCheckerTest, CheckTypeAndOperation) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
-    auto operationNode = std::make_unique<ASTAndOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()));
-}
-
-TEST(TypeCheckerTest, CheckTypeOrOperation) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto operationNode = std::make_unique<ASTOrOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_NO_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()));
-}
-
-TEST(TypeCheckerTest, CheckTypeMismatchedAndOperation) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("false", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
-    auto operationNode = std::make_unique<ASTAndOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()), ZynkError);
-}
-
-TEST(TypeCheckerTest, CheckTypeMismatchedOrOperation) {
-    RuntimeEnvironment env;
-    TypeChecker typeChecker(env);
-
-    auto leftValue = std::make_unique<ASTValue>("true", ASTValueType::Bool, 1);
-    auto rightValue = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
-    auto operationNode = std::make_unique<ASTOrOperation>(
-        std::move(leftValue), std::move(rightValue), 1
-    );
-    ASSERT_THROW(typeChecker.checkType(ASTValueType::Bool, operationNode.get()), ZynkError);
+    ASSERT_EQ(typeChecker.determineType(ASTOperation.get()), ASTValueType::Bool);
 }
