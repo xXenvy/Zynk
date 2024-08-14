@@ -15,11 +15,12 @@ enum class ASTType {
     ReadLine,
     Value,
     Variable,
+    FString,
     BinaryOperation,
     Condition,
     TypeCast,
     AndOperation,
-    OrOperation
+    OrOperation,
 };
 
 enum class ASTValueType {
@@ -32,7 +33,7 @@ enum class ASTValueType {
 
 struct ASTBase {
     const ASTType type;
-    const size_t line;
+    size_t line;
 
     ASTBase(ASTType type, size_t line) : type(type), line(line) {}
 };
@@ -75,6 +76,12 @@ struct ASTVariableModify : public ASTBase {
         : ASTBase(ASTType::VariableModify, line), name(name), value(std::move(value)) {}
     const std::string name;
     std::unique_ptr<ASTBase> value;
+};
+
+struct ASTFString : public ASTBase {
+    ASTFString(const std::string& value, size_t line)
+        : ASTBase(ASTType::FString, line), value(value) {}
+    const std::string value;
 };
 
 struct ASTValue : public ASTBase {

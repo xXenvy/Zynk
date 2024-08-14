@@ -34,7 +34,7 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
 			if (currentToken().type == TokenType::ASSIGN) return parseVariableModify();
-			[[fallthrough]];
+			return std::make_unique<ASTVariable>(current.value, current.line);
 		}
 		default:
 			throw ZynkError(
@@ -243,8 +243,14 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 			return std::make_unique<ASTValue>(current.value, ASTValueType::Bool, currentLine);
 		case TokenType::NONE:
 			return std::make_unique<ASTValue>(current.value, ASTValueType::None, currentLine);
-		case TokenType::IDENTIFIER:
+		case TokenType::IDENTIFIER: {
+			if (currentToken().type == TokenType::STRING && current.value == "f") {
+				const std::string fStringValue = currentToken().value;
+				moveForward();
+				return std::make_unique<ASTFString>(fStringValue, currentLine);
+			}
 			return std::make_unique<ASTVariable>(current.value, currentLine);
+		}
 		case TokenType::READLINE: {
 			position--;
 			std::unique_ptr<ASTBase> expr = parseRead();
