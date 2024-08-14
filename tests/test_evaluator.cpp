@@ -718,3 +718,15 @@ TEST(EvaluatorTest, EvaluateFStringWithStringInterpolation) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "My name is Alice and I am 30 years old.\n");
 }
+
+TEST(EvaluatorTest, EvaluateFStringWithUndefinedVariable) {
+    const std::string code = "println(f\"{abc}\");";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}

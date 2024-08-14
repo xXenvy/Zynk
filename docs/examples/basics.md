@@ -93,3 +93,21 @@ This example demonstrates the use of logical operators `AND` and `OR` in Zynk.
         }
     }
     main();
+
+## Example 7: Formatted Strings (f-string)
+
+This example demonstrates how to use f-strings to create formatted strings in Zynk.
+
+    def main() {
+        var name: string = "Alice";
+        var age: int = 30;
+        var height: float = 5.9;
+
+        // Using f-string to create a formatted string
+        var message: string = f"Name: {name}, Age: {age}, Height: {height}";
+
+        // Printing the formatted string
+        println(message);
+        println(f"{name} will be {age + 1} years old next year.");
+    }
+    main();
