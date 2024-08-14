@@ -12,7 +12,7 @@ enum class ASTType {
     VariableDeclaration,
     VariableModify,
     Print,
-    ReadLine,
+    ReadInput,
     Value,
     Variable,
     BinaryOperation,
@@ -106,9 +106,9 @@ struct ASTCondition : public ASTBase {
     std::vector<std::unique_ptr<ASTBase>> elseBody;
 };
 
-struct ASTReadLine : public ASTBase {
-    ASTReadLine(std::unique_ptr<ASTBase> out, size_t line)
-        : ASTBase(ASTType::ReadLine, line), out(std::move(out)) {}
+struct ASTReadInput : public ASTBase {
+    ASTReadInput(std::unique_ptr<ASTBase> out, size_t line)
+        : ASTBase(ASTType::ReadInput, line), out(std::move(out)) {}
     std::unique_ptr<ASTBase> out;
 };
 

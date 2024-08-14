@@ -109,7 +109,7 @@ Token Lexer::identifier() {
     if (value == "var") return Token(TokenType::VARIABLE, value, line);
     if (value == "if") return Token(TokenType::CONDITION, value, line);
     if (value == "else") return Token(TokenType::ELSE, value, line);
-    if (value == "readLine") return Token(TokenType::READLINE, value, line);
+    if (value == "readInput") return Token(TokenType::READINPUT, value, line);
     if (value == "or") return Token(TokenType::OR, value, line);
     if (value == "and") return Token(TokenType::AND, value, line);
     return Token(TokenType::IDENTIFIER, value, line);

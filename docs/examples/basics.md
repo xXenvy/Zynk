@@ -53,7 +53,7 @@ This example demonstrates defining and calling functions, including nested funct
 This example demonstrates how to read input from the user and use it in your program.
 
     def main() {
-        var name: string = readLine("Enter your name: ");
+        var name: string = readInput("Enter your name: ");
         println(name);
     }
     main();
