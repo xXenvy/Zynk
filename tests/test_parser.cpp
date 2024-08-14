@@ -507,6 +507,82 @@ TEST(ParserTest, parseOrOperation) {
     ASSERT_EQ(rightValue->value, "false");
 }
 
+TEST(ParserTest, parsePrintExpressionWithParentheses) {
+    Lexer lexer("println((1 + 2) * 5);");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Print);
+
+    const auto printStmt = static_cast<ASTPrint*>(program->body.front().get());
+    ASSERT_TRUE(printStmt);
+
+    const auto operation = static_cast<ASTBinaryOperation*>(printStmt->expression.get());
+    ASSERT_EQ(operation->op, "*");
+
+    const auto leftExpr = static_cast<ASTBinaryOperation*>(operation->left.get());
+    ASSERT_NE(leftExpr, nullptr);
+    ASSERT_EQ(leftExpr->op, "+");
+
+    const auto rightExpr = static_cast<ASTValue*>(leftExpr->right.get());
+    ASSERT_NE(rightExpr, nullptr);
+    ASSERT_EQ(rightExpr->value, "2");
+
+    const auto leftValue = static_cast<ASTValue*>(leftExpr->left.get());
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_EQ(leftValue->value, "1");
+
+    const auto multiplier = static_cast<ASTValue*>(operation->right.get());
+    ASSERT_NE(multiplier, nullptr);
+    ASSERT_EQ(multiplier->value, "5");
+}
+
+TEST(ParserTest, parsePrintNestedParentheses) {
+    Lexer lexer("println(((3 + 4) * (2 + 1)));");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Print);
+
+    const auto printStmt = static_cast<ASTPrint*>(program->body.front().get());
+    ASSERT_TRUE(printStmt);
+
+    const auto operation = static_cast<ASTBinaryOperation*>(printStmt->expression.get());
+    ASSERT_EQ(operation->op, "*");
+
+    const auto leftExpr = static_cast<ASTBinaryOperation*>(operation->left.get());
+    ASSERT_NE(leftExpr, nullptr);
+    ASSERT_EQ(leftExpr->op, "+");
+
+    const auto rightExpr = static_cast<ASTBinaryOperation*>(operation->right.get());
+    ASSERT_NE(rightExpr, nullptr);
+    ASSERT_EQ(rightExpr->op, "+");
+
+    const auto leftValue = static_cast<ASTValue*>(leftExpr->left.get());
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_EQ(leftValue->value, "3");
+
+    const auto rightValue = static_cast<ASTValue*>(leftExpr->right.get());
+    ASSERT_NE(rightValue, nullptr);
+    ASSERT_EQ(rightValue->value, "4");
+
+    const auto nestedLeftValue = static_cast<ASTValue*>(rightExpr->left.get());
+    ASSERT_NE(nestedLeftValue, nullptr);
+    ASSERT_EQ(nestedLeftValue->value, "2");
+
+    const auto nestedRightValue = static_cast<ASTValue*>(rightExpr->right.get());
+    ASSERT_NE(nestedRightValue, nullptr);
+    ASSERT_EQ(nestedRightValue->value, "1");
+}
+
 TEST(ParserTest, parseNegativeBoolThrowsException) {
     Lexer lexer("var a: bool = -true;");
     const std::vector<Token> tokens = lexer.tokenize();

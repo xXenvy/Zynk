@@ -206,6 +206,13 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 	const Token current = currentToken();
 	const size_t currentLine = current.line;
 
+	if (current.type == TokenType::LBRACKET) {
+		moveForward();
+		std::unique_ptr<ASTBase> expr = parseExpression(0);
+		consume({ TokenType::RBRACKET, ")", currentLine });
+		return expr;
+	}
+
 	// Handles case for negative number.
 	if (current.type == TokenType::SUBTRACT) {
 		moveForward();
