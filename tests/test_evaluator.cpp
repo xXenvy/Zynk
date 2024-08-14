@@ -392,7 +392,7 @@ TEST(EvaluatorTest, EvaluateShortIfStatement) {
 
 TEST(EvaluatorTest, EvaluateReadStatementWithPrompt) {
     const std::string code = R"(
-        var input: string = readLine("Enter your name: ");
+        var input: string = readInput("Enter your name: ");
         println(input);
     )";
     std::istringstream input("Alice\n");
@@ -416,7 +416,7 @@ TEST(EvaluatorTest, EvaluateReadStatementWithPrompt) {
 
 TEST(EvaluatorTest, EvaluateReadStatementWithoutPrompt) {
     const std::string code = R"(
-        var input: string = readLine();
+        var input: string = readInput();
         println(input);
     )";
     std::istringstream input("Bob\n");
