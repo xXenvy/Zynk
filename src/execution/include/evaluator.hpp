@@ -18,7 +18,7 @@ private:
 
     std::string evaluateExpression(ASTBase* expression);
     std::string evaluateExpression(const std::string& expression, size_t line);
-    std::string evaluateReadLine(ASTReadLine* read);
+    std::string evaluateReadInput(ASTReadInput* read);
     std::string evaluateTypeCast(ASTTypeCast* typeCast);
     std::string evaluateFString(ASTFString* fString);
     std::string evaluateBinaryOperation(ASTBinaryOperation* operation);

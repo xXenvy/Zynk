@@ -26,8 +26,8 @@ void Evaluator::evaluate(ASTBase* ast) {
         case ASTType::Print:
             evaluatePrint(static_cast<ASTPrint*>(ast));
             break;
-        case ASTType::ReadLine:
-            evaluateReadLine(static_cast<ASTReadLine*>(ast));
+        case ASTType::ReadInput:
+            evaluateReadInput(static_cast<ASTReadInput*>(ast));
             break;
         case ASTType::Condition:
             evaluateCondition(static_cast<ASTCondition*>(ast));
@@ -103,7 +103,7 @@ inline void Evaluator::evaluateCondition(ASTCondition* condition) {
     env.exitCurrentBlock();
 }
 
-std::string Evaluator::evaluateReadLine(ASTReadLine* read) {
+std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
     std::string input;
     if (read->out.get() != nullptr) {
         std::cout << evaluateExpression(read->out.get());
@@ -240,14 +240,14 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
         case ASTType::Variable: {
             const auto var = static_cast<ASTVariable*>(expression);
             return evaluateExpression(env.getVariable(var->name, var->line)->value.get());
-        }
-        case ASTType::ReadLine: 
-            return evaluateReadLine(static_cast<ASTReadLine*>(expression));
-        case ASTType::TypeCast: 
+        };
+        case ASTType::ReadInput:
+            return evaluateReadInput(static_cast<ASTReadInput*>(expression));
+        case ASTType::TypeCast:
             return evaluateTypeCast(static_cast<ASTTypeCast*>(expression));
         case ASTType::FString:
             return evaluateFString(static_cast<ASTFString*>(expression));
-        case ASTType::BinaryOperation: 
+        case ASTType::BinaryOperation:
             return evaluateBinaryOperation(static_cast<ASTBinaryOperation*>(expression));
         case ASTType::OrOperation: 
             return evaluateOrOperation(static_cast<ASTOrOperation*>(expression));

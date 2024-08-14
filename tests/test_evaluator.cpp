@@ -392,7 +392,7 @@ TEST(EvaluatorTest, EvaluateShortIfStatement) {
 
 TEST(EvaluatorTest, EvaluateReadStatementWithPrompt) {
     const std::string code = R"(
-        var input: string = readLine("Enter your name: ");
+        var input: string = readInput("Enter your name: ");
         println(input);
     )";
     std::istringstream input("Alice\n");
@@ -416,7 +416,7 @@ TEST(EvaluatorTest, EvaluateReadStatementWithPrompt) {
 
 TEST(EvaluatorTest, EvaluateReadStatementWithoutPrompt) {
     const std::string code = R"(
-        var input: string = readLine();
+        var input: string = readInput();
         println(input);
     )";
     std::istringstream input("Bob\n");
@@ -649,23 +649,6 @@ TEST(EvaluatorTest, EvaluateLogicalOrFalseFalse) {
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
 }
 
-TEST(EvaluatorTest, EvaluateFStringWithIntegers) {
-    const std::string code = R"(
-        var x: int = 42;
-        println(f"Value of x is {x}");
-    )";
-    Lexer lexer(code);
-    const std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    const auto program = parser.parse();
-
-    testing::internal::CaptureStdout();
-    Evaluator evaluator;
-    evaluator.evaluate(program.get());
-    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Value of x is 42\n");
-}
-
 TEST(EvaluatorTest, EvaluateFStringWithMultipleExpressions) {
     const std::string code = R"(
         var x: int = 42;
@@ -682,6 +665,68 @@ TEST(EvaluatorTest, EvaluateFStringWithMultipleExpressions) {
     Evaluator evaluator;
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "x: 42, y: 3.5, sum: 45.500000\n");
+}
+    
+TEST(EvaluatorTest, EvaluatePrintExpressionWithParentheses) {
+    const std::string code = "println((1 + 2) * 5);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
+}
+
+TEST(EvaluatorTest, EvaluatePrintNestedParentheses) {
+    const std::string code = "println(((3 + 4) * (2 + 1)));";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
+}
+
+TEST(EvaluatorTest, EvaluateVarNestedParentheses) {
+    const std::string code = R"(
+        var x: int = ((3 + 4) * (2 + 1));
+        println(x);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
+}
+
+TEST(EvaluatorTest, EvaluateFStringWithIntegers) {
+    const std::string code = R"(
+        var x: int = 42;
+        println(f"Value of x is {x}");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Value of x is 42\n");
 }
 
 TEST(EvaluatorTest, EvaluateFStringWithBooleans) {

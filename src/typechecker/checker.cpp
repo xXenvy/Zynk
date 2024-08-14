@@ -8,7 +8,7 @@ ASTValueType TypeChecker::determineType(ASTBase* expression) {
         case ASTType::TypeCast:
             return static_cast<ASTTypeCast*>(expression)->castType;
         case ASTType::FString:
-        case ASTType::ReadLine:
+        case ASTType::ReadInput:
             return ASTValueType::String;
         case ASTType::Value: 
             return static_cast<ASTValue*>(expression)->valueType;
