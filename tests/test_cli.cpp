@@ -5,12 +5,14 @@
 
 TEST(CLIArgsTest, FileArgumentShortOption) {
     CLI cli({ "main.zk" });
-    EXPECT_TRUE(!cli.args.file_path.empty());
+    EXPECT_FALSE(cli.args.file_path.empty());
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, FileArgumentLongOption) {
-    CLI cli({ "--file_path main.zk" });
-    EXPECT_TRUE(!cli.args.file_path.empty());
+    CLI cli({ "--file main.zk" });
+    EXPECT_FALSE(cli.args.file_path.empty());
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, HelpArgumentShortOption) {
@@ -21,31 +23,37 @@ TEST(CLIArgsTest, HelpArgumentShortOption) {
 TEST(CLIArgsTest, HelpArgumentLongOption) {
     CLI cli({ "--help" });
     EXPECT_TRUE(cli.args.help);
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, VersionArgumentShortOption) {
     CLI cli({ "version" });
     EXPECT_TRUE(cli.args.version);
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, VersionArgumentLongOption) {
     CLI cli({ "--version" });
     EXPECT_TRUE(cli.args.version);
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, InitArgumentShortOption) {
     CLI cli({ "init" });
     EXPECT_TRUE(cli.args.init);
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, InitArgumentLongOption) {
     CLI cli({ "--init" });
     EXPECT_TRUE(cli.args.init);
+    EXPECT_EQ(cli.args.count, 1);
 }
 
 TEST(CLIArgsTest, ShouldBeEmpty) {
     CLI cli({});
     EXPECT_TRUE(cli.args.empty());
+    EXPECT_EQ(cli.args.count, 0);
 }
 
 TEST(CLICheckoutTest, ShouldThrowNoArgumentWasGiven) {
@@ -53,8 +61,13 @@ TEST(CLICheckoutTest, ShouldThrowNoArgumentWasGiven) {
     EXPECT_THROW(cli.checkout(), ZynkError);
 }
 
+TEST(CLICheckoutTest, ShouldNotThrow) {
+    CLI cli({ "--file main.zk"});
+    EXPECT_NO_THROW(cli.checkout());
+}
+
 TEST(CLICheckoutTest, ShouldThrowTooManyArguments) {
-    CLI cli({"--file_path main.zk", "--help"});
+    CLI cli({"--file main.zk", "--help"});
     EXPECT_THROW(cli.checkout(), ZynkError);
 }
 
