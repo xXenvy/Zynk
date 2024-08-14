@@ -648,3 +648,48 @@ TEST(EvaluatorTest, EvaluateLogicalOrFalseFalse) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
 }
+
+TEST(EvaluatorTest, EvaluatePrintExpressionWithParentheses) {
+    const std::string code = "println((1 + 2) * 5);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
+}
+
+TEST(EvaluatorTest, EvaluatePrintNestedParentheses) {
+    const std::string code = "println(((3 + 4) * (2 + 1)));";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
+}
+
+TEST(EvaluatorTest, EvaluateVarNestedParentheses) {
+    const std::string code = R"(
+        var x: int = ((3 + 4) * (2 + 1));
+        println(x);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
+}
