@@ -730,3 +730,15 @@ TEST(EvaluatorTest, EvaluateFStringWithUndefinedVariable) {
     Evaluator evaluator;
     ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
+
+TEST(EvaluatorTest, EvaluateFStringWithUnclosedBracket) {
+    const std::string code = "println(f\"{abc\");";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}
