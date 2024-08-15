@@ -12,8 +12,33 @@ TEST(RuntimeEnvironmentTest, VariableDeclaration) {
     auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(varValue), 10);
     ASSERT_NO_THROW(env.declareVariable("x", varDeclaration.get()));
 
-    auto retrievedVar = env.getVariable("x", 10);
+    auto retrievedVar = env.getVariable("x", 10, true);
     ASSERT_EQ(retrievedVar->name, "x");
+
+    ASSERT_THROW(env.declareVariable("x", varDeclaration.get()), ZynkError);
+    ASSERT_EQ(env.isVariableDeclared("x"), true);
+    env.exitCurrentBlock();
+}
+
+TEST(RuntimeEnvironmentTest, VariableDeclarationWithoutDeepSearch) {
+    RuntimeEnvironment env;
+    env.enterNewBlock();
+
+    auto varValue = std::make_unique<ASTValue>("10", ASTValueType::Integer, 10);
+    auto varDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(varValue), 10);
+    ASSERT_NO_THROW(env.declareVariable("x", varDeclaration.get()));
+
+    env.enterNewBlock();
+    auto retrievedVar = env.getVariable("x", 10, true);
+    ASSERT_EQ(retrievedVar->value.get()->line, 10);
+
+    auto varValue2 = std::make_unique<ASTValue>("50", ASTValueType::Integer, 11);
+    auto varDeclaration2 = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(varValue2), 11);
+    ASSERT_NO_THROW(env.declareVariable("x", varDeclaration2.get()));
+
+    auto retrievedVar2 = env.getVariable("x", 50, false);
+    ASSERT_EQ(retrievedVar2->value.get()->line, 11);
+    env.exitCurrentBlock();
 
     ASSERT_THROW(env.declareVariable("x", varDeclaration.get()), ZynkError);
     ASSERT_EQ(env.isVariableDeclared("x"), true);
@@ -40,7 +65,7 @@ TEST(RuntimeEnvironmentTest, VariableNotDefinedError) {
     RuntimeEnvironment env;
     env.enterNewBlock();
 
-    ASSERT_THROW(env.getVariable("undefinedVar", 1), ZynkError);
+    ASSERT_THROW(env.getVariable("undefinedVar", 1, true), ZynkError);
     ASSERT_EQ(env.isVariableDeclared("undefinedVar"), false);
     env.exitCurrentBlock();
 }

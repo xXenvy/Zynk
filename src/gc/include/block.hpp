@@ -23,19 +23,19 @@ public:
         functions[name] = std::move(func);
     }
 
-    GCObject* getVariable(const std::string& name) {
+    GCObject* getVariable(const std::string& name, bool deepSearch = true) {
         if (variables.find(name) != variables.end()) {
             return variables[name].get();
         }
-        if (parentBlock) return parentBlock->getVariable(name);
+        if (parentBlock && deepSearch) return parentBlock->getVariable(name);
         return nullptr;
     }
 
-    GCObject* getFunction(const std::string& name) {
+    GCObject* getFunction(const std::string& name, bool deepSearch = true) {
         if (functions.find(name) != functions.end()) {
             return functions[name].get();
         }
-        if (parentBlock) return parentBlock->getFunction(name);
+        if (parentBlock && deepSearch) return parentBlock->getFunction(name);
         return nullptr;
     }
 

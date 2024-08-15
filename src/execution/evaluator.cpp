@@ -82,7 +82,7 @@ inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* decla
 }
 
 inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
-    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line);
+    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line, true);
     typeChecker.checkType(declaration->varType, variableModify->value.get());
 
     ASTValue* newValue = new ASTValue(
@@ -239,7 +239,7 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return static_cast<ASTValue*>(expression)->value;
         case ASTType::Variable: {
             const auto var = static_cast<ASTVariable*>(expression);
-            return evaluateExpression(env.getVariable(var->name, var->line)->value.get());
+            return evaluateExpression(env.getVariable(var->name, var->line, true)->value.get());
         };
         case ASTType::ReadInput:
             return evaluateReadInput(static_cast<ASTReadInput*>(expression));
