@@ -184,8 +184,8 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
 
 std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
     ASTValueType valueTypes[2] = {
-                typeChecker.determineType(operation->left.get()),
-                typeChecker.determineType(operation->right.get())
+        typeChecker.determineType(operation->left.get()),
+        typeChecker.determineType(operation->right.get())
     };
     for (ASTValueType& valueType : valueTypes) {
         if (valueType != ASTValueType::Integer && valueType != ASTValueType::Float) {
@@ -207,16 +207,14 @@ std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
 
 std::string Evaluator::evaluateOrOperation(ASTOrOperation* operation) {
     const std::string left = evaluateExpression(operation->left.get());
-    const std::string right = evaluateExpression(operation->right.get());
     if (stringToBool(left)) return left;
-    return right;
+    return evaluateExpression(operation->right.get());
 }
 
 std::string Evaluator::evaluateAndOperation(ASTAndOperation* operation) {
     const std::string left = evaluateExpression(operation->left.get());
-    const std::string right = evaluateExpression(operation->right.get());
     if (!stringToBool(left)) return left;
-    return right;
+    return evaluateExpression(operation->right.get());
 }
 
 std::string Evaluator::evaluateExpression(const std::string& expression, size_t realLine) {

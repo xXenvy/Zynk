@@ -4,6 +4,7 @@
 TypeChecker::TypeChecker(RuntimeEnvironment& env) : env(env) {};
 
 ASTValueType TypeChecker::determineType(ASTBase* expression) {
+    if (expression == nullptr) return ASTValueType::None;
     switch (expression->type) {
         case ASTType::TypeCast:
             return static_cast<ASTTypeCast*>(expression)->castType;
