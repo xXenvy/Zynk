@@ -2,6 +2,8 @@
 #define EVALUATOR_H
 
 #include "../../parsing/include/ast.hpp"
+#include "../../parsing/include/lexer.hpp"
+#include "../../parsing/include/parser.hpp"
 #include "../../typechecker/include/checker.hpp"
 #include "runtime.hpp"
 
@@ -15,16 +17,21 @@ private:
     TypeChecker typeChecker;
 
     std::string evaluateExpression(ASTBase* expression);
+    std::string evaluateExpression(const std::string& expression, size_t line);
     std::string evaluateReadInput(ASTReadInput* read);
     std::string evaluateTypeCast(ASTTypeCast* typeCast);
+    std::string evaluateFString(ASTFString* fString);
+    std::string evaluateBinaryOperation(ASTBinaryOperation* operation);
+    std::string evaluateAndOperation(ASTAndOperation* operation);
+    std::string evaluateOrOperation(ASTOrOperation* operation);
 
-    void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
-    void evaluateVariableModify(ASTVariableModify* variableModify);
-    void evaluateProgram(ASTProgram* program);
-    void evaluateFunctionDeclaration(ASTFunction* function);
-    void evaluateFunctionCall(ASTFunctionCall* functionCall);
-    void evaluatePrint(ASTPrint* print);
-    void evaluateCondition(ASTCondition* condition);
+    inline void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
+    inline void evaluateVariableModify(ASTVariableModify* variableModify);
+    inline void evaluateProgram(ASTProgram* program);
+    inline void evaluateFunctionDeclaration(ASTFunction* function);
+    inline void evaluateFunctionCall(ASTFunctionCall* functionCall);
+    inline void evaluatePrint(ASTPrint* print);
+    inline void evaluateCondition(ASTCondition* condition);
 };
 
 inline bool stringToBool(const std::string& value);

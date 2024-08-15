@@ -582,6 +582,45 @@ TEST(ParserTest, parsePrintNestedParentheses) {
     ASSERT_EQ(nestedRightValue->value, "1");
 }
 
+TEST(ASTFStringTest, BasicFString) {
+    Lexer lexer("var greeting: string = \"Hello, {name}!\";");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto varDecl = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(varDecl->name, "greeting");
+    ASSERT_EQ(varDecl->varType, ASTValueType::String);
+
+    const auto fstring = static_cast<ASTFString*>(varDecl->value.get());
+    ASSERT_NE(fstring, nullptr);
+    ASSERT_EQ(fstring->value, "Hello, {name}!");
+    ASSERT_EQ(fstring->line, 1);
+}
+
+TEST(ASTFStringTest, PrintFString) {
+    Lexer lexer("println(\"Welcome, {name}!\");");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Print);
+
+    const auto print = static_cast<ASTPrint*>(program->body.front().get());
+    const auto fstring = static_cast<ASTFString*>(print->expression.get());
+    ASSERT_NE(fstring, nullptr);
+    ASSERT_EQ(fstring->value, "Welcome, {name}!");
+    ASSERT_EQ(fstring->line, 1);
+}
+
 TEST(ParserTest, parseNegativeBoolThrowsException) {
     Lexer lexer("var a: bool = -true;");
     const std::vector<Token> tokens = lexer.tokenize();

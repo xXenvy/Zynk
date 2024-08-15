@@ -41,7 +41,7 @@ void Evaluator::evaluate(ASTBase* ast) {
     }
 }
 
-void Evaluator::evaluateProgram(ASTProgram* program) {
+inline void Evaluator::evaluateProgram(ASTProgram* program) {
     env.enterNewBlock(); // Main program code block.
     for (const std::unique_ptr<ASTBase>& child : program->body) {
         if(child.get() != nullptr) evaluate(child.get());
@@ -49,12 +49,13 @@ void Evaluator::evaluateProgram(ASTProgram* program) {
     env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
 }
 
-void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
+inline void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
     env.declareFunction(function->name, function);
 }
 
-void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
+inline void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
+
     env.enterNewBlock();
     for (const std::unique_ptr<ASTBase>& child : func->body) {
         evaluate(child.get());
@@ -62,21 +63,12 @@ void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     env.exitCurrentBlock();
 }
 
-void Evaluator::evaluatePrint(ASTPrint* print) {
+inline void Evaluator::evaluatePrint(ASTPrint* print) {
     const std::string value = evaluateExpression(print->expression.get());
     std::cout << value << (print->newLine ? "\n" : "");
 }
 
-std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
-    std::string input;
-    if (read->out.get() != nullptr) {
-        std::cout << evaluateExpression(read->out.get());
-    }
-    std::getline(std::cin, input);
-    return input;
-}
-
-void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
+inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->varType, declaration->value.get());
         ASTValue* varValue = new ASTValue(
@@ -89,8 +81,8 @@ void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration)
     env.declareVariable(declaration->name, declaration);
 }
 
-void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
-    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line);
+inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
+    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line, true);
     typeChecker.checkType(declaration->varType, variableModify->value.get());
 
     ASTValue* newValue = new ASTValue(
@@ -99,6 +91,55 @@ void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
         declaration->line
     );
     declaration->value.reset(newValue);
+}
+
+inline void Evaluator::evaluateCondition(ASTCondition* condition) {
+    const std::string value = evaluateExpression(condition->expression.get());
+
+    env.enterNewBlock();
+    for (const std::unique_ptr<ASTBase>& child : stringToBool(value) ? condition->body : condition->elseBody) {
+        evaluate(child.get());
+    }
+    env.exitCurrentBlock();
+}
+
+std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
+    std::string input;
+    if (read->out.get() != nullptr) {
+        std::cout << evaluateExpression(read->out.get());
+    }
+    std::getline(std::cin, input);
+    return input;
+}
+
+std::string Evaluator::evaluateFString(ASTFString* fString) {
+    std::string result;
+    size_t start = 0;
+    std::string value = fString->value;
+
+    while (start < value.size()) {
+        size_t braceOpen = value.find('{', start);
+        if (braceOpen == std::string::npos) {
+            // There is no further brackets.
+            result += value.substr(start);
+            break;
+        }
+
+        result += value.substr(start, braceOpen - start);
+        size_t braceClose = value.find('}', braceOpen);
+        if (braceClose == std::string::npos) {
+            throw ZynkError(
+                ZynkErrorType::RuntimeError,
+                "Unclosed '{' in f-string.",
+                fString->line
+            );
+        }
+
+        std::string expression = value.substr(braceOpen + 1, braceClose - braceOpen - 1);
+        result += evaluateExpression(expression, fString->line);
+        start = braceClose + 1;
+    }
+    return result;
 }
 
 std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
@@ -111,7 +152,7 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
             } catch (const std::invalid_argument&) {
                 throw ZynkError(
                     ZynkErrorType::TypeCastError, 
-                    "Invalid argument: unable to convert the provided value to an integer.",
+                    "Invalid argument. Unable to convert the provided value to an integer.",
                     typeCast->line
                 );
             }
@@ -128,10 +169,7 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
         case ASTValueType::String:
             return base; // Expressions by default are always strings.
         case ASTValueType::Bool: {
-            if (!stringToBool(base)) {
-                return "false";
-            }
-            return "true";
+            return stringToBool(base) ? "true" : "false";
         }
         default: {
             // This should never happen, but whatever
@@ -144,14 +182,52 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
     }
 }
 
-void Evaluator::evaluateCondition(ASTCondition* condition) {
-    const std::string value = evaluateExpression(condition->expression.get());
-
-    env.enterNewBlock();
-    for (const std::unique_ptr<ASTBase>& child : stringToBool(value) ? condition->body : condition->elseBody) {
-        evaluate(child.get());
+std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
+    ASTValueType valueTypes[2] = {
+        typeChecker.determineType(operation->left.get()),
+        typeChecker.determineType(operation->right.get())
+    };
+    for (ASTValueType& valueType : valueTypes) {
+        if (valueType != ASTValueType::Integer && valueType != ASTValueType::Float) {
+            throw ZynkError(
+                ZynkErrorType::ExpressionError,
+                "Cannot perform BinaryOperation on '" + typeChecker.typeToString(valueType) + "' type.",
+                operation->line
+            );
+        }
     }
-    env.exitCurrentBlock();
+    const std::string left = evaluateExpression(operation->left.get());
+    const std::string right = evaluateExpression(operation->right.get());
+    try {
+        return calculateString(left, right, operation->op);
+    } catch (const ZynkError& err) {
+        throw ZynkError(err.base_type, err.what(), operation->line);
+    }
+}
+
+std::string Evaluator::evaluateOrOperation(ASTOrOperation* operation) {
+    const std::string left = evaluateExpression(operation->left.get());
+    if (stringToBool(left)) return left;
+    return evaluateExpression(operation->right.get());
+}
+
+std::string Evaluator::evaluateAndOperation(ASTAndOperation* operation) {
+    const std::string left = evaluateExpression(operation->left.get());
+    if (!stringToBool(left)) return left;
+    return evaluateExpression(operation->right.get());
+}
+
+std::string Evaluator::evaluateExpression(const std::string& expression, size_t realLine) {
+    Lexer lexer(expression);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto astExpression = parser.parseExpression(0);
+
+    // We set the line number manually here, because the parser doesn't know where
+    // this expression came from. Without this, line in error message would be wrong.
+    astExpression.get()->line = realLine;
+    return evaluateExpression(astExpression.get());
 }
 
 std::string Evaluator::evaluateExpression(ASTBase* expression) {
@@ -161,51 +237,20 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return static_cast<ASTValue*>(expression)->value;
         case ASTType::Variable: {
             const auto var = static_cast<ASTVariable*>(expression);
-            return evaluateExpression(env.getVariable(var->name, var->line)->value.get());
+            return evaluateExpression(env.getVariable(var->name, var->line, true)->value.get());
         };
-        case ASTType::ReadInput: {
+        case ASTType::ReadInput:
             return evaluateReadInput(static_cast<ASTReadInput*>(expression));
-        };
-        case ASTType::TypeCast: {
+        case ASTType::TypeCast:
             return evaluateTypeCast(static_cast<ASTTypeCast*>(expression));
-        };
-        case ASTType::BinaryOperation: {
-            const auto operation = static_cast<ASTBinaryOperation*>(expression);
-            ASTValueType valueTypes[2] = {
-                typeChecker.determineType(operation->left.get()),
-                typeChecker.determineType(operation->right.get())
-            };
-            for (ASTValueType& valueType : valueTypes) {
-                if (valueType != ASTValueType::Integer && valueType != ASTValueType::Float) {
-                    throw ZynkError(
-                        ZynkErrorType::ExpressionError,
-                        "Cannot perform BinaryOperation on '" + typeChecker.typeToString(valueType) + "' type.",
-                        operation->line
-                    );
-                }
-            }
-            const std::string left = evaluateExpression(operation->left.get());
-            const std::string right = evaluateExpression(operation->right.get());
-            try {
-                return calculateString(left, right, operation->op);
-            } catch (const ZynkError& err) {
-                throw ZynkError(err.base_type, err.what(), operation->line);
-            }
-        };
-        case ASTType::OrOperation: {
-            const auto operation = static_cast<ASTOrOperation*>(expression);
-            const std::string left = evaluateExpression(operation->left.get());
-            const std::string right = evaluateExpression(operation->right.get());
-            if (stringToBool(left)) return left;
-            return right;
-        };
-        case ASTType::AndOperation: {
-            const auto operation = static_cast<ASTAndOperation*>(expression);
-            const std::string left = evaluateExpression(operation->left.get());
-            const std::string right = evaluateExpression(operation->right.get());
-            if (!stringToBool(left)) return left;
-            return right;
-        };
+        case ASTType::FString:
+            return evaluateFString(static_cast<ASTFString*>(expression));
+        case ASTType::BinaryOperation:
+            return evaluateBinaryOperation(static_cast<ASTBinaryOperation*>(expression));
+        case ASTType::OrOperation: 
+            return evaluateOrOperation(static_cast<ASTOrOperation*>(expression));
+        case ASTType::AndOperation: 
+            return evaluateAndOperation(static_cast<ASTAndOperation*>(expression));
         default:
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
@@ -228,18 +273,14 @@ std::string calculate(const float left, const float right, const std::string& op
 
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
     // I don't like the way it's done, but I don't know how to do it better right now.
+
+    // todo: refactor this, since it's comparing string values, not int. (operators: <, > etc are not working properly).
+    if (op == "==") return left_value == right_value ? "true" : "false";
+    if (op == "!=") return left_value != right_value ? "true" : "false";
     if (op == ">") return left_value > right_value ? "true" : "false";
     if (op == ">=") return left_value >= right_value ? "true" : "false";
     if (op == "<") return left_value < right_value ? "true" : "false";
     if (op == "<=") return left_value <= right_value ? "true" : "false";
-    if (op == "==") return left_value == right_value ? "true" : "false";
-    if (op == "!=") return left_value != right_value ? "true" : "false";
-    if (op == "or") {
-        return (stringToBool(left_value) == true || stringToBool(right_value) == true) ? "true" : "false";
-    }
-    if (op == "and") {
-        return (stringToBool(left_value) == true && stringToBool(right_value) == true) ? "true" : "false";
-    }
 
     const bool leftIsFloat = left_value.find('.') != std::string::npos;
     const bool rightIsFloat = right_value.find('.') != std::string::npos;

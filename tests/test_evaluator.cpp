@@ -649,6 +649,24 @@ TEST(EvaluatorTest, EvaluateLogicalOrFalseFalse) {
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
 }
 
+TEST(EvaluatorTest, EvaluateFStringWithMultipleExpressions) {
+    const std::string code = R"(
+        var x: int = 42;
+        var y: float = 3.5;
+        println(f"x: {x}, y: {y}, sum: {x + y}");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "x: 42, y: 3.5, sum: 45.500000\n");
+}
+    
 TEST(EvaluatorTest, EvaluatePrintExpressionWithParentheses) {
     const std::string code = "println((1 + 2) * 5);";
     Lexer lexer(code);
@@ -692,4 +710,80 @@ TEST(EvaluatorTest, EvaluateVarNestedParentheses) {
     Evaluator evaluator;
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
+}
+
+TEST(EvaluatorTest, EvaluateFStringWithIntegers) {
+    const std::string code = R"(
+        var x: int = 42;
+        println(f"Value of x is {x}");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Value of x is 42\n");
+}
+
+TEST(EvaluatorTest, EvaluateFStringWithBooleans) {
+    const std::string code = R"(
+        var is_valid: bool = true;
+        println(f"Is the input valid? {is_valid}");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Is the input valid? true\n");
+}
+
+TEST(EvaluatorTest, EvaluateFStringWithStringInterpolation) {
+    const std::string code = R"(
+        var name: string = "Alice";
+        var age: int = 30;
+        println(f"My name is {name} and I am {age} years old.");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "My name is Alice and I am 30 years old.\n");
+}
+
+TEST(EvaluatorTest, EvaluateFStringWithUndefinedVariable) {
+    const std::string code = "println(f\"{abc}\");";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}
+
+TEST(EvaluatorTest, EvaluateFStringWithUnclosedBracket) {
+    const std::string code = "println(f\"{abc\");";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }

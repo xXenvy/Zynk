@@ -25,12 +25,12 @@ private:
 	std::unique_ptr<ASTBase> parsePrint(bool newLine);
 	std::unique_ptr<ASTBase> parseRead();
 	std::unique_ptr<ASTBase> parseTypeCast(TokenType type);
-	std::unique_ptr<ASTBase> parseExpression(int priority);
 	std::unique_ptr<ASTBase> parsePrimaryExpression();
 	std::unique_ptr<ASTBase> parseIfStatement();
 public:
 	Parser(const std::vector<Token>& tokens);
 	std::unique_ptr<ASTProgram> parse();
 	std::unique_ptr<ASTBase> parseCurrent();
+	std::unique_ptr<ASTBase> parseExpression(int priority);
 };
 #endif // PARSER_H

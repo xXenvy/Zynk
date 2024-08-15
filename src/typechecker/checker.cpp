@@ -4,17 +4,18 @@
 TypeChecker::TypeChecker(RuntimeEnvironment& env) : env(env) {};
 
 ASTValueType TypeChecker::determineType(ASTBase* expression) {
+    if (expression == nullptr) return ASTValueType::None;
     switch (expression->type) {
         case ASTType::TypeCast:
             return static_cast<ASTTypeCast*>(expression)->castType;
+        case ASTType::FString:
         case ASTType::ReadInput:
             return ASTValueType::String;
-        case ASTType::Value: {
+        case ASTType::Value: 
             return static_cast<ASTValue*>(expression)->valueType;
-        }
         case ASTType::Variable: {
             ASTVariable* var = static_cast<ASTVariable*>(expression);
-            ASTVariableDeclaration* declaration = env.getVariable(var->name, var->line);
+            ASTVariableDeclaration* declaration = env.getVariable(var->name, var->line, true);
             return determineType(declaration->value.get());
         }
         case ASTType::BinaryOperation: {
