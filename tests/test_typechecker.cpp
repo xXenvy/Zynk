@@ -155,6 +155,32 @@ TEST(TypeCheckerTest, DetermineTypeMismatchedBinaryOperation) {
     ASSERT_EQ(typeChecker.determineType(ASTOperation.get()), ASTValueType::String);
 }
 
+TEST(TypeCheckerTest, DetermineTypeComparisonOperation) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+
+    auto ASTLeftValueInt = std::make_unique<ASTValue>("5", ASTValueType::Integer, 1);
+    auto ASTRightValueInt = std::make_unique<ASTValue>("3", ASTValueType::Integer, 1);
+    auto ComparisonOperation = std::make_unique<ASTComparisonOperation>(
+        std::move(ASTLeftValueInt), "==", std::move(ASTRightValueInt), 1
+    );
+    ASSERT_EQ(typeChecker.determineType(ComparisonOperation.get()), ASTValueType::Bool);
+
+    auto ASTLeftValueFloat = std::make_unique<ASTValue>("2.5", ASTValueType::Float, 1);
+    auto ASTRightValueFloat = std::make_unique<ASTValue>("2.5", ASTValueType::Float, 1);
+    ComparisonOperation = std::make_unique<ASTComparisonOperation>(
+        std::move(ASTLeftValueFloat), "==", std::move(ASTRightValueFloat), 1
+    );
+    ASSERT_EQ(typeChecker.determineType(ComparisonOperation.get()), ASTValueType::Bool);
+
+    auto ASTLeftValueString = std::make_unique<ASTValue>("hello", ASTValueType::String, 1);
+    auto ASTRightValueString = std::make_unique<ASTValue>("world", ASTValueType::String, 1);
+    ComparisonOperation = std::make_unique<ASTComparisonOperation>(
+        std::move(ASTLeftValueString), "!=", std::move(ASTRightValueString), 1
+    );
+    ASSERT_EQ(typeChecker.determineType(ComparisonOperation.get()), ASTValueType::Bool);
+}
+
 TEST(TypeCheckerTest, DetermineTypeFString) {
     RuntimeEnvironment env;
     TypeChecker typeChecker(env);

@@ -205,6 +205,32 @@ std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
     }
 }
 
+std::string Evaluator::evaluateComparisonOperation(ASTComparisonOperation* operation) {
+    const std::string left = evaluateExpression(operation->left.get());
+    const std::string right = evaluateExpression(operation->right.get());
+    const std::string& op = operation->op;
+
+    auto compare = [&](auto a, auto b) -> std::string {
+        if (op == "==") return a == b ? "true" : "false";
+        if (op == "!=") return a != b ? "true" : "false";
+        if (op == ">") return a > b ? "true" : "false";
+        if (op == ">=") return a >= b ? "true" : "false";
+        if (op == "<") return a < b ? "true" : "false";
+        if (op == "<=") return a <= b ? "true" : "false";
+        throw ZynkError(
+            ZynkErrorType::RuntimeError,
+            "Invalid operator '" + op + "' in ComparisonOperation.",
+            operation->line
+        );
+    };
+
+    try {
+        return compare(std::stof(left), std::stof(right));
+    } catch (const std::invalid_argument&) {
+        return compare(left, right);
+    }
+}
+
 std::string Evaluator::evaluateOrOperation(ASTOrOperation* operation) {
     const std::string left = evaluateExpression(operation->left.get());
     if (stringToBool(left)) return left;
@@ -247,7 +273,9 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return evaluateFString(static_cast<ASTFString*>(expression));
         case ASTType::BinaryOperation:
             return evaluateBinaryOperation(static_cast<ASTBinaryOperation*>(expression));
-        case ASTType::OrOperation: 
+        case ASTType::ComparisonOperation:
+            return evaluateComparisonOperation(static_cast<ASTComparisonOperation*>(expression));
+        case ASTType::OrOperation:
             return evaluateOrOperation(static_cast<ASTOrOperation*>(expression));
         case ASTType::AndOperation: 
             return evaluateAndOperation(static_cast<ASTAndOperation*>(expression));
@@ -273,15 +301,6 @@ std::string calculate(const float left, const float right, const std::string& op
 
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
     // I don't like the way it's done, but I don't know how to do it better right now.
-
-    // todo: refactor this, since it's comparing string values, not int. (operators: <, > etc are not working properly).
-    if (op == "==") return left_value == right_value ? "true" : "false";
-    if (op == "!=") return left_value != right_value ? "true" : "false";
-    if (op == ">") return left_value > right_value ? "true" : "false";
-    if (op == ">=") return left_value >= right_value ? "true" : "false";
-    if (op == "<") return left_value < right_value ? "true" : "false";
-    if (op == "<=") return left_value <= right_value ? "true" : "false";
-
     const bool leftIsFloat = left_value.find('.') != std::string::npos;
     const bool rightIsFloat = right_value.find('.') != std::string::npos;
 

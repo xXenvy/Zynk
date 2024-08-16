@@ -13,6 +13,8 @@ ASTValueType TypeChecker::determineType(ASTBase* expression) {
             return ASTValueType::String;
         case ASTType::Value: 
             return static_cast<ASTValue*>(expression)->valueType;
+        case ASTType::ComparisonOperation:
+            return ASTValueType::Bool;
         case ASTType::Variable: {
             ASTVariable* var = static_cast<ASTVariable*>(expression);
             ASTVariableDeclaration* declaration = env.getVariable(var->name, var->line, true);

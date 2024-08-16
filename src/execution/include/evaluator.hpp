@@ -22,6 +22,7 @@ private:
     std::string evaluateTypeCast(ASTTypeCast* typeCast);
     std::string evaluateFString(ASTFString* fString);
     std::string evaluateBinaryOperation(ASTBinaryOperation* operation);
+    std::string evaluateComparisonOperation(ASTComparisonOperation* operation);
     std::string evaluateAndOperation(ASTAndOperation* operation);
     std::string evaluateOrOperation(ASTOrOperation* operation);
 

@@ -17,6 +17,7 @@ enum class ASTType {
     Variable,
     FString,
     BinaryOperation,
+    ComparisonOperation,
     Condition,
     TypeCast,
     AndOperation,
@@ -97,14 +98,6 @@ struct ASTVariable : public ASTBase {
     const std::string name;
 };
 
-struct ASTBinaryOperation : public ASTBase {
-    ASTBinaryOperation(std::unique_ptr<ASTBase> left, const std::string& op, std::unique_ptr<ASTBase> right, size_t line)
-        : ASTBase(ASTType::BinaryOperation, line), left(std::move(left)), op(op), right(std::move(right)) {}
-    std::unique_ptr<ASTBase> left;
-    const std::string op;
-    std::unique_ptr<ASTBase> right;
-};
-
 struct ASTCondition : public ASTBase {
     ASTCondition(std::unique_ptr<ASTBase> expression, size_t line)
         : ASTBase(ASTType::Condition, line), expression(std::move(expression)) {}
@@ -124,6 +117,23 @@ struct ASTTypeCast : public ASTBase {
         : ASTBase(ASTType::TypeCast, line), value(std::move(value)), castType(type) {}
     std::unique_ptr<ASTBase> value;
     const ASTValueType castType;
+};
+
+struct ASTBinaryOperation : public ASTBase {
+    ASTBinaryOperation(std::unique_ptr<ASTBase> left, const std::string& op, std::unique_ptr<ASTBase> right, size_t line)
+        : ASTBase(ASTType::BinaryOperation, line), left(std::move(left)), op(op), right(std::move(right)) {}
+    std::unique_ptr<ASTBase> left;
+    const std::string op;
+    std::unique_ptr<ASTBase> right;
+};
+
+struct ASTComparisonOperation : public ASTBase {
+    ASTComparisonOperation(std::unique_ptr<ASTBase> left, const std::string& op, std::unique_ptr<ASTBase> right, size_t line)
+        : ASTBase(ASTType::ComparisonOperation, line), left(std::move(left)), op(op), right(std::move(right)) {}
+
+    std::unique_ptr<ASTBase> left;
+    const std::string op;
+    std::unique_ptr<ASTBase> right;
 };
 
 struct ASTAndOperation : public ASTBase {

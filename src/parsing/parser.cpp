@@ -174,6 +174,16 @@ std::unique_ptr<ASTBase> Parser::parseExpression(int priority) {
 
 		std::unique_ptr<ASTBase> right = parseExpression(opPriority);
 		switch (op.type) {
+			case TokenType::EQUAL:
+			case TokenType::NOT_EQUAL:
+			case TokenType::GREATER_THAN:
+			case TokenType::LESS_THAN:
+			case TokenType::GREATER_OR_EQUAL:
+			case TokenType::LESS_OR_EQUAL:
+				left = std::make_unique<ASTComparisonOperation>(
+					std::move(left), op.value, std::move(right), op.line
+				);
+				break;
 			case TokenType::OR:
 				left = std::make_unique<ASTOrOperation>(
 					std::move(left), std::move(right), op.line
