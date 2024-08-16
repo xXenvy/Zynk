@@ -787,3 +787,63 @@ TEST(EvaluatorTest, EvaluateFStringWithUnclosedBracket) {
     Evaluator evaluator;
     ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
+
+TEST(EvaluatorTest, EvaluateEqualOperation) {
+    const std::string code = "println(5 == 5);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
+}
+
+TEST(EvaluatorTest, EvaluateGreaterThanOperation) {
+    const std::string code = "println(7 > 4);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
+}
+
+TEST(EvaluatorTest, EvaluateStringEqualityOperation) {
+    const std::string code = R"(
+        var a: string = "hello";
+        var b: string = "hello";
+        println(a == b);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
+}
+
+TEST(EvaluatorTest, EvaluateLessThanOrEqualOperation) {
+    const std::string code = "println(5 <= 5);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
+}

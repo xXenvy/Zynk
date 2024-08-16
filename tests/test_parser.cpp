@@ -621,6 +621,58 @@ TEST(ASTFStringTest, PrintFString) {
     ASSERT_EQ(fstring->line, 1);
 }
 
+TEST(ParserTest, parseSimpleComparison) {
+    Lexer lexer("var isEqual: bool = a == b;");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::VariableDeclaration);
+
+    const auto var = static_cast<ASTVariableDeclaration*>(program->body.front().get());
+    ASSERT_EQ(var->name, "isEqual");
+    ASSERT_EQ(var->varType, ASTValueType::Bool);
+
+    const auto comparison = static_cast<ASTBinaryOperation*>(var->value.get());
+    ASSERT_NE(comparison, nullptr);
+    ASSERT_EQ(comparison->op, "==");
+
+    const auto leftVar = static_cast<ASTVariable*>(comparison->left.get());
+    const auto rightVar = static_cast<ASTVariable*>(comparison->right.get());
+    ASSERT_NE(leftVar, nullptr);
+    ASSERT_NE(rightVar, nullptr);
+    ASSERT_EQ(leftVar->name, "a");
+    ASSERT_EQ(rightVar->name, "b");
+}
+
+TEST(ParserTest, parseGreaterThanComparison) {
+    Lexer lexer("if (a > b) println(\"a is greater than b\");");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::Condition);
+
+    const auto condition = static_cast<ASTCondition*>(program->body.front().get());
+    const auto conditionExpression = static_cast<ASTBinaryOperation*>(condition->expression.get());
+
+    ASSERT_NE(condition, nullptr);
+    ASSERT_EQ(conditionExpression->op, ">");
+
+    ASSERT_EQ(condition->body.size(), 1);
+    const auto printStmt = static_cast<ASTPrint*>(condition->body.front().get());
+    const auto printValue = static_cast<ASTValue*>(printStmt->expression.get());
+
+    ASSERT_NE(printStmt, nullptr);
+    ASSERT_EQ(printValue->value, "a is greater than b");
+}
+
 TEST(ParserTest, parseNegativeBoolThrowsException) {
     Lexer lexer("var a: bool = -true;");
     const std::vector<Token> tokens = lexer.tokenize();
