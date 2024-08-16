@@ -7,9 +7,13 @@
 #include <memory>
 #include <stack>
 
+
 class RuntimeEnvironment {
 public:
+    const size_t MAX_DEPTH = 1000;
     GarbageCollector gc;
+
+    bool isRecursionDepthExceeded() const;
 
     void declareVariable(const std::string& name, ASTVariableDeclaration* value);
     ASTVariableDeclaration* getVariable(const std::string& name, const size_t line, bool deepSearch = true);
@@ -21,10 +25,11 @@ public:
 
     Block* currentBlock();
     void collectGarbage();
-    void enterNewBlock();
-    void exitCurrentBlock();
+    void enterNewBlock(const bool increaseDepth = false);
+    void exitCurrentBlock(const bool decreaseDepth = false);
 private:
     std::stack<std::unique_ptr<Block>> blockStack;
+    size_t currentDepth = 0;
 };
 
 #endif // RUNTIME_H

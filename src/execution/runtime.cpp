@@ -2,6 +2,10 @@
 #include "include/runtime.hpp"
 #include <cassert>
 
+bool RuntimeEnvironment::isRecursionDepthExceeded() const {
+    return currentDepth >= MAX_DEPTH;
+}
+
 Block* RuntimeEnvironment::currentBlock() {
     if (blockStack.empty()) return nullptr;
     return blockStack.top().get();
@@ -93,14 +97,16 @@ void RuntimeEnvironment::collectGarbage() {
     gc.collectGarbage(currentBlock());
 }
 
-void RuntimeEnvironment::enterNewBlock() {
+void RuntimeEnvironment::enterNewBlock(const bool increaseDepth) {
+    if (increaseDepth) currentDepth++;
     blockStack.push(std::make_unique<Block>(currentBlock()));
 }
 
-void RuntimeEnvironment::exitCurrentBlock() {
+void RuntimeEnvironment::exitCurrentBlock(const bool decreaseDepth) {
     if (blockStack.empty()) return;
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
+    if (decreaseDepth) currentDepth--;
     
     // Unmarking all functions / variables in the current block since we don't need them anymore.
     for (const auto& varPair : block->variables) {

@@ -20,7 +20,8 @@ enum class ZynkErrorType {
     PanicError,
     CLIError,
     DuplicateDeclarationError,
-    TypeCastError
+    TypeCastError,
+    RecursionError,
 };
 
 struct ZynkError : public std::runtime_error {
@@ -58,6 +59,7 @@ private:
             case ZynkErrorType::NotDefinedError: return "NotDefinedError";
             case ZynkErrorType::DuplicateDeclarationError: return "DuplicateDeclarationError";
             case ZynkErrorType::TypeCastError: return "TypeCastError";
+            case ZynkErrorType::RecursionError: return "RecursionError";
             default: return "UnknownError";
         }
     }

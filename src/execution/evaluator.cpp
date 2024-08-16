@@ -56,11 +56,19 @@ inline void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
 inline void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
 
-    env.enterNewBlock();
+    if (env.isRecursionDepthExceeded()) {
+        throw ZynkError{
+            ZynkErrorType::RecursionError,
+            "Exceeded maximum recursion depth of " + std::to_string(env.MAX_DEPTH) + ".",
+            functionCall->line,
+        };
+    }
+
+    env.enterNewBlock(true);
     for (const std::unique_ptr<ASTBase>& child : func->body) {
         evaluate(child.get());
     }
-    env.exitCurrentBlock();
+    env.exitCurrentBlock(true);
 }
 
 inline void Evaluator::evaluatePrint(ASTPrint* print) {

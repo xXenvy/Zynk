@@ -847,3 +847,23 @@ TEST(EvaluatorTest, EvaluateLessThanOrEqualOperation) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
+
+TEST(EvaluatorTest, A) {
+    const std::string code = R"(
+        var x: int = 0;
+
+        def main() {
+            x = x + 1;
+            if(x <= 1000) main();
+        }
+        main();
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}
