@@ -22,6 +22,7 @@ enum class ASTType {
     TypeCast,
     AndOperation,
     OrOperation,
+    Return,
 };
 
 enum class ASTValueType {
@@ -45,9 +46,10 @@ struct ASTProgram : public ASTBase {
 };
 
 struct ASTFunction : public ASTBase {
-    ASTFunction(const std::string& name, size_t line)
-        : ASTBase(ASTType::FunctionDeclaration, line), name(name) {}
+    ASTFunction(const std::string& name, const ASTValueType returnType, size_t line)
+        : ASTBase(ASTType::FunctionDeclaration, line), name(name), returnType(returnType) {}
     const std::string name;
+    const ASTValueType returnType;
     std::vector<std::unique_ptr<ASTBase>> body;
 };
 
@@ -55,6 +57,12 @@ struct ASTFunctionCall : public ASTBase {
     ASTFunctionCall(const std::string& name, size_t line)
         : ASTBase(ASTType::FunctionCall, line), name(name) {}
     const std::string name; // Currently we do not support function arguments.
+};
+
+struct ASTReturn : public ASTBase {
+    ASTReturn(std::unique_ptr<ASTBase> value, size_t line)
+        : ASTBase(ASTType::Return, line), value(std::move(value)) {}
+    std::unique_ptr<ASTBase> value;
 };
 
 struct ASTPrint : public ASTBase {

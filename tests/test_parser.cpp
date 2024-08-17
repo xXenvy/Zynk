@@ -41,7 +41,7 @@ TEST(ParserTest, parseMultipleVariableDeclarations) {
 }
 
 TEST(ParserTest, parseFunctionDeclaration) {
-    Lexer lexer("def main(){\n    println(10);\n}");
+    Lexer lexer("def main() -> null {\n    println(10);\n}");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -65,7 +65,7 @@ TEST(ParserTest, parseFunctionDeclaration) {
 }
 
 TEST(ParserTest, parseEmptyFunction) {
-    Lexer lexer("def main(){\n}");
+    Lexer lexer("def main() -> null {\n}");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -759,7 +759,7 @@ TEST(ParserTest, parseFunctionDeclarationWithMissingBracket) {
 }
 
 TEST(ParserTest, parseFunctionWithInvalidExpression) {
-    Lexer lexer("def main() {\n    println(10 + ;\n}"); // Invalid expression with missing operand
+    Lexer lexer("def main() -> null {\n    println(10 + ;\n}"); // Invalid expression with missing operand
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -776,7 +776,7 @@ TEST(ParserTest, parseFunctionWithInvalidExpression) {
 }
 
 TEST(ParserTest, parseFunctionCallWithExtraTokens) {
-    Lexer lexer("main(10);"); // Extra comma in function call
+    Lexer lexer("main(10);"); // Extra arg in function call
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);

@@ -8,6 +8,7 @@ class TypeChecker {
 public:
     TypeChecker(RuntimeEnvironment& env);
     void checkType(const ASTValueType& declared, ASTBase* value);
+    void checkType(ASTFunction* func, ASTBase* value);
     ASTValueType determineType(ASTBase* expression);
     std::string typeToString(const ASTValueType& type);
 private:

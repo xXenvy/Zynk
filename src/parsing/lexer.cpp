@@ -112,6 +112,7 @@ Token Lexer::identifier() {
     if (value == "readInput") return Token(TokenType::READINPUT, value, line);
     if (value == "or") return Token(TokenType::OR, value, line);
     if (value == "and") return Token(TokenType::AND, value, line);
+    if (value == "return") return Token(TokenType::RETURN, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 

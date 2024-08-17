@@ -35,7 +35,11 @@ TEST(EvaluatorTest, EvaluateVariableDeclarationAndPrint) {
 }
 
 TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
-	const std::string code = "def myFunction(){\nprintln(\"Inside function\");\n}";
+    const std::string code = R"(
+        def myFunction() -> null {
+            println("Inside function");
+        }
+    )";
 	Lexer lexer(code);
 	const std::vector<Token> tokens = lexer.tokenize();
 
@@ -51,7 +55,7 @@ TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
 
 TEST(EvaluatorTest, EvaluateFunctionCall) {
 	const std::string code = R"(
-        def myFunction(){
+        def myFunction() -> null {
 			var x: string = "Inside function.";
 			println(x);
 		}
@@ -71,8 +75,8 @@ TEST(EvaluatorTest, EvaluateFunctionCall) {
 
 TEST(EvaluatorTest, EvaluateNestedFunctionCalls) {
 	const std::string code = R"(
-        def outerFunction() {
-            def innerFunction() { 
+        def outerFunction() -> null {
+            def innerFunction() -> null { 
                 println("Inside inner function"); 
             }
 			println("Outer function");
@@ -214,8 +218,8 @@ TEST(EvaluatorTest, DuplicateVariableDeclaration) {
 
 TEST(EvaluatorTest, DuplicateFunctionDeclaration) {
     const std::string code = R"(
-        def myFunction() { }
-        def myFunction() { }
+        def myFunction() -> null { }
+        def myFunction() -> null { }
     )";
     Lexer lexer(code);
     const std::vector<Token> tokens = lexer.tokenize();
@@ -848,11 +852,11 @@ TEST(EvaluatorTest, EvaluateLessThanOrEqualOperation) {
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
-TEST(EvaluatorTest, A) {
+TEST(EvaluatorTest, FunctionCallWithRecursiveLoopThrowsError) {
     const std::string code = R"(
         var x: int = 0;
 
-        def main() {
+        def main() -> null {
             x = x + 1;
             if(x <= 1000) main();
         }
