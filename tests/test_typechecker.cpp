@@ -227,3 +227,30 @@ TEST(TypeCheckerTest, DetermineTypeAndOperation) {
     );
     ASSERT_EQ(typeChecker.determineType(ASTOperation.get()), ASTValueType::Bool);
 }
+
+TEST(TypeCheckerTest, DetermineTypeReturn) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+    env.enterNewBlock();
+
+    auto func = std::make_unique<ASTFunction>("myFunc", ASTValueType::Integer, 1);
+    auto returnValue = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
+    auto returnStmt = std::make_unique<ASTReturn>(std::move(returnValue), 1);
+
+    env.declareFunction("myFunc", func.get());
+    ASSERT_EQ(typeChecker.determineType(returnStmt.get()), ASTValueType::Integer);
+    env.exitCurrentBlock();
+}
+
+TEST(TypeCheckerTest, DetermineTypeFunctionCall) {
+    RuntimeEnvironment env;
+    TypeChecker typeChecker(env);
+    env.enterNewBlock();
+
+    auto func = std::make_unique<ASTFunction>("myFunc", ASTValueType::Integer, 1);
+    env.declareFunction("myFunc", func.get());
+
+    auto funcCall = std::make_unique<ASTFunctionCall>("myFunc", 1);
+    ASSERT_EQ(typeChecker.determineType(funcCall.get()), ASTValueType::Integer);
+    env.exitCurrentBlock();
+}

@@ -871,3 +871,39 @@ TEST(EvaluatorTest, FunctionCallWithRecursiveLoopThrowsError) {
     Evaluator evaluator;
     ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
 }
+
+TEST(EvaluatorTest, EvaluateFunctionReturningWrongType) {
+    const std::string code = R"(
+        def myFunction() -> int {
+            return "string"; // Funkcja deklaruje int, ale zwraca string
+        }
+        myFunction();
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}
+TEST(EvaluatorTest, EvaluateFunctionReturningNullWhenValueExpected) {
+    const std::string code = R"(
+        def myFunction() -> int {
+            return 1;
+        }
+        var x: int = myFunction();
+        println(x);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
+}

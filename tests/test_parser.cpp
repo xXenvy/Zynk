@@ -53,6 +53,7 @@ TEST(ParserTest, parseFunctionDeclaration) {
 
     const auto function = static_cast<ASTFunction*>(program->body.front().get());
     ASSERT_EQ(function->name, "main");
+    ASSERT_EQ(function->returnType, ASTValueType::None);
     ASSERT_EQ(function->body.size(), 1);
     ASSERT_EQ(function->body.front()->type, ASTType::Print);
 
@@ -62,6 +63,38 @@ TEST(ParserTest, parseFunctionDeclaration) {
     const auto printValue = static_cast<ASTValue*>(print->expression.get());
     ASSERT_NE(printValue, nullptr);
     ASSERT_EQ(printValue->value, "10");
+}
+
+TEST(ParserTest, parseFunctionDeclarationWithReturnType) {
+    Lexer lexer("def add() -> int {\n    return a + b;\n}");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::FunctionDeclaration);
+
+    const auto function = static_cast<ASTFunction*>(program->body.front().get());
+    ASSERT_EQ(function->name, "add");
+    ASSERT_EQ(function->returnType, ASTValueType::Integer);
+    ASSERT_EQ(function->body.size(), 1);
+    ASSERT_EQ(function->body.front()->type, ASTType::Return);
+
+    const auto returnStmt = static_cast<ASTReturn*>(function->body.front().get());
+    ASSERT_NE(returnStmt, nullptr);
+
+    const auto returnValue = static_cast<ASTBinaryOperation*>(returnStmt->value.get());
+    ASSERT_NE(returnValue, nullptr);
+    ASSERT_EQ(returnValue->op, "+");
+
+    const auto left = static_cast<ASTVariable*>(returnValue->left.get());
+    const auto right = static_cast<ASTVariable*>(returnValue->right.get());
+    ASSERT_NE(left, nullptr);
+    ASSERT_NE(right, nullptr);
+    ASSERT_EQ(left->name, "a");
+    ASSERT_EQ(right->name, "b");
 }
 
 TEST(ParserTest, parseEmptyFunction) {

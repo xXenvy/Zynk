@@ -37,7 +37,6 @@ void Evaluator::evaluate(ASTBase* ast) {
             evaluateExpression(ast);
             break;
         default:
-            std::cout << static_cast<int>(ast->type) << std::endl;
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
                 "Unknown AST type encountered during evaluation.",
