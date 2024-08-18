@@ -266,7 +266,7 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     std::string result = "null";
     std::vector<std::unique_ptr<ASTVariableDeclaration>> envArgs;
 
-    for (int i = 0; func->arguments.size() > i; i++) {
+    for (size_t i = 0; func->arguments.size() > i; i++) {
         // So here we compare the types of arguments in functionCall and function definition.
         ASTBase* funcCallArg = functionCall->arguments[i].get();
         auto funcArg = static_cast<ASTFunctionArgument*>(func->arguments[i].get());
