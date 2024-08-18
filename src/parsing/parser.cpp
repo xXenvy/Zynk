@@ -310,7 +310,6 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 			return expr;
 		}
 		default:
-			std::cout << static_cast<int>(current.type) << std::endl;
 			throw ZynkError(
 				ZynkErrorType::ExpressionError,
 				"Unexpected token '" + current.value + "' while parsing expression.",

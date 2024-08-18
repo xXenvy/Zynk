@@ -65,7 +65,7 @@ struct ASTFunctionArgument : public ASTBase {
 struct ASTFunctionCall : public ASTBase {
     ASTFunctionCall(const std::string& name, size_t line)
         : ASTBase(ASTType::FunctionCall, line), name(name) {}
-    const std::string name; // Currently we do not support function arguments.
+    const std::string name;
     std::vector<std::unique_ptr<ASTBase>> arguments;
 };
 

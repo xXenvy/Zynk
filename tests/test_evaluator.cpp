@@ -907,3 +907,83 @@ TEST(EvaluatorTest, EvaluateFunctionReturningNullWhenValueExpected) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
 }
+
+TEST(EvaluatorTest, EvaluateFunctionWithIntegerArgument) {
+    const std::string code = R"(
+        def myFunction(x: int) -> null {
+            println(x + 1);
+        }
+        myFunction(10);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "11\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithMultipleArguments) {
+    const std::string code = R"(
+        def add(a: int, b: int) -> int {
+            return a + b;
+        }
+        println(add(3, 4));
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "7\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithStringArgument) {
+    const std::string code = R"(
+        def greet(name: string) -> null {
+            println(f"Hello, {name}!");
+        }
+        greet("Alice");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Hello, Alice!\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithBooleanArgument) {
+    const std::string code = R"(
+        def checkStatus(active: bool) -> null {
+            if (active) {
+                println("Active");
+            } else {
+                println("Inactive");
+            }
+        }
+        checkStatus(true);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Active\n");
+}

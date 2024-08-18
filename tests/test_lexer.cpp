@@ -419,3 +419,12 @@ TEST(LexerTokenizeTest, ReturnKeyword) {
 	EXPECT_TRUE(tokens.front().type == TokenType::RETURN);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
+
+TEST(LexerTokenizeTest, Commas) {
+	Lexer lexer(",, , () ,");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 7);
+	EXPECT_TRUE(tokens.front().type == TokenType::COMMA);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}

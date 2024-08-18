@@ -221,7 +221,6 @@ std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) 
     const auto& body = status ? condition->body : condition->elseBody;
 
     env.enterNewBlock();
-
     for (const std::unique_ptr<ASTBase>& child : body) {
 
         if (child->type == ASTType::Return) {
@@ -231,14 +230,16 @@ std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) 
             return std::make_unique<ASTValue>(result, resultType, child->line);
         }
 
-        if (child->type == ASTType::Condition) {
+        else if (child->type == ASTType::Condition) {
             auto result = evaluateCondition(static_cast<ASTCondition*>(child.get()));
             if (result != nullptr) {
                 env.exitCurrentBlock();
                 return result;
             }
         }
-        evaluate(child.get());
+        else {
+            evaluate(child.get());
+        }
     }
     env.exitCurrentBlock();
     return nullptr;
@@ -296,15 +297,14 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
             break;
         }
 
-        if (child->type == ASTType::Condition) {
+        else if (child->type == ASTType::Condition) {
             const auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
             if (maybeResult != nullptr) {
                 typeChecker.checkType(func, maybeResult.get());
                 result = maybeResult->value;
                 break;
             }
-        }
-        evaluate(child.get());
+        } else evaluate(child.get());
     }
     env.exitCurrentBlock(true);
 
@@ -372,7 +372,6 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
         case ASTType::Return:
             return evaluateExpression(static_cast<ASTReturn*>(expression)->value.get());
         default:
-            std::cout << "Invalid: " << static_cast<int>(expression->type) << std::endl;
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
                 "Invalid expression type encountered during evaluation.",
