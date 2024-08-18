@@ -50,7 +50,6 @@ int main(int argc, char* argv[]) {
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
-
 	ZynkInterpreter interpreter;
 	try {
 		interpreter.interpretFile(cli.args.file_path);

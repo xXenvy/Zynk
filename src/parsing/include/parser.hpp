@@ -21,6 +21,7 @@ private:
 	ASTValueType parseValueType() const;
 	std::unique_ptr<ASTBase> parseFunctionDeclaration();
 	std::unique_ptr<ASTBase> parseFunctionCall(bool isFinalInstruction = true);
+	std::unique_ptr<ASTBase> parseFunctionArgument();
 	std::unique_ptr<ASTBase> parseVariableDeclaration();
 	std::unique_ptr<ASTBase> parseVariableModify();
 	std::unique_ptr<ASTBase> parsePrint(bool newLine);

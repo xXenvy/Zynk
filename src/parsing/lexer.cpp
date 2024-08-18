@@ -39,6 +39,7 @@ Token Lexer::next() {
 
     moveForward();
     switch (current) {
+        case ',': return Token(TokenType::COMMA, ",", currentLine);
         case ':': return Token(TokenType::COLON, ":", currentLine);
         case '+': return Token(TokenType::ADD, "+", currentLine);
         case '-': return Token(TokenType::SUBTRACT, "-", currentLine);

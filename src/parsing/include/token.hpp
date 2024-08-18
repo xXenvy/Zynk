@@ -18,7 +18,7 @@ enum class TokenType {
 
     IDENTIFIER, COLON, LBRACE, // Syntax.
     RBRACE, SEMICOLON, LBRACKET,
-    RBRACKET,
+    RBRACKET, COMMA,
 
     END_OF_FILE, UNKNOWN, // Extra.
 };

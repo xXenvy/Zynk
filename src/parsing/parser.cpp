@@ -5,7 +5,7 @@ Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 
 std::unique_ptr<ASTProgram> Parser::parse() {
 	// Process to parse Program AST from provided tokens.
-	std::unique_ptr<ASTProgram> programTree = std::make_unique<ASTProgram>(1);
+	std::unique_ptr<ASTProgram> programTree = std::make_unique<ASTProgram>();
 	while (!endOfFile()) {
 		programTree->body.push_back(parseCurrent());
 	}
@@ -21,9 +21,8 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 		case TokenType::VARIABLE:
 			return parseVariableDeclaration();
 		case TokenType::PRINT:
-			return parsePrint(false);
 		case TokenType::PRINTLN:
-			return parsePrint(true);
+			return parsePrint(current.type == TokenType::PRINTLN);
 		case TokenType::READINPUT:
 			return parseRead();
 		case TokenType::CONDITION:
@@ -51,10 +50,17 @@ std::unique_ptr<ASTBase> Parser::parseFunctionDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::DEF, "def", currentLine });
 	const std::string functionName = currentToken().value;
+	std::vector<std::unique_ptr<ASTBase>> funcArgs;
 
 	// Function name should be an identifier.
 	consume({ TokenType::IDENTIFIER, functionName, currentLine });
 	consume({ TokenType::LBRACKET, "(", currentLine });
+
+	while (currentToken().type != TokenType::RBRACKET && !endOfFile()) {
+		funcArgs.push_back(parseFunctionArgument());
+		if(currentToken().type != TokenType::RBRACKET) consume({ TokenType::COMMA, ",", currentLine });
+	}
+
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	consume({ TokenType::SUBTRACT, "-", currentLine });
 	consume({ TokenType::GREATER_THAN, ">", currentLine });
@@ -62,6 +68,8 @@ std::unique_ptr<ASTBase> Parser::parseFunctionDeclaration() {
 	std::unique_ptr<ASTFunction> function = std::make_unique<ASTFunction>(
 		functionName, parseValueType(), currentLine
 	);
+	function->arguments = std::move(funcArgs);
+
 	moveForward();
 	consume({ TokenType::LBRACE, "{", currentLine });
 
@@ -75,12 +83,36 @@ std::unique_ptr<ASTBase> Parser::parseFunctionDeclaration() {
 std::unique_ptr<ASTBase> Parser::parseFunctionCall(bool isFinalInstruction) {
 	position--; // We had to jump one position to see if it was a function call.
 	const Token current = currentToken();
+	std::vector<std::unique_ptr<ASTBase>> args;
 
 	consume({ TokenType::IDENTIFIER, current.value, current.line });
 	consume({ TokenType::LBRACKET, "(", current.line });
+
+	while (currentToken().type != TokenType::RBRACKET && !endOfFile()) {
+		args.push_back(parseExpression(0));
+		if (currentToken().type != TokenType::RBRACKET) {
+			consume({ TokenType::COMMA, ",", current.line });
+		}
+	}
+
 	consume({ TokenType::RBRACKET, ")", current.line });
 	if(isFinalInstruction) consume({ TokenType::SEMICOLON, ";", current.line });
-	return std::make_unique<ASTFunctionCall>(current.value, current.line);
+
+	auto funcCall = std::make_unique<ASTFunctionCall>(current.value, current.line);
+	funcCall->arguments = std::move(args);
+	return funcCall;
+}
+
+std::unique_ptr<ASTBase> Parser::parseFunctionArgument() {
+	const size_t currentLine = currentToken().line;
+	const std::string argumentName = currentToken().value;
+
+	consume({ TokenType::IDENTIFIER, argumentName, currentLine });
+	consume({ TokenType::COLON, ":", currentLine });
+	const ASTValueType argumentType = parseValueType();
+
+	moveForward();
+	return std::make_unique<ASTFunctionArgument>(argumentName, argumentType, currentLine);
 }
 
 std::unique_ptr<ASTBase> Parser::parseReturnStatement() {

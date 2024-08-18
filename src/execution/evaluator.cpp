@@ -65,6 +65,7 @@ inline void Evaluator::evaluatePrint(ASTPrint* print) {
 inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->varType, declaration->value.get());
+
         ASTValue* varValue = new ASTValue(
             evaluateExpression(declaration->value.get()),
             declaration->varType,
@@ -245,7 +246,14 @@ std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) 
 
 std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
-    std::string result = "null";
+
+    if (func->arguments.size() != functionCall->arguments.size()) {
+        throw ZynkError(
+            ZynkErrorType::RuntimeError,
+            "Todo: invalid argument size",
+            functionCall->line
+        );
+    }
 
     if (env.isRecursionDepthExceeded()) {
         throw ZynkError(
@@ -254,7 +262,32 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
             functionCall->line
         );
     }
+
+    std::string result = "null";
+    std::vector<std::unique_ptr<ASTVariableDeclaration>> envArgs;
+
+    for (int i = 0; func->arguments.size() > i; i++) {
+        // So here we compare the types of arguments in functionCall and function definition.
+        ASTBase* funcCallArg = functionCall->arguments[i].get();
+        auto funcArg = static_cast<ASTFunctionArgument*>(func->arguments[i].get());
+        typeChecker.checkType(funcArg->valueType, funcCallArg);
+
+        auto argumentValue = std::make_unique<ASTValue>(
+            evaluateExpression(funcCallArg),
+            funcArg->valueType,
+            funcArg->line
+        );
+
+        envArgs.push_back(std::make_unique<ASTVariableDeclaration>(
+                funcArg->name,
+                funcArg->valueType,
+                std::move(argumentValue),
+                funcArg->line
+            )
+        );
+    }
     env.enterNewBlock(true);
+    for (auto& arg : envArgs) env.declareVariable(arg->name, arg.get());
 
     for (const std::unique_ptr<ASTBase>& child : func->body) {
         if (child->type == ASTType::Return) {
@@ -339,6 +372,7 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
         case ASTType::Return:
             return evaluateExpression(static_cast<ASTReturn*>(expression)->value.get());
         default:
+            std::cout << "Invalid: " << static_cast<int>(expression->type) << std::endl;
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
                 "Invalid expression type encountered during evaluation.",

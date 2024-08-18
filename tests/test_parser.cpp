@@ -808,23 +808,6 @@ TEST(ParserTest, parseFunctionWithInvalidExpression) {
     }
 }
 
-TEST(ParserTest, parseFunctionCallWithExtraTokens) {
-    Lexer lexer("main(10);"); // Extra arg in function call
-    const std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    try {
-        parser.parse();
-        FAIL() << "Expected ZynkError thrown.";
-    }
-    catch (const ZynkError& error) {
-        ASSERT_EQ(error.base_type, ZynkErrorType::SyntaxError);
-    }
-    catch (const std::exception& error) {
-        FAIL() << "Unexpected exception type: " << error.what();
-    }
-}
-
 TEST(ParserTest, parseVariableDeclarationWithMissingColon) {
     Lexer lexer("var a int = 10;"); // Missing colon
     const std::vector<Token> tokens = lexer.tokenize();
