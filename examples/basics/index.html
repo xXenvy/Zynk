@@ -443,6 +443,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-7-formatted-strings-f-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 7: Formatted Strings (f-string)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -560,6 +569,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#example-7-formatted-strings-f-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 7: Formatted Strings (f-string)
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -579,7 +597,7 @@
 <p>Welcome to the Basic Examples section. Here, we showcase fundamental code snippets to help you get started with Zynk. </p>
 <h2 id="example-1-basic-variables-and-output">Example 1: Basic Variables and Output</h2>
 <p>This example demonstrates the use of variables and basic output functions.</p>
-<pre><code>def main() {
+<pre><code>def main() -&gt; null {
     var x: int = 1;
     var y: string = "elo";
     println(x);
@@ -589,11 +607,12 @@ main();
 </code></pre>
 <h2 id="example-2-control-flow-with-loops-and-conditionals">Example 2: Control Flow with Loops and Conditionals</h2>
 <p>This example shows how to use loops and conditionals in Zynk.</p>
-<pre><code>def main() {
+<pre><code>def main() -&gt; null {
     var x: int = 1;
 
     while(true) {
-        if(x == 1) {
+        x = x + 1;
+        if(x &gt;= 10) {
             break;
         }
     }
@@ -602,13 +621,13 @@ main();
 </code></pre>
 <h2 id="example-3-nested-functions">Example 3: Nested Functions</h2>
 <p>This example demonstrates defining and calling functions, including nested functions.</p>
-<pre><code>def main() {
+<pre><code>def main() -&gt; null {
     var number: int = 1;
 
-    def displayNumber() {
+    def displayNumber() -&gt; null {
         println(number);
         var multiplier: float = 1.5;
-        def calculateAndPrint() {
+        def calculateAndPrint() -&gt; null {
             println(number * multiplier);
         }
         calculateAndPrint();
@@ -619,7 +638,7 @@ main();
 </code></pre>
 <h2 id="example-4-reading-input">Example 4: Reading Input</h2>
 <p>This example demonstrates how to read input from the user and use it in your program.</p>
-<pre><code>def main() {
+<pre><code>def main() -&gt; null {
     var name: string = readInput("Enter your name: ");
     println(name);
 }
@@ -627,7 +646,7 @@ main();
 </code></pre>
 <h2 id="example-5-type-casting">Example 5: Type Casting</h2>
 <p>This example demonstrates how to use type casting in Zynk. Type casting allows you to convert values between different types.</p>
-<pre><code>def main() {
+<pre><code>def main() -&gt; null {
     var intValue: int = 5;
     var floatValue: float = float(intValue);
     var stringValue: string = string(floatValue);
@@ -644,7 +663,7 @@ main();
 </code></pre>
 <h2 id="example-6-logical-operators-and-or">Example 6: Logical Operators (AND, OR)</h2>
 <p>This example demonstrates the use of logical operators <code>AND</code> and <code>OR</code> in Zynk.</p>
-<pre><code>def main() {
+<pre><code>def main() -&gt; null {
     var a: bool = true;
     var b: bool = false;
     var c: bool = a and b;
@@ -653,6 +672,22 @@ main();
     if(c &amp;&amp; d) {
         println("Both c and d are true.");
     }
+}
+main();
+</code></pre>
+<h2 id="example-7-formatted-strings-f-string">Example 7: Formatted Strings (f-string)</h2>
+<p>This example demonstrates how to use f-strings to create formatted strings in Zynk.</p>
+<pre><code>def main() -&gt; null {
+    var name: string = "Alice";
+    var age: int = 30;
+    var height: float = 185;
+
+    // Using f-string to create a formatted string
+    var message: string = f"Name: {name}, Age: {age}, Height: {height}";
+
+    // Printing the formatted string
+    println(message);
+    println(f"{name} will be {age + 1} years old next year.");
 }
 main();
 </code></pre>
