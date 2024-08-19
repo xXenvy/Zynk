@@ -4,12 +4,14 @@
 #include "string"
 
 enum class TokenType {
-    DEF, PRINTLN, PRINT,
+    DEF, PRINTLN, PRINT, // Keywords.
     VARIABLE, CONDITION, ELSE, 
     READINPUT, COMMENT, OR, 
-    AND, RETURN, // Keywords.
+    AND, RETURN, WHILE,
+    BREAK,
 
-    INT, FLOAT, STRING, BOOL, NONE, // Types.
+    INT, FLOAT, STRING, // Types.
+    BOOL, NONE,
 
     ADD, SUBTRACT, MULTIPLY, // Operators.
     DIVIDE, ASSIGN, NOT_EQUAL, 
@@ -24,8 +26,8 @@ enum class TokenType {
 };
 
 struct Token {
-    TokenType type;
-    std::string value;
+    const TokenType type;
+    const std::string value;
     const size_t line;
 
     Token(TokenType type, const std::string& value, const size_t line) : type(type), value(value), line(line) {}

@@ -427,4 +427,38 @@ TEST(LexerTokenizeTest, Commas) {
 	EXPECT_TRUE(tokens.size() == 7);
 	EXPECT_TRUE(tokens.front().type == TokenType::COMMA);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+
+	size_t commaCount = 0;
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::COMMA) {
+			commaCount++;
+		}
+	}
+	ASSERT_EQ(commaCount, 4);
+}
+
+TEST(LexerTokenizeTest, BreakKeyword) {
+	Lexer lexer("break;break;  break;");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 7);
+	EXPECT_TRUE(tokens.front().type == TokenType::BREAK);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+
+	size_t breakCount = 0;
+	for (const Token& token : tokens) {
+		if (token.type == TokenType::BREAK) {
+			breakCount++;
+		}
+	}
+	ASSERT_EQ(breakCount, 3);
+}
+
+TEST(LexerTokenizeTest, WhileKeyword) {
+	Lexer lexer("while(false) {}");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 7);
+	EXPECT_TRUE(tokens.front().type == TokenType::WHILE);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }

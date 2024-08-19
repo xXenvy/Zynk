@@ -23,6 +23,8 @@ enum class ASTType {
     TypeCast,
     AndOperation,
     OrOperation,
+    While,
+    Break,
     Return,
 };
 
@@ -106,7 +108,7 @@ struct ASTFString : public ASTBase {
 struct ASTValue : public ASTBase {
     ASTValue(const std::string& value, ASTValueType type, size_t line)
         : ASTBase(ASTType::Value, line), value(value), valueType(type) {}
-    const std::string value;
+    std::string value;
     const ASTValueType valueType;
 };
 
@@ -128,6 +130,17 @@ struct ASTReadInput : public ASTBase {
     ASTReadInput(std::unique_ptr<ASTBase> out, size_t line)
         : ASTBase(ASTType::ReadInput, line), out(std::move(out)) {}
     std::unique_ptr<ASTBase> out;
+};
+
+struct ASTWhile : public ASTBase {
+    ASTWhile(std::unique_ptr<ASTBase> value, size_t line)
+        : ASTBase(ASTType::While, line), value(std::move(value)) {}
+    std::unique_ptr<ASTBase> value;
+    std::vector<std::unique_ptr<ASTBase>> body;
+};
+
+struct ASTBreak : public ASTBase {
+    ASTBreak(size_t line) : ASTBase(ASTType::Break, line) {}
 };
 
 struct ASTTypeCast : public ASTBase {

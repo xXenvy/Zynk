@@ -987,3 +987,47 @@ TEST(EvaluatorTest, EvaluateFunctionWithBooleanArgument) {
     evaluator.evaluate(program.get());
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Active\n");
 }
+
+TEST(EvaluatorTest, EvaluateWhileLoopBasic) {
+    const std::string code = R"(
+        var x: int = 0;
+        while (x < 5) {
+            println(x);
+            x = x + 1;
+        }
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "0\n1\n2\n3\n4\n");
+}
+
+TEST(EvaluatorTest, EvaluateWhileLoopWithBreak) {
+    const std::string code = R"(
+        var x: int = 0;
+        while (true) {
+            println(x);
+            x = x + 1;
+            if (x >= 3) {
+                break;
+            }
+        }
+        println("Loop ended");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "0\n1\n2\nLoop ended\n");
+}

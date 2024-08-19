@@ -2,6 +2,7 @@
 #include "include/evaluator.hpp"
 #include <memory>
 #include <cassert>
+#include <unordered_map>
 
 Evaluator::Evaluator() : typeChecker(env) {};
 
@@ -31,6 +32,9 @@ void Evaluator::evaluate(ASTBase* ast) {
             break;
         case ASTType::Condition:
             evaluateCondition(static_cast<ASTCondition*>(ast));
+            break;
+        case ASTType::While:
+            evaluateWhile(static_cast<ASTWhile*>(ast));
             break;
         case ASTType::Variable:
         case ASTType::Value:
@@ -71,21 +75,16 @@ inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* decla
             declaration->varType,
             declaration->line
         );
-        declaration->value.reset(varValue);
+        env.declareVariable(declaration->name, varValue);
+        return;
     }
-    env.declareVariable(declaration->name, declaration);
+    env.declareVariable(declaration->name, nullptr);
 }
 
 inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
-    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line, true);
-    typeChecker.checkType(declaration->varType, variableModify->value.get());
-
-    ASTValue* newValue = new ASTValue(
-        evaluateExpression(variableModify->value.get()),
-        declaration->varType,
-        declaration->line
-    );
-    declaration->value.reset(newValue);
+    ASTValue* var = env.getVariable(variableModify->name, variableModify->line, true);
+    typeChecker.checkType(var->valueType, variableModify->value.get());
+    var->value = evaluateExpression(variableModify->value.get());
 }
 
 std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
@@ -216,7 +215,7 @@ std::string Evaluator::evaluateComparisonOperation(ASTComparisonOperation* opera
     }
 }
 
-std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) {
+std::unique_ptr<ASTBase> Evaluator::evaluateCondition(ASTCondition* condition) {
     const bool status = stringToBool(evaluateExpression(condition->expression.get()));
     const auto& body = status ? condition->body : condition->elseBody;
 
@@ -230,6 +229,11 @@ std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) 
             return std::make_unique<ASTValue>(result, resultType, child->line);
         }
 
+        if (child->type == ASTType::Break) {
+            env.exitCurrentBlock();
+            return std::make_unique<ASTBreak>(child->line);
+        }
+
         else if (child->type == ASTType::Condition) {
             auto result = evaluateCondition(static_cast<ASTCondition*>(child.get()));
             if (result != nullptr) {
@@ -237,7 +241,42 @@ std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) 
                 return result;
             }
         }
-        else {
+        else evaluate(child.get());
+    }
+    env.exitCurrentBlock();
+    return nullptr;
+}
+
+std::unique_ptr<ASTBase> Evaluator::evaluateWhile(ASTWhile* loop) {
+    env.enterNewBlock();
+    bool shouldContinue = true;
+
+    while (stringToBool(evaluateExpression(loop->value.get())) && shouldContinue) {
+
+        for (const std::unique_ptr<ASTBase>& child : loop->body) {
+            if (child == nullptr) continue;
+            if (child->type == ASTType::Break) {
+                shouldContinue = false;
+                break;
+            }
+            if (child->type == ASTType::Return) {
+                ASTValueType resultType = typeChecker.determineType(child.get());
+                std::string result = evaluateExpression(child.get());
+                env.exitCurrentBlock();
+                return std::make_unique<ASTValue>(result, resultType, child->line);
+            }
+            if (child->type == ASTType::Condition) {
+                auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+                if (maybeResult == nullptr) continue;
+                if (maybeResult->type == ASTType::Break) {
+                    shouldContinue = false;
+                    break;
+                }
+                if (maybeResult->type == ASTType::Value) {
+                    env.exitCurrentBlock();
+                    return maybeResult;
+                }
+            }
             evaluate(child.get());
         }
     }
@@ -251,7 +290,7 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     if (func->arguments.size() != functionCall->arguments.size()) {
         throw ZynkError(
             ZynkErrorType::RuntimeError,
-            "Todo: invalid argument size",
+            "Invalid number of arguments for function '" + functionCall->name + "'.",
             functionCall->line
         );
     }
@@ -264,47 +303,65 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
         );
     }
 
-    std::string result = "null";
-    std::vector<std::unique_ptr<ASTVariableDeclaration>> envArgs;
+    std::unordered_map<std::string, std::unique_ptr<ASTValue>> envArgs;
 
-    for (size_t i = 0; func->arguments.size() > i; i++) {
-        // So here we compare the types of arguments in functionCall and function definition.
+    for (size_t i = 0; i < func->arguments.size(); ++i) {
         ASTBase* funcCallArg = functionCall->arguments[i].get();
         auto funcArg = static_cast<ASTFunctionArgument*>(func->arguments[i].get());
+
         typeChecker.checkType(funcArg->valueType, funcCallArg);
 
-        auto argumentValue = std::make_unique<ASTValue>(
-            evaluateExpression(funcCallArg),
-            funcArg->valueType,
-            funcArg->line
-        );
-
-        envArgs.push_back(std::make_unique<ASTVariableDeclaration>(
+        envArgs.insert({
                 funcArg->name,
-                funcArg->valueType,
-                std::move(argumentValue),
-                funcArg->line
-            )
+                std::make_unique<ASTValue>(
+                    evaluateExpression(funcCallArg),
+                    funcArg->valueType,
+                    funcArg->line)
+            }
         );
     }
+
     env.enterNewBlock(true);
-    for (auto& arg : envArgs) env.declareVariable(arg->name, arg.get());
+    for (const auto& argPair : envArgs) {
+        env.declareVariable(argPair.first, argPair.second.get());
+    }
+
+    std::string result = "null";
 
     for (const std::unique_ptr<ASTBase>& child : func->body) {
-        if (child->type == ASTType::Return) {
-            typeChecker.checkType(func, child.get());
-            result = evaluateExpression(child.get());
-            break;
-        }
+        if (child == nullptr) continue;
 
-        else if (child->type == ASTType::Condition) {
-            const auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
-            if (maybeResult != nullptr) {
-                typeChecker.checkType(func, maybeResult.get());
-                result = maybeResult->value;
+        switch (child->type) {
+            case ASTType::Return: {
+                typeChecker.checkType(func, child.get());
+                result = evaluateExpression(child.get());
+                env.exitCurrentBlock(true);
+                return result;
+            }
+            case ASTType::Condition: {
+                auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+                if (maybeResult != nullptr && maybeResult->type == ASTType::Value) {
+                    typeChecker.checkType(func, maybeResult.get());
+                    result = static_cast<ASTValue*>(maybeResult.get())->value;
+                    env.exitCurrentBlock(true);
+                    return result;
+                }
                 break;
             }
-        } else evaluate(child.get());
+            case ASTType::While: {
+                auto maybeResult = evaluateWhile(static_cast<ASTWhile*>(child.get()));
+                if (maybeResult != nullptr && maybeResult->type == ASTType::Value) {
+                    typeChecker.checkType(func, maybeResult.get());
+                    result = static_cast<ASTValue*>(maybeResult.get())->value;
+                    env.exitCurrentBlock(true);
+                    return result;
+                }
+                break;
+            }
+            default:
+                evaluate(child.get());
+                break;
+        }
     }
     env.exitCurrentBlock(true);
 
@@ -351,7 +408,7 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return static_cast<ASTValue*>(expression)->value;
         case ASTType::Variable: {
             const auto var = static_cast<ASTVariable*>(expression);
-            return evaluateExpression(env.getVariable(var->name, var->line, true)->value.get());
+            return evaluateExpression(env.getVariable(var->name, var->line, true));
         };
         case ASTType::ReadInput:
             return evaluateReadInput(static_cast<ASTReadInput*>(expression));
