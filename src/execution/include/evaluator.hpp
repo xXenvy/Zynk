@@ -26,7 +26,9 @@ private:
     std::string evaluateAndOperation(ASTAndOperation* operation);
     std::string evaluateOrOperation(ASTOrOperation* operation);
     std::string evaluateFunctionCall(ASTFunctionCall* functionCall);
-    std::unique_ptr<ASTValue> evaluateCondition(ASTCondition* condition);
+
+    std::unique_ptr<ASTBase> evaluateCondition(ASTCondition* condition);
+    std::unique_ptr<ASTBase> evaluateWhile(ASTWhile* loop);
 
     inline void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     inline void evaluateVariableModify(ASTVariableModify* variableModify);

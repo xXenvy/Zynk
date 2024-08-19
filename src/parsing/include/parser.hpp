@@ -24,12 +24,14 @@ private:
 	std::unique_ptr<ASTBase> parseFunctionArgument();
 	std::unique_ptr<ASTBase> parseVariableDeclaration();
 	std::unique_ptr<ASTBase> parseVariableModify();
-	std::unique_ptr<ASTBase> parsePrint(bool newLine);
-	std::unique_ptr<ASTBase> parseRead(bool isFinalInstruction = true);
+	std::unique_ptr<ASTBase> parseReturnStatement();
 	std::unique_ptr<ASTBase> parseTypeCast(TokenType type);
 	std::unique_ptr<ASTBase> parsePrimaryExpression();
 	std::unique_ptr<ASTBase> parseIfStatement();
-	std::unique_ptr<ASTBase> parseReturnStatement();
+	std::unique_ptr<ASTBase> parsePrintStatement(bool newLine);
+	std::unique_ptr<ASTBase> parseReadStatement(bool isFinalInstruction = true);
+	std::unique_ptr<ASTBase> parseWhileStatement();
+	std::unique_ptr<ASTBase> parseBreakStatement();
 public:
 	Parser(const std::vector<Token>& tokens);
 	std::unique_ptr<ASTProgram> parse();
