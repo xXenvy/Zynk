@@ -1,11 +1,10 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include "object.hpp"
 #include <unordered_map>
 #include <memory>
 #include <string>
-
-class GCObject;
 
 class Block {
 public:
@@ -15,11 +14,11 @@ public:
 
     Block(Block* parent = nullptr) : parentBlock(parent) {}
 
-    void setVariable(const std::string& name, std::unique_ptr<GCObject> value) {
+    inline void setVariable(const std::string& name, std::unique_ptr<GCObject> value) {
         variables[name] = std::move(value);
     }
 
-    void setFunction(const std::string& name, std::unique_ptr<GCObject> func) {
+    inline void setFunction(const std::string& name, std::unique_ptr<GCObject> func) {
         functions[name] = std::move(func);
     }
 
@@ -38,7 +37,6 @@ public:
         if (parentBlock && deepSearch) return parentBlock->getFunction(name);
         return nullptr;
     }
-
 };
 
 #endif // BLOCK_H

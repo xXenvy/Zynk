@@ -53,7 +53,9 @@ void Evaluator::evaluate(ASTBase* ast) {
 inline void Evaluator::evaluateProgram(ASTProgram* program) {
     env.enterNewBlock(); // Main program code block.
     for (const std::unique_ptr<ASTBase>& child : program->body) {
-        if(child.get() != nullptr) evaluate(child.get());
+        if (child.get() != nullptr) {
+            evaluate(child.get());
+        }
     }
     env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
 }
@@ -80,6 +82,7 @@ inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* decla
         return;
     }
     env.declareVariable(declaration->name, nullptr);
+
 }
 
 inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {

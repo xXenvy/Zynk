@@ -10,9 +10,9 @@
 class Evaluator {
 public:
     Evaluator();
+    void evaluate(ASTBase* ast);
 
     RuntimeEnvironment env;
-    void evaluate(ASTBase* ast);
 private:
     TypeChecker typeChecker;
 
@@ -30,9 +30,9 @@ private:
     std::unique_ptr<ASTBase> evaluateCondition(ASTCondition* condition);
     std::unique_ptr<ASTBase> evaluateWhile(ASTWhile* loop);
 
+    inline void evaluateProgram(ASTProgram* program);
     inline void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     inline void evaluateVariableModify(ASTVariableModify* variableModify);
-    inline void evaluateProgram(ASTProgram* program);
     inline void evaluateFunctionDeclaration(ASTFunction* function);
     inline void evaluatePrint(ASTPrint* print);
 };

@@ -5,7 +5,6 @@ set(Sources
     test_parser.cpp
     test_evaluator.cpp
     test_block.cpp
-    test_gc.cpp
     test_runtime.cpp
     test_typechecker.cpp
 )

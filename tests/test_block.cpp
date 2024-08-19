@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "../src/execution/gc/include/block.hpp"
-#include "../src/execution/gc/include/object.hpp"
+#include "../src/execution/block/include/block.hpp"
+#include "../src/execution/block/include/object.hpp"
 #include "../src/parsing/include/ast.hpp"
 
 TEST(BlockTest, SetAndGetVariable) {

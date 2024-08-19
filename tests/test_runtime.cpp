@@ -108,9 +108,9 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionAfterBlockExit) {
     env.declareVariable("var1", varValue1.get());
     env.declareVariable("var2", varValue2.get());
 
-    ASSERT_EQ(env.gc.size(), 2);
+    ASSERT_EQ(env.currentBlock()->variables.size(), 2);
     env.exitCurrentBlock();
-    ASSERT_EQ(env.gc.size(), 0);
+    ASSERT_EQ(env.currentBlock(), nullptr);
 }
 
 TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
@@ -125,7 +125,8 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
     ASSERT_NO_THROW(env.declareVariable("globalVar", globalVar.get()));
     ASSERT_NO_THROW(env.declareFunction("globalFunc", globalFunc.get()));
 
-    ASSERT_EQ(env.gc.size(), 2);
+    ASSERT_EQ(env.currentBlock()->variables.size(), 1);
+    ASSERT_EQ(env.currentBlock()->functions.size(), 1);
     ASSERT_TRUE(env.isVariableDeclared("globalVar"));
     ASSERT_TRUE(env.isFunctionDeclared("globalFunc"));
 
@@ -136,19 +137,19 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
 
     env.declareFunction("innerFunc", innerFunc.get());
 
-    ASSERT_EQ(env.gc.size(), 4);
+    ASSERT_EQ(env.currentBlock()->variables.size(), 1);
     ASSERT_TRUE(env.isVariableDeclared("innerVar"));
     ASSERT_TRUE(env.isFunctionDeclared("innerFunc"));
 
     env.exitCurrentBlock();
-    ASSERT_EQ(env.gc.size(), 2);
+    ASSERT_EQ(env.currentBlock()->variables.size(), 1);
     ASSERT_FALSE(env.isVariableDeclared("innerVar"));
     ASSERT_FALSE(env.isFunctionDeclared("innerFunc"));
     ASSERT_TRUE(env.isVariableDeclared("globalVar"));
     ASSERT_TRUE(env.isFunctionDeclared("globalFunc"));
 
     env.exitCurrentBlock();
-    ASSERT_EQ(env.gc.size(), 0);
+    ASSERT_EQ(env.currentBlock(), nullptr);
     ASSERT_FALSE(env.isVariableDeclared("globalVar"));
     ASSERT_FALSE(env.isFunctionDeclared("globalFunc"));
 }
