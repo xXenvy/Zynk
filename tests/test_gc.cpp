@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 #include <vector>
-#include "../src/gc/include/gc.hpp"
-#include "../src/gc/include/block.hpp"
+
+#include "../src/execution/gc/include/gc.hpp"
+#include "../src/execution/gc/include/block.hpp"
 #include "../src/parsing/include/ast.hpp"
 
 TEST(GarbageCollectorTest, MarkAndSweepDecrementsCorrectly) {

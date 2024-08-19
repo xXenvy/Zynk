@@ -1,7 +1,7 @@
 #ifndef GC_OBJECT_H
 #define GC_OBJECT_H
 
-#include "../../parsing/include/ast.hpp"
+#include "../../../parsing/include/ast.hpp"
 
 class GCObject {
 private:

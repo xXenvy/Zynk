@@ -4,7 +4,7 @@
 #include "../../parsing/include/ast.hpp"
 #include "../../parsing/include/lexer.hpp"
 #include "../../parsing/include/parser.hpp"
-#include "../../typechecker/include/checker.hpp"
+#include "../typechecker/include/checker.hpp"
 #include "runtime.hpp"
 
 class Evaluator {

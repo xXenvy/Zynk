@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../src/common/include/cli.hpp"
-#include "../src/common/include/errors.hpp"
+#include "../src/cli/include/cli.hpp"
+#include "../src/errors/include/errors.hpp"
 
 TEST(CLIArgsTest, FileArgumentShortOption) {
     CLI cli({ "main.zk" });

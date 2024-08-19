@@ -1,4 +1,4 @@
-def main() {
+def main() -> null {
 	println("Hello World!");
 	var a: int = 1024;
 	var b: int = 2048;

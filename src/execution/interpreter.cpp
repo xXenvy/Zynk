@@ -1,6 +1,6 @@
 #include "include/interpreter.hpp"
 
-#include "../common/include/errors.hpp"
+#include "../errors/include/errors.hpp"
 #include "../parsing/include/lexer.hpp"
 #include "../parsing/include/parser.hpp"
 #include "../parsing/include/ast.hpp"

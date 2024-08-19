@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../src/typechecker/include/checker.hpp"
-#include "../src/common/include/errors.hpp"
+#include "../src/execution/typechecker/include/checker.hpp"
+#include "../src/errors/include/errors.hpp"
 
 TEST(TypeCheckerTest, DetermineTypeIntegerValue) {
     RuntimeEnvironment env;

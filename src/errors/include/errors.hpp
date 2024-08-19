@@ -2,8 +2,8 @@
 #define ERRORS_H
 
 #include <string>
-#include <iostream>
 #include <optional>
+#include <iostream>
 
 #define RESET "\033[0m"
 #define RED "\033[31m"
@@ -24,12 +24,13 @@ enum class ZynkErrorType {
     RecursionError,
 };
 
-struct ZynkError : public std::runtime_error {
+class ZynkError : public std::runtime_error {
+public:
     const ZynkErrorType base_type;
     std::optional<size_t> line;
 
     ZynkError(ZynkErrorType type, const std::string& message, std::optional<size_t> line = std::nullopt)
-        : std::runtime_error(message), base_type(type), line(line) {}
+        : std::runtime_error(message), base_type(type), line(line) {};
 
     void print(std::optional<std::string> filepath = std::nullopt) const {
         std::cout << std::endl;
@@ -45,7 +46,6 @@ struct ZynkError : public std::runtime_error {
         }
         std::cerr << RESET << "=====================" << std::endl;
     }
-
 private:
     std::string errorToString() const {
         switch (base_type) {

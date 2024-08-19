@@ -2,7 +2,7 @@
 
 #include "../src/execution/include/runtime.hpp"
 #include "../src/parsing/include/ast.hpp"
-#include "../src/common/include/errors.hpp"
+#include "../src/errors/include/errors.hpp"
 
 TEST(RuntimeEnvironmentTest, VariableDeclaration) {
     RuntimeEnvironment env;

@@ -3,8 +3,8 @@
 #include <csignal>
 
 #include "execution/include/interpreter.hpp"
-#include "common/include/cli.hpp"
-#include "common/include/errors.hpp"
+#include "cli/include/cli.hpp"
+#include "errors/include/errors.hpp"
 
 constexpr char const* version = "0.0.1";
 

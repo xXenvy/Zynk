@@ -1,6 +1,5 @@
 #include "include/checker.hpp"
-#include "../common/include/errors.hpp"
-#include <functional>
+#include "../../errors/include/errors.hpp"
 
 TypeChecker::TypeChecker(RuntimeEnvironment& env) : env(env) {};
 
