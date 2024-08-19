@@ -769,7 +769,70 @@ TEST(ParserTest, parseFunctionWithMultipleArguments) {
     ASSERT_EQ(right->name, "b");
 }
 
+TEST(ParserTest, parseWhileLoop) {
+    Lexer lexer("while (a < 10) {\n    a = a + 1;\n}");
+    const std::vector<Token> tokens = lexer.tokenize();
 
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::While);
+
+    const auto whileLoop = static_cast<ASTWhile*>(program->body.front().get());
+
+    const auto condition = static_cast<ASTBinaryOperation*>(whileLoop->value.get());
+    ASSERT_NE(condition, nullptr);
+    ASSERT_EQ(condition->op, "<");
+
+    const auto left = static_cast<ASTVariable*>(condition->left.get());
+    const auto right = static_cast<ASTValue*>(condition->right.get());
+    ASSERT_NE(left, nullptr);
+    ASSERT_NE(right, nullptr);
+    ASSERT_EQ(left->name, "a");
+    ASSERT_EQ(right->value, "10");
+
+    ASSERT_EQ(whileLoop->body.size(), 1);
+    const auto bodyStmt = whileLoop->body.front().get();
+    ASSERT_EQ(bodyStmt->type, ASTType::VariableModify);
+
+    const auto varModify = static_cast<ASTVariableModify*>(bodyStmt);
+    ASSERT_EQ(varModify->name, "a");
+
+    const auto newValue = static_cast<ASTBinaryOperation*>(varModify->value.get());
+    ASSERT_NE(newValue, nullptr);
+    ASSERT_EQ(newValue->op, "+");
+
+    const auto leftValue = static_cast<ASTVariable*>(newValue->left.get());
+    const auto rightValue = static_cast<ASTValue*>(newValue->right.get());
+    ASSERT_NE(leftValue, nullptr);
+    ASSERT_NE(rightValue, nullptr);
+    ASSERT_EQ(leftValue->name, "a");
+    ASSERT_EQ(rightValue->value, "1");
+}
+
+TEST(ParserTest, parseBreakStatement) {
+    Lexer lexer("while (true) {\n    break;\n}");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::While);
+
+    const auto whileLoop = static_cast<ASTWhile*>(program->body.front().get());
+
+    const auto condition = static_cast<ASTValue*>(whileLoop->value.get());
+    ASSERT_NE(condition, nullptr);
+    ASSERT_EQ(condition->value, "true");
+
+    ASSERT_EQ(whileLoop->body.size(), 1);
+    const auto bodyStmt = whileLoop->body.front().get();
+    ASSERT_EQ(bodyStmt->type, ASTType::Break);
+}
 
 TEST(ParserTest, parseNegativeBoolThrowsException) {
     Lexer lexer("var a: bool = -true;");

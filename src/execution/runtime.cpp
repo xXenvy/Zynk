@@ -52,6 +52,7 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSe
     return true;
 }
 
+// todo: remove name argument.
 void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* func) {
     if (isFunctionDeclared(name)) {
         throw ZynkError{
