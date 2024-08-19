@@ -97,5 +97,6 @@ bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) const {
 void RuntimeEnvironment::exitCurrentBlock(bool decreaseDepth) {
     if (blockStack.empty()) return;
     if (decreaseDepth) currentDepth--;
+    currentBlock()->freeBlock();
     blockStack.pop();
 }

@@ -37,6 +37,11 @@ public:
         if (parentBlock && deepSearch) return parentBlock->getFunction(name);
         return nullptr;
     }
+
+    void freeBlock() {
+        variables.clear();
+        functions.clear();
+    }
 };
 
 #endif // BLOCK_H
