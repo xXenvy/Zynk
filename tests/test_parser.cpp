@@ -41,7 +41,7 @@ TEST(ParserTest, parseMultipleVariableDeclarations) {
 }
 
 TEST(ParserTest, parseFunctionDeclaration) {
-    Lexer lexer("def main(){\n    println(10);\n}");
+    Lexer lexer("def main() -> null {\n    println(10);\n}");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -53,6 +53,7 @@ TEST(ParserTest, parseFunctionDeclaration) {
 
     const auto function = static_cast<ASTFunction*>(program->body.front().get());
     ASSERT_EQ(function->name, "main");
+    ASSERT_EQ(function->returnType, ASTValueType::None);
     ASSERT_EQ(function->body.size(), 1);
     ASSERT_EQ(function->body.front()->type, ASTType::Print);
 
@@ -64,8 +65,40 @@ TEST(ParserTest, parseFunctionDeclaration) {
     ASSERT_EQ(printValue->value, "10");
 }
 
+TEST(ParserTest, parseFunctionDeclarationWithReturnType) {
+    Lexer lexer("def add() -> int {\n    return a + b;\n}");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::FunctionDeclaration);
+
+    const auto function = static_cast<ASTFunction*>(program->body.front().get());
+    ASSERT_EQ(function->name, "add");
+    ASSERT_EQ(function->returnType, ASTValueType::Integer);
+    ASSERT_EQ(function->body.size(), 1);
+    ASSERT_EQ(function->body.front()->type, ASTType::Return);
+
+    const auto returnStmt = static_cast<ASTReturn*>(function->body.front().get());
+    ASSERT_NE(returnStmt, nullptr);
+
+    const auto returnValue = static_cast<ASTBinaryOperation*>(returnStmt->value.get());
+    ASSERT_NE(returnValue, nullptr);
+    ASSERT_EQ(returnValue->op, "+");
+
+    const auto left = static_cast<ASTVariable*>(returnValue->left.get());
+    const auto right = static_cast<ASTVariable*>(returnValue->right.get());
+    ASSERT_NE(left, nullptr);
+    ASSERT_NE(right, nullptr);
+    ASSERT_EQ(left->name, "a");
+    ASSERT_EQ(right->name, "b");
+}
+
 TEST(ParserTest, parseEmptyFunction) {
-    Lexer lexer("def main(){\n}");
+    Lexer lexer("def main() -> null {\n}");
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -673,6 +706,71 @@ TEST(ParserTest, parseGreaterThanComparison) {
     ASSERT_EQ(printValue->value, "a is greater than b");
 }
 
+TEST(ParserTest, parseFunctionWithSingleArgument) {
+    Lexer lexer("def square(n: int) -> int {\n    return n * n;\n}");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::FunctionDeclaration);
+
+    const auto function = static_cast<ASTFunction*>(program->body.front().get());
+    ASSERT_EQ(function->name, "square");
+    ASSERT_EQ(function->returnType, ASTValueType::Integer);
+    ASSERT_EQ(function->arguments.size(), 1);
+
+    const auto arg = static_cast<ASTFunctionArgument*>(function->arguments.front().get());
+    ASSERT_EQ(arg->name, "n");
+    ASSERT_EQ(arg->valueType, ASTValueType::Integer);
+
+    ASSERT_EQ(function->body.size(), 1);
+    ASSERT_EQ(function->body.front()->type, ASTType::Return);
+}
+
+TEST(ParserTest, parseFunctionWithMultipleArguments) {
+    Lexer lexer("def add(a: int, b: int) -> int {\n    return a + b;\n}");
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    ASSERT_EQ(program->type, ASTType::Program);
+    ASSERT_EQ(program->body.size(), 1);
+    ASSERT_EQ(program->body.front()->type, ASTType::FunctionDeclaration);
+
+    const auto function = static_cast<ASTFunction*>(program->body.front().get());
+    ASSERT_EQ(function->name, "add");
+    ASSERT_EQ(function->returnType, ASTValueType::Integer);
+    ASSERT_EQ(function->arguments.size(), 2);
+
+    const auto arg1 = static_cast<ASTFunctionArgument*>(function->arguments[0].get());
+    ASSERT_EQ(arg1->name, "a");
+    ASSERT_EQ(arg1->valueType, ASTValueType::Integer);
+
+    const auto arg2 = static_cast<ASTFunctionArgument*>(function->arguments[1].get());
+    ASSERT_EQ(arg2->name, "b");
+    ASSERT_EQ(arg2->valueType, ASTValueType::Integer);
+
+    ASSERT_EQ(function->body.size(), 1);
+    ASSERT_EQ(function->body.front()->type, ASTType::Return);
+
+    const auto returnStmt = static_cast<ASTReturn*>(function->body.front().get());
+    const auto returnValue = static_cast<ASTBinaryOperation*>(returnStmt->value.get());
+
+    ASSERT_NE(returnValue, nullptr);
+    ASSERT_EQ(returnValue->op, "+");
+
+    const auto left = static_cast<ASTVariable*>(returnValue->left.get());
+    const auto right = static_cast<ASTVariable*>(returnValue->right.get());
+    ASSERT_EQ(left->name, "a");
+    ASSERT_EQ(right->name, "b");
+}
+
+
+
 TEST(ParserTest, parseNegativeBoolThrowsException) {
     Lexer lexer("var a: bool = -true;");
     const std::vector<Token> tokens = lexer.tokenize();
@@ -759,7 +857,7 @@ TEST(ParserTest, parseFunctionDeclarationWithMissingBracket) {
 }
 
 TEST(ParserTest, parseFunctionWithInvalidExpression) {
-    Lexer lexer("def main() {\n    println(10 + ;\n}"); // Invalid expression with missing operand
+    Lexer lexer("def main() -> null {\n    println(10 + ;\n}"); // Invalid expression with missing operand
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
@@ -769,23 +867,6 @@ TEST(ParserTest, parseFunctionWithInvalidExpression) {
     }
     catch (const ZynkError& error) {
         ASSERT_EQ(error.base_type, ZynkErrorType::ExpressionError);
-    }
-    catch (const std::exception& error) {
-        FAIL() << "Unexpected exception type: " << error.what();
-    }
-}
-
-TEST(ParserTest, parseFunctionCallWithExtraTokens) {
-    Lexer lexer("main(10);"); // Extra comma in function call
-    const std::vector<Token> tokens = lexer.tokenize();
-
-    Parser parser(tokens);
-    try {
-        parser.parse();
-        FAIL() << "Expected ZynkError thrown.";
-    }
-    catch (const ZynkError& error) {
-        ASSERT_EQ(error.base_type, ZynkErrorType::SyntaxError);
     }
     catch (const std::exception& error) {
         FAIL() << "Unexpected exception type: " << error.what();

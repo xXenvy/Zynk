@@ -35,7 +35,11 @@ TEST(EvaluatorTest, EvaluateVariableDeclarationAndPrint) {
 }
 
 TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
-	const std::string code = "def myFunction(){\nprintln(\"Inside function\");\n}";
+    const std::string code = R"(
+        def myFunction() -> null {
+            println("Inside function");
+        }
+    )";
 	Lexer lexer(code);
 	const std::vector<Token> tokens = lexer.tokenize();
 
@@ -51,7 +55,7 @@ TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
 
 TEST(EvaluatorTest, EvaluateFunctionCall) {
 	const std::string code = R"(
-        def myFunction(){
+        def myFunction() -> null {
 			var x: string = "Inside function.";
 			println(x);
 		}
@@ -71,8 +75,8 @@ TEST(EvaluatorTest, EvaluateFunctionCall) {
 
 TEST(EvaluatorTest, EvaluateNestedFunctionCalls) {
 	const std::string code = R"(
-        def outerFunction() {
-            def innerFunction() { 
+        def outerFunction() -> null {
+            def innerFunction() -> null { 
                 println("Inside inner function"); 
             }
 			println("Outer function");
@@ -214,8 +218,8 @@ TEST(EvaluatorTest, DuplicateVariableDeclaration) {
 
 TEST(EvaluatorTest, DuplicateFunctionDeclaration) {
     const std::string code = R"(
-        def myFunction() { }
-        def myFunction() { }
+        def myFunction() -> null { }
+        def myFunction() -> null { }
     )";
     Lexer lexer(code);
     const std::vector<Token> tokens = lexer.tokenize();
@@ -848,11 +852,11 @@ TEST(EvaluatorTest, EvaluateLessThanOrEqualOperation) {
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
-TEST(EvaluatorTest, A) {
+TEST(EvaluatorTest, FunctionCallWithRecursiveLoopThrowsError) {
     const std::string code = R"(
         var x: int = 0;
 
-        def main() {
+        def main() -> null {
             x = x + 1;
             if(x <= 1000) main();
         }
@@ -866,4 +870,120 @@ TEST(EvaluatorTest, A) {
 
     Evaluator evaluator;
     ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}
+
+TEST(EvaluatorTest, EvaluateFunctionReturningWrongType) {
+    const std::string code = R"(
+        def myFunction() -> int {
+            return "string"; // Funkcja deklaruje int, ale zwraca string
+        }
+        myFunction();
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    Evaluator evaluator;
+    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+}
+TEST(EvaluatorTest, EvaluateFunctionReturningNullWhenValueExpected) {
+    const std::string code = R"(
+        def myFunction() -> int {
+            return 1;
+        }
+        var x: int = myFunction();
+        println(x);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithIntegerArgument) {
+    const std::string code = R"(
+        def myFunction(x: int) -> null {
+            println(x + 1);
+        }
+        myFunction(10);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "11\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithMultipleArguments) {
+    const std::string code = R"(
+        def add(a: int, b: int) -> int {
+            return a + b;
+        }
+        println(add(3, 4));
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "7\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithStringArgument) {
+    const std::string code = R"(
+        def greet(name: string) -> null {
+            println(f"Hello, {name}!");
+        }
+        greet("Alice");
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Hello, Alice!\n");
+}
+
+TEST(EvaluatorTest, EvaluateFunctionWithBooleanArgument) {
+    const std::string code = R"(
+        def checkStatus(active: bool) -> null {
+            if (active) {
+                println("Active");
+            } else {
+                println("Inactive");
+            }
+        }
+        checkStatus(true);
+    )";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
+
+    Parser parser(tokens);
+    const auto program = parser.parse();
+
+    testing::internal::CaptureStdout();
+    Evaluator evaluator;
+    evaluator.evaluate(program.get());
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Active\n");
 }

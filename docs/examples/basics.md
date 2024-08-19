@@ -6,7 +6,7 @@ Welcome to the Basic Examples section. Here, we showcase fundamental code snippe
 
 This example demonstrates the use of variables and basic output functions.
 
-    def main() {
+    def main() -> null {
         var x: int = 1;
         var y: string = "elo";
         println(x);
@@ -18,7 +18,7 @@ This example demonstrates the use of variables and basic output functions.
 
 This example shows how to use loops and conditionals in Zynk.
 
-    def main() {
+    def main() -> null {
         var x: int = 1;
 
         while(true) {
@@ -33,13 +33,13 @@ This example shows how to use loops and conditionals in Zynk.
 
 This example demonstrates defining and calling functions, including nested functions.
 
-    def main() {
+    def main() -> null {
         var number: int = 1;
 
-        def displayNumber() {
+        def displayNumber() -> null {
             println(number);
             var multiplier: float = 1.5;
-            def calculateAndPrint() {
+            def calculateAndPrint() -> null {
                 println(number * multiplier);
             }
             calculateAndPrint();
@@ -52,7 +52,7 @@ This example demonstrates defining and calling functions, including nested funct
 
 This example demonstrates how to read input from the user and use it in your program.
 
-    def main() {
+    def main() -> null {
         var name: string = readInput("Enter your name: ");
         println(name);
     }
@@ -62,7 +62,7 @@ This example demonstrates how to read input from the user and use it in your pro
 
 This example demonstrates how to use type casting in Zynk. Type casting allows you to convert values between different types.
 
-    def main() {
+    def main() -> null {
         var intValue: int = 5;
         var floatValue: float = float(intValue);
         var stringValue: string = string(floatValue);
@@ -82,7 +82,7 @@ This example demonstrates how to use type casting in Zynk. Type casting allows y
 This example demonstrates the use of logical operators `AND` and `OR` in Zynk.
 
 
-    def main() {
+    def main() -> null {
         var a: bool = true;
         var b: bool = false;
         var c: bool = a and b;
@@ -98,7 +98,7 @@ This example demonstrates the use of logical operators `AND` and `OR` in Zynk.
 
 This example demonstrates how to use f-strings to create formatted strings in Zynk.
 
-    def main() {
+    def main() -> null {
         var name: string = "Alice";
         var age: int = 30;
         var height: float = 185;

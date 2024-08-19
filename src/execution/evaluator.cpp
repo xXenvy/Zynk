@@ -32,6 +32,10 @@ void Evaluator::evaluate(ASTBase* ast) {
         case ASTType::Condition:
             evaluateCondition(static_cast<ASTCondition*>(ast));
             break;
+        case ASTType::Variable:
+        case ASTType::Value:
+            evaluateExpression(ast);
+            break;
         default:
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
@@ -53,24 +57,6 @@ inline void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
     env.declareFunction(function->name, function);
 }
 
-inline void Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
-    ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
-
-    if (env.isRecursionDepthExceeded()) {
-        throw ZynkError{
-            ZynkErrorType::RecursionError,
-            "Exceeded maximum recursion depth of " + std::to_string(env.MAX_DEPTH) + ".",
-            functionCall->line,
-        };
-    }
-
-    env.enterNewBlock(true);
-    for (const std::unique_ptr<ASTBase>& child : func->body) {
-        evaluate(child.get());
-    }
-    env.exitCurrentBlock(true);
-}
-
 inline void Evaluator::evaluatePrint(ASTPrint* print) {
     const std::string value = evaluateExpression(print->expression.get());
     std::cout << value << (print->newLine ? "\n" : "");
@@ -79,6 +65,7 @@ inline void Evaluator::evaluatePrint(ASTPrint* print) {
 inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->varType, declaration->value.get());
+
         ASTValue* varValue = new ASTValue(
             evaluateExpression(declaration->value.get()),
             declaration->varType,
@@ -99,16 +86,6 @@ inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify)
         declaration->line
     );
     declaration->value.reset(newValue);
-}
-
-inline void Evaluator::evaluateCondition(ASTCondition* condition) {
-    const std::string value = evaluateExpression(condition->expression.get());
-
-    env.enterNewBlock();
-    for (const std::unique_ptr<ASTBase>& child : stringToBool(value) ? condition->body : condition->elseBody) {
-        evaluate(child.get());
-    }
-    env.exitCurrentBlock();
 }
 
 std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
@@ -239,6 +216,109 @@ std::string Evaluator::evaluateComparisonOperation(ASTComparisonOperation* opera
     }
 }
 
+std::unique_ptr<ASTValue> Evaluator::evaluateCondition(ASTCondition* condition) {
+    const bool status = stringToBool(evaluateExpression(condition->expression.get()));
+    const auto& body = status ? condition->body : condition->elseBody;
+
+    env.enterNewBlock();
+    for (const std::unique_ptr<ASTBase>& child : body) {
+
+        if (child->type == ASTType::Return) {
+            ASTValueType resultType = typeChecker.determineType(child.get());
+            std::string result = evaluateExpression(child.get());
+            env.exitCurrentBlock();
+            return std::make_unique<ASTValue>(result, resultType, child->line);
+        }
+
+        else if (child->type == ASTType::Condition) {
+            auto result = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+            if (result != nullptr) {
+                env.exitCurrentBlock();
+                return result;
+            }
+        }
+        else {
+            evaluate(child.get());
+        }
+    }
+    env.exitCurrentBlock();
+    return nullptr;
+}
+
+std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
+    ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
+
+    if (func->arguments.size() != functionCall->arguments.size()) {
+        throw ZynkError(
+            ZynkErrorType::RuntimeError,
+            "Todo: invalid argument size",
+            functionCall->line
+        );
+    }
+
+    if (env.isRecursionDepthExceeded()) {
+        throw ZynkError(
+            ZynkErrorType::RecursionError,
+            "Exceeded maximum recursion depth of " + std::to_string(env.MAX_DEPTH) + ".",
+            functionCall->line
+        );
+    }
+
+    std::string result = "null";
+    std::vector<std::unique_ptr<ASTVariableDeclaration>> envArgs;
+
+    for (size_t i = 0; func->arguments.size() > i; i++) {
+        // So here we compare the types of arguments in functionCall and function definition.
+        ASTBase* funcCallArg = functionCall->arguments[i].get();
+        auto funcArg = static_cast<ASTFunctionArgument*>(func->arguments[i].get());
+        typeChecker.checkType(funcArg->valueType, funcCallArg);
+
+        auto argumentValue = std::make_unique<ASTValue>(
+            evaluateExpression(funcCallArg),
+            funcArg->valueType,
+            funcArg->line
+        );
+
+        envArgs.push_back(std::make_unique<ASTVariableDeclaration>(
+                funcArg->name,
+                funcArg->valueType,
+                std::move(argumentValue),
+                funcArg->line
+            )
+        );
+    }
+    env.enterNewBlock(true);
+    for (auto& arg : envArgs) env.declareVariable(arg->name, arg.get());
+
+    for (const std::unique_ptr<ASTBase>& child : func->body) {
+        if (child->type == ASTType::Return) {
+            typeChecker.checkType(func, child.get());
+            result = evaluateExpression(child.get());
+            break;
+        }
+
+        else if (child->type == ASTType::Condition) {
+            const auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+            if (maybeResult != nullptr) {
+                typeChecker.checkType(func, maybeResult.get());
+                result = maybeResult->value;
+                break;
+            }
+        } else evaluate(child.get());
+    }
+    env.exitCurrentBlock(true);
+
+    if (result == "null" && func->returnType != ASTValueType::None) {
+        throw ZynkError(
+            ZynkErrorType::TypeError,
+            "Function '" + functionCall->name + "' does not return a value of type " 
+            + typeChecker.typeToString(func->returnType) + " in all control paths.",
+            func->line
+        );
+    }
+    return result;
+}
+
 std::string Evaluator::evaluateOrOperation(ASTOrOperation* operation) {
     const std::string left = evaluateExpression(operation->left.get());
     if (stringToBool(left)) return left;
@@ -287,6 +367,10 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return evaluateOrOperation(static_cast<ASTOrOperation*>(expression));
         case ASTType::AndOperation: 
             return evaluateAndOperation(static_cast<ASTAndOperation*>(expression));
+        case ASTType::FunctionCall:
+            return evaluateFunctionCall(static_cast<ASTFunctionCall*>(expression));
+        case ASTType::Return:
+            return evaluateExpression(static_cast<ASTReturn*>(expression)->value.get());
         default:
             throw ZynkError(
                 ZynkErrorType::RuntimeError,
@@ -308,7 +392,7 @@ std::string calculate(const float left, const float right, const std::string& op
 }
 
 std::string calculateString(const std::string& left_value, const std::string& right_value, const std::string& op) {
-    // I don't like the way it's done, but I don't know how to do it better right now.
+    // todo: refactor this crap
     const bool leftIsFloat = left_value.find('.') != std::string::npos;
     const bool rightIsFloat = right_value.find('.') != std::string::npos;
 

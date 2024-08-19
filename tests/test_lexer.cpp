@@ -410,3 +410,21 @@ TEST(LexerTokenizeTest, LogicalOrOperator) {
 	EXPECT_TRUE(tokens.front().type == TokenType::BOOL);
 	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
 }
+
+TEST(LexerTokenizeTest, ReturnKeyword) {
+	Lexer lexer("return 1;");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 4);
+	EXPECT_TRUE(tokens.front().type == TokenType::RETURN);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}
+
+TEST(LexerTokenizeTest, Commas) {
+	Lexer lexer(",, , () ,");
+	const std::vector<Token> tokens = lexer.tokenize();
+
+	EXPECT_TRUE(tokens.size() == 7);
+	EXPECT_TRUE(tokens.front().type == TokenType::COMMA);
+	EXPECT_TRUE(tokens.back().type == TokenType::END_OF_FILE);
+}

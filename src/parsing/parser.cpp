@@ -5,7 +5,7 @@ Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
 
 std::unique_ptr<ASTProgram> Parser::parse() {
 	// Process to parse Program AST from provided tokens.
-	std::unique_ptr<ASTProgram> programTree = std::make_unique<ASTProgram>(1);
+	std::unique_ptr<ASTProgram> programTree = std::make_unique<ASTProgram>();
 	while (!endOfFile()) {
 		programTree->body.push_back(parseCurrent());
 	}
@@ -21,15 +21,16 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 		case TokenType::VARIABLE:
 			return parseVariableDeclaration();
 		case TokenType::PRINT:
-			return parsePrint(false);
 		case TokenType::PRINTLN:
-			return parsePrint(true);
+			return parsePrint(current.type == TokenType::PRINTLN);
 		case TokenType::READINPUT:
 			return parseRead();
 		case TokenType::CONDITION:
 			return parseIfStatement();
 		case TokenType::END_OF_FILE:
 			return nullptr;
+		case TokenType::RETURN:
+			return parseReturnStatement();
 		case TokenType::IDENTIFIER: {
 			moveForward();
 			if (currentToken().type == TokenType::LBRACKET) return parseFunctionCall();
@@ -48,14 +49,28 @@ std::unique_ptr<ASTBase> Parser::parseCurrent() {
 std::unique_ptr<ASTBase> Parser::parseFunctionDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::DEF, "def", currentLine });
-
 	const std::string functionName = currentToken().value;
-	std::unique_ptr<ASTFunction> function = std::make_unique<ASTFunction>(functionName, currentLine);
+	std::vector<std::unique_ptr<ASTBase>> funcArgs;
 
 	// Function name should be an identifier.
 	consume({ TokenType::IDENTIFIER, functionName, currentLine });
 	consume({ TokenType::LBRACKET, "(", currentLine });
+
+	while (currentToken().type != TokenType::RBRACKET && !endOfFile()) {
+		funcArgs.push_back(parseFunctionArgument());
+		if(currentToken().type != TokenType::RBRACKET) consume({ TokenType::COMMA, ",", currentLine });
+	}
+
 	consume({ TokenType::RBRACKET, ")", currentLine });
+	consume({ TokenType::SUBTRACT, "-", currentLine });
+	consume({ TokenType::GREATER_THAN, ">", currentLine });
+
+	std::unique_ptr<ASTFunction> function = std::make_unique<ASTFunction>(
+		functionName, parseValueType(), currentLine
+	);
+	function->arguments = std::move(funcArgs);
+
+	moveForward();
 	consume({ TokenType::LBRACE, "{", currentLine });
 
 	while (currentToken().type != TokenType::RBRACE && !endOfFile()) {
@@ -65,49 +80,66 @@ std::unique_ptr<ASTBase> Parser::parseFunctionDeclaration() {
 	return function;
 }
 
-std::unique_ptr<ASTBase> Parser::parseFunctionCall() {
+std::unique_ptr<ASTBase> Parser::parseFunctionCall(bool isFinalInstruction) {
 	position--; // We had to jump one position to see if it was a function call.
 	const Token current = currentToken();
+	std::vector<std::unique_ptr<ASTBase>> args;
 
 	consume({ TokenType::IDENTIFIER, current.value, current.line });
 	consume({ TokenType::LBRACKET, "(", current.line });
+
+	while (currentToken().type != TokenType::RBRACKET && !endOfFile()) {
+		args.push_back(parseExpression(0));
+		if (currentToken().type != TokenType::RBRACKET) {
+			consume({ TokenType::COMMA, ",", current.line });
+		}
+	}
+
 	consume({ TokenType::RBRACKET, ")", current.line });
-	consume({ TokenType::SEMICOLON, ";", current.line });
-	return std::make_unique<ASTFunctionCall>(current.value, current.line);
+	if(isFinalInstruction) consume({ TokenType::SEMICOLON, ";", current.line });
+
+	auto funcCall = std::make_unique<ASTFunctionCall>(current.value, current.line);
+	funcCall->arguments = std::move(args);
+	return funcCall;
+}
+
+std::unique_ptr<ASTBase> Parser::parseFunctionArgument() {
+	const size_t currentLine = currentToken().line;
+	const std::string argumentName = currentToken().value;
+
+	consume({ TokenType::IDENTIFIER, argumentName, currentLine });
+	consume({ TokenType::COLON, ":", currentLine });
+	const ASTValueType argumentType = parseValueType();
+
+	moveForward();
+	return std::make_unique<ASTFunctionArgument>(argumentName, argumentType, currentLine);
+}
+
+std::unique_ptr<ASTBase> Parser::parseReturnStatement() {
+	moveForward();
+
+	const size_t currentLine = currentToken().line;
+	if (currentToken().type == TokenType::SEMICOLON) {
+		consume({ TokenType::SEMICOLON, ";", currentLine });
+		return std::make_unique<ASTReturn>(nullptr, currentLine);
+	}
+
+	auto returnAST = std::make_unique<ASTReturn>(parseExpression(0), currentLine);
+	consume({ TokenType::SEMICOLON, ";", currentLine });
+	return returnAST;
 }
 
 std::unique_ptr<ASTBase> Parser::parseVariableDeclaration() {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::VARIABLE, "var", currentLine });
-
 	const std::string varName = currentToken().value;
-	ASTValueType varType;
 
 	consume({ TokenType::IDENTIFIER, varName, currentLine });
 	consume({ TokenType::COLON, ":", currentLine });
 
-	const Token varTypeToken = currentToken();
-	switch (varTypeToken.type) {
-		case TokenType::INT:
-			varType = ASTValueType::Integer;
-			break;
-		case TokenType::FLOAT:
-			varType = ASTValueType::Float;
-			break;
-		case TokenType::STRING:
-			varType = ASTValueType::String;
-			break;
-		case TokenType::BOOL:
-			varType = ASTValueType::Bool;
-			break;
-		default:
-			throw ZynkError(
-				ZynkErrorType::TypeError,
-				"Expected type 'int', 'float', 'string', or 'bool', but found: '" + varTypeToken.value + "'.",
-				currentLine
-			);
-	}
-	consume(varTypeToken);
+	const ASTValueType varType = parseValueType();
+	moveForward();
+
 	if (currentToken().type == TokenType::SEMICOLON) {
 		consume({ TokenType::SEMICOLON, ";", currentLine });
 		return std::make_unique<ASTVariableDeclaration>(
@@ -128,6 +160,7 @@ std::unique_ptr<ASTBase> Parser::parseVariableModify() {
 
 	consume({ TokenType::IDENTIFIER, current.value, current.line});
 	consume({ TokenType::ASSIGN, "=", current.line });
+
 	std::unique_ptr<ASTBase> newValue = parseExpression(0);
 	consume({ TokenType::SEMICOLON, ";", current.line });
 	return std::make_unique<ASTVariableModify>(current.value, std::move(newValue), current.line);
@@ -146,7 +179,7 @@ std::unique_ptr<ASTBase> Parser::parsePrint(bool newLine) {
 	return print;
 }
 
-std::unique_ptr<ASTBase> Parser::parseRead() {
+std::unique_ptr<ASTBase> Parser::parseRead(bool isFinalInstruction) {
 	const size_t currentLine = currentToken().line;
 	consume({ TokenType::READINPUT, "readInput", currentLine });
 	consume({ TokenType::LBRACKET, "(", currentLine });
@@ -158,7 +191,7 @@ std::unique_ptr<ASTBase> Parser::parseRead() {
 		read = std::make_unique<ASTReadInput>(parseExpression(0), currentLine);
 	}
 	consume({ TokenType::RBRACKET, ")", currentLine });
-	consume({ TokenType::SEMICOLON, ";", currentLine });
+	if (isFinalInstruction) consume({ TokenType::SEMICOLON, ";", currentLine });
 	return read;
 }
 
@@ -266,12 +299,14 @@ std::unique_ptr<ASTBase> Parser::parsePrimaryExpression() {
 				moveForward();
 				return std::make_unique<ASTFString>(fStringValue, currentLine);
 			}
+			if (currentToken().type == TokenType::LBRACKET) {
+				return parseFunctionCall(false);
+			}
 			return std::make_unique<ASTVariable>(current.value, currentLine);
 		}
 		case TokenType::READINPUT: {
 			position--;
-			std::unique_ptr<ASTBase> expr = parseRead();
-			position--;
+			std::unique_ptr<ASTBase> expr = parseRead(false);
 			return expr;
 		}
 		default:
@@ -345,6 +380,10 @@ std::unique_ptr<ASTBase> Parser::parseTypeCast(TokenType type) {
 	return std::make_unique<ASTTypeCast>(std::move(value), castType, currentLine);
 }
 
+void Parser::moveForward() {
+	if (!endOfFile()) position++;
+}
+
 bool Parser::endOfFile() const {
 	return position > tokens.size() || tokens[position].type == TokenType::END_OF_FILE;
 }
@@ -369,18 +408,35 @@ bool Parser::isOperator(TokenType type) const {
 	}
 }
 
-void Parser::moveForward() {
-	if (!endOfFile()) position++;
-}
-
 int Parser::getPriority(TokenType type) const {
 	switch (type) {
 		case TokenType::MULTIPLY:
 		case TokenType::DIVIDE:
 			return 2;
 		default:
-			if (isOperator(type)) return 1;
-			return 0;
+			return isOperator(type) ? 1 : 0;
+	}
+}
+
+ASTValueType Parser::parseValueType() const {
+	const Token current = currentToken();
+	switch (current.type) {
+		case TokenType::INT:
+			return ASTValueType::Integer;
+		case TokenType::FLOAT:
+			return ASTValueType::Float;
+		case TokenType::STRING:
+			return ASTValueType::String;
+		case TokenType::BOOL:
+			return ASTValueType::Bool;
+		case TokenType::NONE:
+			return ASTValueType::None;
+		default:
+			throw ZynkError(
+				ZynkErrorType::TypeError,
+				"Expected type 'int', 'float', 'string', 'null, or 'bool', but found: '" + current.value + "'.",
+				current.line
+			);
 	}
 }
 

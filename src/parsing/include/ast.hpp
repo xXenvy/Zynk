@@ -9,6 +9,7 @@ enum class ASTType {
     Program,
     FunctionDeclaration,
     FunctionCall,
+    FunctionArgument,
     VariableDeclaration,
     VariableModify,
     Print,
@@ -22,6 +23,7 @@ enum class ASTType {
     TypeCast,
     AndOperation,
     OrOperation,
+    Return,
 };
 
 enum class ASTValueType {
@@ -40,21 +42,37 @@ struct ASTBase {
 };
 
 struct ASTProgram : public ASTBase {
-    ASTProgram(const size_t line) : ASTBase(ASTType::Program, line) {}
+    ASTProgram(const size_t line = 1) : ASTBase(ASTType::Program, line) {}
     std::vector<std::unique_ptr<ASTBase>> body;
 };
 
 struct ASTFunction : public ASTBase {
-    ASTFunction(const std::string& name, size_t line)
-        : ASTBase(ASTType::FunctionDeclaration, line), name(name) {}
+    ASTFunction(const std::string& name, const ASTValueType returnType, size_t line)
+        : ASTBase(ASTType::FunctionDeclaration, line), name(name), returnType(returnType) {}
     const std::string name;
+    const ASTValueType returnType;
+    std::vector<std::unique_ptr<ASTBase>> arguments;
     std::vector<std::unique_ptr<ASTBase>> body;
+};
+
+struct ASTFunctionArgument : public ASTBase {
+    ASTFunctionArgument(const std::string& name, const ASTValueType valueType, size_t line)
+        : ASTBase(ASTType::FunctionArgument, line), name(name), valueType(valueType) {}
+    const std::string name;
+    const ASTValueType valueType;
 };
 
 struct ASTFunctionCall : public ASTBase {
     ASTFunctionCall(const std::string& name, size_t line)
         : ASTBase(ASTType::FunctionCall, line), name(name) {}
-    const std::string name; // Currently we do not support function arguments.
+    const std::string name;
+    std::vector<std::unique_ptr<ASTBase>> arguments;
+};
+
+struct ASTReturn : public ASTBase {
+    ASTReturn(std::unique_ptr<ASTBase> value, size_t line)
+        : ASTBase(ASTType::Return, line), value(std::move(value)) {}
+    std::unique_ptr<ASTBase> value;
 };
 
 struct ASTPrint : public ASTBase {

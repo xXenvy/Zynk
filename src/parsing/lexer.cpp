@@ -39,6 +39,7 @@ Token Lexer::next() {
 
     moveForward();
     switch (current) {
+        case ',': return Token(TokenType::COMMA, ",", currentLine);
         case ':': return Token(TokenType::COLON, ":", currentLine);
         case '+': return Token(TokenType::ADD, "+", currentLine);
         case '-': return Token(TokenType::SUBTRACT, "-", currentLine);
@@ -112,6 +113,7 @@ Token Lexer::identifier() {
     if (value == "readInput") return Token(TokenType::READINPUT, value, line);
     if (value == "or") return Token(TokenType::OR, value, line);
     if (value == "and") return Token(TokenType::AND, value, line);
+    if (value == "return") return Token(TokenType::RETURN, value, line);
     return Token(TokenType::IDENTIFIER, value, line);
 }
 

@@ -7,7 +7,7 @@ enum class TokenType {
     DEF, PRINTLN, PRINT,
     VARIABLE, CONDITION, ELSE, 
     READINPUT, COMMENT, OR, 
-    AND, // Keywords.
+    AND, RETURN, // Keywords.
 
     INT, FLOAT, STRING, BOOL, NONE, // Types.
 
@@ -18,7 +18,7 @@ enum class TokenType {
 
     IDENTIFIER, COLON, LBRACE, // Syntax.
     RBRACE, SEMICOLON, LBRACKET,
-    RBRACKET,
+    RBRACKET, COMMA,
 
     END_OF_FILE, UNKNOWN, // Extra.
 };

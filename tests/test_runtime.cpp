@@ -49,7 +49,7 @@ TEST(RuntimeEnvironmentTest, FunctionDeclaration) {
     RuntimeEnvironment env;
     env.enterNewBlock();
 
-    auto funcDeclaration = std::make_unique<ASTFunction>("myFunction", 20);
+    auto funcDeclaration = std::make_unique<ASTFunction>("myFunction", ASTValueType::None, 20);
     ASSERT_NO_THROW(env.declareFunction("myFunction", funcDeclaration.get()));
 
     auto retrievedFunc = env.getFunction("myFunction", 20);
@@ -126,7 +126,7 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
 
     auto varValue = std::make_unique<ASTValue>("Abc", ASTValueType::String, 50);
     auto globalVar = std::make_unique<ASTVariableDeclaration>("globalVar", ASTValueType::String, std::move(varValue), 50);
-    auto globalFunc = std::make_unique<ASTFunction>("globalFunc", 51);
+    auto globalFunc = std::make_unique<ASTFunction>("globalFunc", ASTValueType::None, 51);
 
     ASSERT_NO_THROW(env.declareVariable("globalVar", globalVar.get()));
     ASSERT_NO_THROW(env.declareFunction("globalFunc", globalFunc.get()));
@@ -138,7 +138,7 @@ TEST(RuntimeEnvironmentTest, GarbageCollectionWithNestedBlocks) {
     env.enterNewBlock();
     auto innerVarValue = std::make_unique<ASTValue>("Cba", ASTValueType::String, 60);
     auto innerVar = std::make_unique<ASTVariableDeclaration>("innerVar", ASTValueType::String, std::move(innerVarValue), 60);
-    auto innerFunc = std::make_unique<ASTFunction>("innerFunc", 61);
+    auto innerFunc = std::make_unique<ASTFunction>("innerFunc", ASTValueType::None, 61);
 
     env.declareVariable("innerVar", innerVar.get());
     env.declareFunction("innerFunc", innerFunc.get());

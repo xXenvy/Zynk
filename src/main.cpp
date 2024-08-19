@@ -46,11 +46,10 @@ int main(int argc, char* argv[]) {
 	}
 	if (cli.args.init) {
 		std::ofstream initfile("main.zk");
-		initfile << "def main() {\n    println(\"Hello Pimpki!\"); \n}\nmain();";
+		initfile << "def main() -> null {\n    println(\"Hello Pimpki!\");\n}\nmain();";
 		std::cout << "Successfully created a new main.zk file." << std::endl;
 		return 0;
 	}
-
 	ZynkInterpreter interpreter;
 	try {
 		interpreter.interpretFile(cli.args.file_path);

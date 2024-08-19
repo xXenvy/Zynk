@@ -25,14 +25,14 @@ private:
     std::string evaluateComparisonOperation(ASTComparisonOperation* operation);
     std::string evaluateAndOperation(ASTAndOperation* operation);
     std::string evaluateOrOperation(ASTOrOperation* operation);
+    std::string evaluateFunctionCall(ASTFunctionCall* functionCall);
+    std::unique_ptr<ASTValue> evaluateCondition(ASTCondition* condition);
 
     inline void evaluateVariableDeclaration(ASTVariableDeclaration* variable);
     inline void evaluateVariableModify(ASTVariableModify* variableModify);
     inline void evaluateProgram(ASTProgram* program);
     inline void evaluateFunctionDeclaration(ASTFunction* function);
-    inline void evaluateFunctionCall(ASTFunctionCall* functionCall);
     inline void evaluatePrint(ASTPrint* print);
-    inline void evaluateCondition(ASTCondition* condition);
 };
 
 inline bool stringToBool(const std::string& value);
