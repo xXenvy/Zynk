@@ -11,7 +11,7 @@ Block* RuntimeEnvironment::currentBlock() {
     return blockStack.top().get();
 }
 
-void RuntimeEnvironment::declareVariable(const std::string& name, ASTVariableDeclaration* value) {
+void RuntimeEnvironment::declareVariable(const std::string& name, ASTValue* value) {
     if (isVariableDeclared(name, false)) {
         throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
@@ -27,7 +27,7 @@ void RuntimeEnvironment::declareVariable(const std::string& name, ASTVariableDec
     block->setVariable(name, std::move(gcObject));
 }
 
-ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name, const size_t line, bool deepSearch) {
+ASTValue* RuntimeEnvironment::getVariable(const std::string& name, const size_t line, bool deepSearch) {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
     GCObject* gcObject = block->getVariable(name, deepSearch);
@@ -39,7 +39,7 @@ ASTVariableDeclaration* RuntimeEnvironment::getVariable(const std::string& name,
             line
         );
     }
-    return static_cast<ASTVariableDeclaration*>(gcObject->value);
+    return static_cast<ASTValue*>(gcObject->value);
 }
 
 bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSearch) {

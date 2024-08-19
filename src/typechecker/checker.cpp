@@ -25,8 +25,8 @@ ASTValueType TypeChecker::determineType(ASTBase* expression) {
         }
         case ASTType::Variable: {
             ASTVariable* var = static_cast<ASTVariable*>(expression);
-            ASTVariableDeclaration* declaration = env.getVariable(var->name, var->line, true);
-            return determineType(declaration->value.get());
+            ASTValue* varValue = env.getVariable(var->name, var->line, true);
+            return determineType(varValue);
         }
         case ASTType::BinaryOperation: {
             ASTBinaryOperation* operation = static_cast<ASTBinaryOperation*>(expression);

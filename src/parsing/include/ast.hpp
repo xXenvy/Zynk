@@ -108,7 +108,7 @@ struct ASTFString : public ASTBase {
 struct ASTValue : public ASTBase {
     ASTValue(const std::string& value, ASTValueType type, size_t line)
         : ASTBase(ASTType::Value, line), value(value), valueType(type) {}
-    const std::string value;
+    std::string value;
     const ASTValueType valueType;
 };
 

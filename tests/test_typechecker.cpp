@@ -73,8 +73,7 @@ TEST(TypeCheckerTest, DetermineTypeIntegerVariable) {
     env.enterNewBlock();
 
     auto ASTValueInt = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
-    auto ASTVarDeclaration = std::make_unique<ASTVariableDeclaration>("x", ASTValueType::Integer, std::move(ASTValueInt), 1);
-    env.declareVariable("x", ASTVarDeclaration.get());
+    env.declareVariable("x", ASTValueInt.get());
 
     auto ASTVariableInt = std::make_unique<ASTVariable>("x", 1);
     ASSERT_EQ(typeChecker.determineType(ASTVariableInt.get()), ASTValueType::Integer);
@@ -87,8 +86,7 @@ TEST(TypeCheckerTest, DetermineTypeFloatVariable) {
     env.enterNewBlock();
 
     auto ASTValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    auto ASTVarDeclaration = std::make_unique<ASTVariableDeclaration>("y", ASTValueType::Float, std::move(ASTValueFloat), 1);
-    env.declareVariable("y", ASTVarDeclaration.get());
+    env.declareVariable("y", ASTValueFloat.get());
 
     auto ASTVariableFloat = std::make_unique<ASTVariable>("y", 1);
     ASSERT_EQ(typeChecker.determineType(ASTVariableFloat.get()), ASTValueType::Float);
@@ -101,8 +99,7 @@ TEST(TypeCheckerTest, DetermineTypeStringVariable) {
     env.enterNewBlock();
 
     auto ASTValueString = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
-    auto ASTVarDeclaration = std::make_unique<ASTVariableDeclaration>("greeting", ASTValueType::String, std::move(ASTValueString), 1);
-    env.declareVariable("greeting", ASTVarDeclaration.get());
+    env.declareVariable("greeting", ASTValueString.get());
 
     auto ASTVariableString = std::make_unique<ASTVariable>("greeting", 1);
     ASSERT_EQ(typeChecker.determineType(ASTVariableString.get()), ASTValueType::String);

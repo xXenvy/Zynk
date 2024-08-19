@@ -15,8 +15,8 @@ public:
 
     bool isRecursionDepthExceeded() const;
 
-    void declareVariable(const std::string& name, ASTVariableDeclaration* value);
-    ASTVariableDeclaration* getVariable(const std::string& name, const size_t line, bool deepSearch = true);
+    void declareVariable(const std::string& name, ASTValue* value);
+    ASTValue* getVariable(const std::string& name, const size_t line, bool deepSearch = true);
     bool isVariableDeclared(const std::string& name, bool deepSearch = true);
 
     void declareFunction(const std::string& name, ASTFunction* func);

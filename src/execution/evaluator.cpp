@@ -2,6 +2,7 @@
 #include "include/evaluator.hpp"
 #include <memory>
 #include <cassert>
+#include <unordered_map>
 
 Evaluator::Evaluator() : typeChecker(env) {};
 
@@ -74,21 +75,16 @@ inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* decla
             declaration->varType,
             declaration->line
         );
-        declaration->value.reset(varValue);
+        env.declareVariable(declaration->name, varValue);
+        return;
     }
-    env.declareVariable(declaration->name, declaration);
+    env.declareVariable(declaration->name, nullptr);
 }
 
 inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
-    ASTVariableDeclaration* declaration = env.getVariable(variableModify->name, variableModify->line, true);
-    typeChecker.checkType(declaration->varType, variableModify->value.get());
-
-    ASTValue* newValue = new ASTValue(
-        evaluateExpression(variableModify->value.get()),
-        declaration->varType,
-        declaration->line
-    );
-    declaration->value.reset(newValue);
+    ASTValue* var = env.getVariable(variableModify->name, variableModify->line, true);
+    typeChecker.checkType(var->valueType, variableModify->value.get());
+    var->value = evaluateExpression(variableModify->value.get());
 }
 
 std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
@@ -307,7 +303,7 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
         );
     }
 
-    std::vector<std::unique_ptr<ASTVariableDeclaration>> envArgs;
+    std::unordered_map<std::string, std::unique_ptr<ASTValue>> envArgs;
 
     for (size_t i = 0; i < func->arguments.size(); ++i) {
         ASTBase* funcCallArg = functionCall->arguments[i].get();
@@ -315,23 +311,19 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
 
         typeChecker.checkType(funcArg->valueType, funcCallArg);
 
-        auto argumentValue = std::make_unique<ASTValue>(
-            evaluateExpression(funcCallArg),
-            funcArg->valueType,
-            funcArg->line
+        envArgs.insert({
+                funcArg->name,
+                std::make_unique<ASTValue>(
+                    evaluateExpression(funcCallArg),
+                    funcArg->valueType,
+                    funcArg->line)
+            }
         );
-
-        envArgs.push_back(std::make_unique<ASTVariableDeclaration>(
-            funcArg->name,
-            funcArg->valueType,
-            std::move(argumentValue),
-            funcArg->line
-        ));
     }
 
     env.enterNewBlock(true);
-    for (auto& arg : envArgs) {
-        env.declareVariable(arg->name, arg.get());
+    for (const auto& argPair : envArgs) {
+        env.declareVariable(argPair.first, argPair.second.get());
     }
 
     std::string result = "null";
@@ -416,7 +408,7 @@ std::string Evaluator::evaluateExpression(ASTBase* expression) {
             return static_cast<ASTValue*>(expression)->value;
         case ASTType::Variable: {
             const auto var = static_cast<ASTVariable*>(expression);
-            return evaluateExpression(env.getVariable(var->name, var->line, true)->value.get());
+            return evaluateExpression(env.getVariable(var->name, var->line, true));
         };
         case ASTType::ReadInput:
             return evaluateReadInput(static_cast<ASTReadInput*>(expression));
