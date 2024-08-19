@@ -19,7 +19,7 @@ public:
     ASTFunction* getFunction(const std::string& name, const size_t line) const;
     bool isFunctionDeclared(const std::string& name) const;
 
-    inline Block* currentBlock() const;
+    Block* currentBlock() const;
     void enterNewBlock(bool increaseDepth = false);
     void exitCurrentBlock(bool decreaseDepth = false);
 

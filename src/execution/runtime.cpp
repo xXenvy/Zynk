@@ -6,7 +6,7 @@ bool RuntimeEnvironment::isRecursionDepthExceeded() const {
     return currentDepth >= MAX_DEPTH;
 }
 
-inline Block* RuntimeEnvironment::currentBlock() const {
+Block* RuntimeEnvironment::currentBlock() const {
     if (blockStack.empty()) return nullptr;
     return blockStack.top().get();
 }
