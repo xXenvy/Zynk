@@ -22,7 +22,8 @@ This example shows how to use loops and conditionals in Zynk.
         var x: int = 1;
 
         while(true) {
-            if(x == 1) {
+            x = x + 1;
+            if(x >= 10) {
                 break;
             }
         }
