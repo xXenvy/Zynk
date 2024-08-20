@@ -50,25 +50,24 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSe
     return true;
 }
 
-void RuntimeEnvironment::declareFunction(const std::string& name, std::unique_ptr<ASTFunction> func) {
-    if (isFunctionDeclared(name)) {
-        throw ZynkError{
+void RuntimeEnvironment::declareFunction(std::unique_ptr<ASTFunction> func) {
+    if (isFunctionDeclared(func->name)) {
+        throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
-            "Function '" + name + "' is already declared.",
+            "Function '" + func->name + "' is already declared.",
             func->line
-        };
+        );
     }
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-
-    block->setFunction(name, std::move(func));
+    block->setFunction(std::move(func));
 }
 
 ASTFunction* RuntimeEnvironment::getFunction(const std::string& name, const size_t line) const {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-    ASTFunction* function = block->getFunction(name);
 
+    ASTFunction* function = block->getFunction(name);
     if (function == nullptr) {
         throw ZynkError{
             ZynkErrorType::NotDefinedError,

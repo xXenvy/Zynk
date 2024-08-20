@@ -615,7 +615,7 @@ TEST(ParserTest, parsePrintNestedParentheses) {
     ASSERT_EQ(nestedRightValue->value, "1");
 }
 
-TEST(ASTFStringTest, BasicFString) {
+TEST(ParserTest, BasicFString) {
     Lexer lexer("var greeting: string = \"Hello, {name}!\";");
     const std::vector<Token> tokens = lexer.tokenize();
 
@@ -636,7 +636,7 @@ TEST(ASTFStringTest, BasicFString) {
     ASSERT_EQ(fstring->line, 1);
 }
 
-TEST(ASTFStringTest, PrintFString) {
+TEST(ParserTest, PrintFString) {
     Lexer lexer("println(\"Welcome, {name}!\");");
     const std::vector<Token> tokens = lexer.tokenize();
 

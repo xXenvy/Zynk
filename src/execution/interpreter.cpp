@@ -21,7 +21,7 @@ void ZynkInterpreter::interpret(const std::string& source) {
     
     // Executing the program.
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
 }
 
 void ZynkInterpreter::interpretFile(const std::string& filePath) {

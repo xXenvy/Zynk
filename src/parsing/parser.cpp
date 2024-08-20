@@ -15,6 +15,7 @@ std::unique_ptr<ASTProgram> Parser::parse() {
 std::unique_ptr<ASTBase> Parser::parseCurrent() {
 	// Parses current token.
 	const Token current = currentToken();
+
 	switch (current.type) {
 		case TokenType::PRINT:
 		case TokenType::PRINTLN:

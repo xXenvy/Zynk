@@ -28,7 +28,7 @@ set(gtest_force_shared_crt on)
 enable_testing()
 
 add_subdirectory(src)
-# add_subdirectory(tests)
+add_subdirectory(tests)
 
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")

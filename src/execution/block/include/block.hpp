@@ -3,6 +3,7 @@
 
 #include "../../../parsing/include/ast.hpp"
 #include <unordered_map>
+#include <iostream>
 #include <memory>
 #include <string>
 
@@ -18,8 +19,8 @@ public:
         variables[name] = std::move(value);
     }
 
-    inline void setFunction(const std::string& name, std::unique_ptr<ASTFunction> func) {
-        functions[name] = std::move(func);
+    inline void setFunction(std::unique_ptr<ASTFunction> func) {
+        functions[func->name] = std::move(func);
     }
 
     ASTValue* getVariable(const std::string& name, bool deepSearch = true) {
