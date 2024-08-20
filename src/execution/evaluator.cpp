@@ -307,7 +307,7 @@ std::unique_ptr<ASTBase> Evaluator::evaluateWhile(std::unique_ptr<ASTWhile> loop
 
             if (child->type == ASTType::Return) {
                 ASTValueType resultType = typeChecker.determineType(child.get());
-                std::string result = evaluateExpression(std::move(child->clone()));
+                std::string result = evaluateExpression(child->clone());
                 env.exitCurrentBlock();
                 return std::make_unique<ASTValue>(result, resultType, child->line);
             }
@@ -328,7 +328,7 @@ std::unique_ptr<ASTBase> Evaluator::evaluateWhile(std::unique_ptr<ASTWhile> loop
                     return maybeResult;
                 }
             }
-            evaluate(std::move(child->clone()));
+            evaluate(child->clone());
         }
     }
     env.exitCurrentBlock();
@@ -384,7 +384,7 @@ std::string Evaluator::evaluateFunctionCall(std::unique_ptr<ASTFunctionCall> fun
         switch (child->type) {
             case ASTType::Return: {
                 typeChecker.checkType(func, child.get());
-                result = evaluateExpression(std::move(child->clone()));
+                result = evaluateExpression(child->clone());
                 env.exitCurrentBlock(true);
                 return result;
             }
@@ -419,7 +419,7 @@ std::string Evaluator::evaluateFunctionCall(std::unique_ptr<ASTFunctionCall> fun
                 break;
             }
             default:
-                evaluate(std::move(child->clone()));
+                evaluate(child->clone());
                 break;
         }
     }
