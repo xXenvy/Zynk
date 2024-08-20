@@ -17,7 +17,6 @@ set(Headers
 	execution/include/runtime.hpp
 	execution/include/interpreter.hpp
 	execution/block/include/block.hpp
-	execution/block/include/object.hpp
 
 	execution/typechecker/include/checker.hpp
 	cli/include/cli.hpp

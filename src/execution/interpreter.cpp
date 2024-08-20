@@ -17,7 +17,7 @@ void ZynkInterpreter::interpret(const std::string& source) {
 
     // Parsing the tokens into AST objects.
     Parser parser(tokens);
-    const std::unique_ptr<ASTProgram> program = parser.parse();
+    std::unique_ptr<ASTProgram> program = parser.parse();
     
     // Executing the program.
     Evaluator evaluator;

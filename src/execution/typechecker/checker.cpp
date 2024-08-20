@@ -5,6 +5,7 @@ TypeChecker::TypeChecker(RuntimeEnvironment& env) : env(env) {};
 
 ASTValueType TypeChecker::determineType(ASTBase* expression) {
     if (expression == nullptr) return ASTValueType::None;
+
     switch (expression->type) {
         case ASTType::TypeCast:
             return static_cast<ASTTypeCast*>(expression)->castType;
@@ -43,6 +44,7 @@ ASTValueType TypeChecker::determineType(ASTBase* expression) {
             ASTOrOperation* operation = static_cast<ASTOrOperation*>(expression);
             ASTValueType leftType = determineType(operation->left.get());
             ASTValueType rightType = determineType(operation->right.get());
+
             if (leftType != rightType) {
                 throw ZynkError(
                     ZynkErrorType::TypeError,
@@ -56,6 +58,7 @@ ASTValueType TypeChecker::determineType(ASTBase* expression) {
             ASTAndOperation* operation = static_cast<ASTAndOperation*>(expression);
             ASTValueType leftType = determineType(operation->left.get());
             ASTValueType rightType = determineType(operation->right.get());
+
             if (leftType != rightType) {
                 throw ZynkError(
                     ZynkErrorType::TypeError,
@@ -98,10 +101,6 @@ void TypeChecker::checkType(ASTFunction* func, ASTBase* value) {
     }
 }
 
-bool TypeChecker::isNumber(const ASTValueType& type) {
-    return type == ASTValueType::Float || type == ASTValueType::Integer;
-}
-
 std::string TypeChecker::typeToString(const ASTValueType& type) {
     switch (type) {
         case ASTValueType::String:
@@ -114,7 +113,11 @@ std::string TypeChecker::typeToString(const ASTValueType& type) {
             return "bool";
         case ASTValueType::None:
             return "null";
-        default:
+        default: // todo: consider throw
             return "Unknown Type";
     }
+}
+
+inline bool TypeChecker::isNumber(const ASTValueType& type) {
+    return type == ASTValueType::Float || type == ASTValueType::Integer;
 }

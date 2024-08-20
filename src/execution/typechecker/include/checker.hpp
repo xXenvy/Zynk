@@ -13,7 +13,7 @@ public:
     std::string typeToString(const ASTValueType& type);
 private:
     RuntimeEnvironment& env;
-    bool isNumber(const ASTValueType& type);
+    inline bool isNumber(const ASTValueType& type);
 };
 
 #endif // CHECKER_HPP

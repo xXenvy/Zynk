@@ -11,7 +11,7 @@ Block* RuntimeEnvironment::currentBlock() const {
     return blockStack.top().get();
 }
 
-void RuntimeEnvironment::declareVariable(const std::string& name, ASTValue* value) {
+void RuntimeEnvironment::declareVariable(const std::string& name, std::unique_ptr<ASTValue> value) {
     if (isVariableDeclared(name, false)) {
         throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
@@ -22,22 +22,22 @@ void RuntimeEnvironment::declareVariable(const std::string& name, ASTValue* valu
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    block->setVariable(name, std::make_unique<GCObject>(value));
+    block->setVariable(name, std::move(value));
 }
 
 ASTValue* RuntimeEnvironment::getVariable(const std::string& name, const size_t line, bool deepSearch) const {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-    GCObject* gcObject = block->getVariable(name, deepSearch);
+    ASTValue* variable = block->getVariable(name, deepSearch);
 
-    if (gcObject == nullptr) {
+    if (variable == nullptr) {
         throw ZynkError(
             ZynkErrorType::NotDefinedError,
             "Variable named '" + name + "' is not defined.",
             line
         );
     }
-    return static_cast<ASTValue*>(gcObject->value);
+    return variable;
 }
 
 bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSearch) const {
@@ -50,7 +50,7 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSe
     return true;
 }
 
-void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* func) {
+void RuntimeEnvironment::declareFunction(const std::string& name, std::unique_ptr<ASTFunction> func) {
     if (isFunctionDeclared(name)) {
         throw ZynkError{
             ZynkErrorType::DuplicateDeclarationError,
@@ -61,22 +61,22 @@ void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* f
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
 
-    block->setFunction(name, std::make_unique<GCObject>(func));
+    block->setFunction(name, std::move(func));
 }
 
 ASTFunction* RuntimeEnvironment::getFunction(const std::string& name, const size_t line) const {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-    GCObject* gcObject = block->getFunction(name);
+    ASTFunction* function = block->getFunction(name);
 
-    if (gcObject == nullptr) {
+    if (function == nullptr) {
         throw ZynkError{
             ZynkErrorType::NotDefinedError,
             "Function named '" + name + "' is not defined.",
             line
         };
     }
-    return static_cast<ASTFunction*>(gcObject->value);
+    return function;
 }
 
 bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) const {
@@ -97,6 +97,5 @@ bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) const {
 void RuntimeEnvironment::exitCurrentBlock(bool decreaseDepth) {
     if (blockStack.empty()) return;
     if (decreaseDepth) currentDepth--;
-    std::unique_ptr<Block> _ = std::move(blockStack.top());
     blockStack.pop();
 }
