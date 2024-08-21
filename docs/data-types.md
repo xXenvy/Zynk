@@ -1,6 +1,6 @@
 # Data types
 
-Zynk currently supports only primitive data types, which are fundamental for basic computations and operations. Understanding these types is essential for writing efficient and correct programs. This section will cover the basic data types available in Zynk.
+Zynk currently supports only primitive data types, which are fundamental for basic computations and operations.
 
 ## Primitive Data Types
 
