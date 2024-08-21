@@ -7,7 +7,7 @@
 struct Arguments {
 	Arguments(const size_t count, const std::string file_path = "", bool help = 0, bool version = 0, bool init = 0) :
 		count(count), file_path(file_path), help(help), version(version), init(init) {};
-	inline bool empty() const;
+	bool empty() const;
 
 	size_t count;
 	std::string file_path;
