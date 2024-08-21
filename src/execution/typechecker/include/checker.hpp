@@ -1,8 +1,8 @@
 #ifndef CHECKER_HPP
 #define CHECKER_HPP
 
-#include "../../parsing/include/ast.hpp"
-#include "../../execution/include/runtime.hpp"
+#include "../../../parsing/include/ast.hpp"
+#include "../../include/runtime.hpp"
 
 class TypeChecker {
 public:
@@ -13,7 +13,7 @@ public:
     std::string typeToString(const ASTValueType& type);
 private:
     RuntimeEnvironment& env;
-    bool isNumber(const ASTValueType& type);
+    inline bool isNumber(const ASTValueType& type);
 };
 
 #endif // CHECKER_HPP

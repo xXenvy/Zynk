@@ -12,12 +12,12 @@ std::vector<Token> Lexer::tokenize() {
     }
 }
 
-char Lexer::peek() const {
+inline char Lexer::peek() const {
     if (position > source.size()) return '\0';
     return source[position];
 }
 
-void Lexer::moveForward() {
+inline void Lexer::moveForward() {
     if (position > source.size()) return;
     position++;
     if (peek() == '\n') line++;

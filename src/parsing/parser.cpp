@@ -1,4 +1,4 @@
-#include "../common/include/errors.hpp"
+#include "../errors/include/errors.hpp"
 #include "include/parser.hpp"
 
 Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {};
@@ -15,6 +15,7 @@ std::unique_ptr<ASTProgram> Parser::parse() {
 std::unique_ptr<ASTBase> Parser::parseCurrent() {
 	// Parses current token.
 	const Token current = currentToken();
+
 	switch (current.type) {
 		case TokenType::PRINT:
 		case TokenType::PRINTLN:
@@ -180,6 +181,7 @@ std::unique_ptr<ASTBase> Parser::parseReadStatement(bool isFinalInstruction) {
 	} else {
 		read = std::make_unique<ASTReadInput>(parseExpression(0), currentLine);
 	}
+
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	if (isFinalInstruction) consume({ TokenType::SEMICOLON, ";", currentLine });
 	return read;

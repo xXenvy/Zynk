@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../src/typechecker/include/checker.hpp"
-#include "../src/common/include/errors.hpp"
+#include "../src/execution/typechecker/include/checker.hpp"
+#include "../src/errors/include/errors.hpp"
 
 TEST(TypeCheckerTest, DetermineTypeIntegerValue) {
     RuntimeEnvironment env;
@@ -73,7 +73,7 @@ TEST(TypeCheckerTest, DetermineTypeIntegerVariable) {
     env.enterNewBlock();
 
     auto ASTValueInt = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
-    env.declareVariable("x", ASTValueInt.get());
+    env.declareVariable("x", std::move(ASTValueInt));
 
     auto ASTVariableInt = std::make_unique<ASTVariable>("x", 1);
     ASSERT_EQ(typeChecker.determineType(ASTVariableInt.get()), ASTValueType::Integer);
@@ -86,7 +86,7 @@ TEST(TypeCheckerTest, DetermineTypeFloatVariable) {
     env.enterNewBlock();
 
     auto ASTValueFloat = std::make_unique<ASTValue>("3.14", ASTValueType::Float, 1);
-    env.declareVariable("y", ASTValueFloat.get());
+    env.declareVariable("y", std::move(ASTValueFloat));
 
     auto ASTVariableFloat = std::make_unique<ASTVariable>("y", 1);
     ASSERT_EQ(typeChecker.determineType(ASTVariableFloat.get()), ASTValueType::Float);
@@ -99,7 +99,7 @@ TEST(TypeCheckerTest, DetermineTypeStringVariable) {
     env.enterNewBlock();
 
     auto ASTValueString = std::make_unique<ASTValue>("Hello", ASTValueType::String, 1);
-    env.declareVariable("greeting", ASTValueString.get());
+    env.declareVariable("greeting", std::move(ASTValueString));
 
     auto ASTVariableString = std::make_unique<ASTVariable>("greeting", 1);
     ASSERT_EQ(typeChecker.determineType(ASTVariableString.get()), ASTValueType::String);
@@ -234,7 +234,7 @@ TEST(TypeCheckerTest, DetermineTypeReturn) {
     auto returnValue = std::make_unique<ASTValue>("42", ASTValueType::Integer, 1);
     auto returnStmt = std::make_unique<ASTReturn>(std::move(returnValue), 1);
 
-    env.declareFunction("myFunc", func.get());
+    env.declareFunction(std::move(func));
     ASSERT_EQ(typeChecker.determineType(returnStmt.get()), ASTValueType::Integer);
     env.exitCurrentBlock();
 }
@@ -245,7 +245,7 @@ TEST(TypeCheckerTest, DetermineTypeFunctionCall) {
     env.enterNewBlock();
 
     auto func = std::make_unique<ASTFunction>("myFunc", ASTValueType::Integer, 1);
-    env.declareFunction("myFunc", func.get());
+    env.declareFunction(std::move(func));
 
     auto funcCall = std::make_unique<ASTFunctionCall>("myFunc", 1);
     ASSERT_EQ(typeChecker.determineType(funcCall.get()), ASTValueType::Integer);

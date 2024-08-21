@@ -4,34 +4,34 @@
 #include "../src/execution/include/runtime.hpp"
 #include "../src/parsing/include/parser.hpp"
 #include "../src/parsing/include/lexer.hpp"
-#include "../src/common/include/errors.hpp"
+#include "../src/errors/include/errors.hpp"
 
 TEST(EvaluatorTest, EvaluatePrintStatement) {
-	const std::string code = "println(\"Hello, World!\");";
-	Lexer lexer(code);
-	const std::vector<Token> tokens = lexer.tokenize();
+    const std::string code = "println(\"Hello, World!\");";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
 
-	Parser parser(tokens);
-	const auto program = parser.parse();
-    
+    Parser parser(tokens);
+    auto program = parser.parse();
+
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-	evaluator.evaluate(program.get());
-	ASSERT_EQ(testing::internal::GetCapturedStdout(), "Hello, World!\n");
+    evaluator.evaluate(std::move(program));
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Hello, World!\n");
 }
 
 TEST(EvaluatorTest, EvaluateVariableDeclarationAndPrint) {
-	const std::string code = "var x: int = 42; println(x);";
-	Lexer lexer(code);
-	const std::vector<Token> tokens = lexer.tokenize();
+    const std::string code = "var x: int = 42; println(x);";
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
 
-	Parser parser(tokens);
-	const auto program = parser.parse();
+    Parser parser(tokens);
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-	evaluator.evaluate(program.get());
-	ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
+    evaluator.evaluate(std::move(program));
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
 }
 
 TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
@@ -40,60 +40,60 @@ TEST(EvaluatorTest, EvaluateFunctionDeclaration) {
             println("Inside function");
         }
     )";
-	Lexer lexer(code);
-	const std::vector<Token> tokens = lexer.tokenize();
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
 
-	Parser parser(tokens);
-	const auto program = parser.parse();
-       
+    Parser parser(tokens);
+    auto program = parser.parse();
+
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-	evaluator.evaluate(program.get());
-	// We do not call the function, so nothing should show up.
-	ASSERT_EQ(testing::internal::GetCapturedStdout(), "");
+    evaluator.evaluate(std::move(program));
+    // We do not call the function, so nothing should show up.
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "");
 }
 
 TEST(EvaluatorTest, EvaluateFunctionCall) {
-	const std::string code = R"(
+    const std::string code = R"(
         def myFunction() -> null {
-			var x: string = "Inside function.";
-			println(x);
-		}
+            var x: string = "Inside function.";
+            println(x);
+        }
         myFunction();
     )";
-	Lexer lexer(code);
-	const std::vector<Token> tokens = lexer.tokenize();
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
 
-	Parser parser(tokens);
-	const auto program = parser.parse();
+    Parser parser(tokens);
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-	evaluator.evaluate(program.get());
-	ASSERT_EQ(testing::internal::GetCapturedStdout(), "Inside function.\n");
+    evaluator.evaluate(std::move(program));
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Inside function.\n");
 }
 
 TEST(EvaluatorTest, EvaluateNestedFunctionCalls) {
-	const std::string code = R"(
+    const std::string code = R"(
         def outerFunction() -> null {
             def innerFunction() -> null { 
                 println("Inside inner function"); 
             }
-			println("Outer function");
+            println("Outer function");
             innerFunction();
         }
         outerFunction();
     )";
-	Lexer lexer(code);
-	const std::vector<Token> tokens = lexer.tokenize();
+    Lexer lexer(code);
+    const std::vector<Token> tokens = lexer.tokenize();
 
-	Parser parser(tokens);
-	const auto program = parser.parse();
+    Parser parser(tokens);
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
-	Evaluator evaluator;
-	evaluator.evaluate(program.get());
-	ASSERT_EQ(testing::internal::GetCapturedStdout(), "Outer function\nInside inner function\n");
+    Evaluator evaluator;
+    evaluator.evaluate(std::move(program));
+    ASSERT_EQ(testing::internal::GetCapturedStdout(), "Outer function\nInside inner function\n");
 }
 
 TEST(EvaluatorTest, EvaluateBinaryOperationAddition) {
@@ -102,11 +102,11 @@ TEST(EvaluatorTest, EvaluateBinaryOperationAddition) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "8\n");
 }
 
@@ -116,11 +116,11 @@ TEST(EvaluatorTest, EvaluateBinaryOperationMultiply) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
 }
 
@@ -130,11 +130,11 @@ TEST(EvaluatorTest, EvaluateBinaryOperationSubtraction) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "6\n");
 }
 
@@ -144,11 +144,11 @@ TEST(EvaluatorTest, EvaluateBinaryOperationDivision) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "3\n");
 }
 
@@ -158,10 +158,10 @@ TEST(EvaluatorTest, EvaluateUndefinedFunctionCall) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateUndefinedVariableUsage) {
@@ -170,10 +170,10 @@ TEST(EvaluatorTest, EvaluateUndefinedVariableUsage) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateFloatVariableDeclarationAndPrint) {
@@ -182,11 +182,11 @@ TEST(EvaluatorTest, EvaluateFloatVariableDeclarationAndPrint) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "3.14\n");
 }
 
@@ -196,11 +196,11 @@ TEST(EvaluatorTest, EvaluateBinaryOperationFloatAddition) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "4.000000\n");
 }
 
@@ -210,25 +210,25 @@ TEST(EvaluatorTest, DuplicateVariableDeclaration) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, DuplicateFunctionDeclaration) {
     const std::string code = R"(
-        def myFunction() -> null { }
-        def myFunction() -> null { }
+        def myFunction() -> null {}
+        def myFunction() -> null {}
     )";
     Lexer lexer(code);
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateVariableInExpression) {
@@ -237,11 +237,11 @@ TEST(EvaluatorTest, EvaluateVariableInExpression) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
 }
 
@@ -251,11 +251,11 @@ TEST(EvaluatorTest, EvaluateBinaryOperationFloatMultiplication) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "5.000000\n");
 }
 
@@ -265,10 +265,10 @@ TEST(EvaluatorTest, EvaluateDivisionByZero) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateEmptyProgram) {
@@ -277,11 +277,11 @@ TEST(EvaluatorTest, EvaluateEmptyProgram) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "");
 }
 
@@ -291,11 +291,11 @@ TEST(EvaluatorTest, EvaluateVariableModifyInteger) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "20\n");
 }
 
@@ -305,11 +305,11 @@ TEST(EvaluatorTest, EvaluateVariableModifyWithExpression) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
 }
 
@@ -326,11 +326,11 @@ TEST(EvaluatorTest, EvaluateVariableModifyMultipleTimes) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n2\n3\n");
 }
 
@@ -347,11 +347,11 @@ TEST(EvaluatorTest, EvaluateIfStatementTrueCondition) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Condition is true\n");
 }
 
@@ -368,11 +368,11 @@ TEST(EvaluatorTest, EvaluateIfElseStatement) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Condition is false, so this is printed\n");
 }
 
@@ -386,11 +386,11 @@ TEST(EvaluatorTest, EvaluateShortIfStatement) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
 }
 
@@ -407,10 +407,10 @@ TEST(EvaluatorTest, EvaluateReadStatementWithPrompt) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
 
     std::cin.rdbuf(originalCinStreamBuf);
     std::string captured_output = testing::internal::GetCapturedStdout();
@@ -431,10 +431,10 @@ TEST(EvaluatorTest, EvaluateReadStatementWithoutPrompt) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
 
     std::cin.rdbuf(originalCinStreamBuf);
     std::string captured_output = testing::internal::GetCapturedStdout();
@@ -447,11 +447,11 @@ TEST(EvaluatorTest, EvaluateStringToIntCast) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "43\n");
 }
 
@@ -461,11 +461,11 @@ TEST(EvaluatorTest, EvaluateIntToFloatCast) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "42.000000\n");
 }
 
@@ -475,11 +475,11 @@ TEST(EvaluatorTest, EvaluateFloatToIntCast) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "42\n");
 }
 
@@ -489,11 +489,11 @@ TEST(EvaluatorTest, EvaluateStringToFloatCast) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "42.500000\n");
 }
 
@@ -503,11 +503,11 @@ TEST(EvaluatorTest, EvaluateStringToBoolCast) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
 }
 
@@ -520,12 +520,12 @@ TEST(EvaluatorTest, EvaluateInvalidStringToIntCast) {
     auto program = parser.parse();
     Evaluator evaluator;
 
-    EXPECT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    EXPECT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateCommentedPrintStatement) {
     const std::string code = R"(
-        // println(\"This should not be printed\");
+        // println("This should not be printed");
         var x: int = 5;
         println(x);
     )";
@@ -533,11 +533,11 @@ TEST(EvaluatorTest, EvaluateCommentedPrintStatement) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "5\n");
 }
 
@@ -547,11 +547,11 @@ TEST(EvaluatorTest, EvaluateNegativeInteger) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "-42\n");
 }
 
@@ -561,11 +561,11 @@ TEST(EvaluatorTest, EvaluateNegativeFloat) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "-3.14\n");
 }
 
@@ -575,11 +575,11 @@ TEST(EvaluatorTest, EvaluateAdditionWithNegativeInteger) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "6\n");
 }
 
@@ -589,11 +589,11 @@ TEST(EvaluatorTest, EvaluateMultiplicationWithNegativeInteger) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "-16.500000\n");
 }
 
@@ -603,11 +603,11 @@ TEST(EvaluatorTest, EvaluateLogicalAndTrueTrue) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
@@ -617,11 +617,11 @@ TEST(EvaluatorTest, EvaluateLogicalAndTrueFalse) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
 }
 
@@ -631,11 +631,11 @@ TEST(EvaluatorTest, EvaluateLogicalOrTrueFalse) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
@@ -645,11 +645,11 @@ TEST(EvaluatorTest, EvaluateLogicalOrFalseFalse) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "false\n");
 }
 
@@ -663,25 +663,25 @@ TEST(EvaluatorTest, EvaluateFStringWithMultipleExpressions) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "x: 42, y: 3.5, sum: 45.500000\n");
 }
-    
+
 TEST(EvaluatorTest, EvaluatePrintExpressionWithParentheses) {
     const std::string code = "println((1 + 2) * 5);";
     Lexer lexer(code);
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "15\n");
 }
 
@@ -691,11 +691,11 @@ TEST(EvaluatorTest, EvaluatePrintNestedParentheses) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
 }
 
@@ -708,11 +708,11 @@ TEST(EvaluatorTest, EvaluateVarNestedParentheses) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "21\n");
 }
 
@@ -725,11 +725,11 @@ TEST(EvaluatorTest, EvaluateFStringWithIntegers) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Value of x is 42\n");
 }
 
@@ -742,11 +742,11 @@ TEST(EvaluatorTest, EvaluateFStringWithBooleans) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Is the input valid? true\n");
 }
 
@@ -760,11 +760,11 @@ TEST(EvaluatorTest, EvaluateFStringWithStringInterpolation) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "My name is Alice and I am 30 years old.\n");
 }
 
@@ -774,10 +774,10 @@ TEST(EvaluatorTest, EvaluateFStringWithUndefinedVariable) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateFStringWithUnclosedBracket) {
@@ -786,10 +786,10 @@ TEST(EvaluatorTest, EvaluateFStringWithUnclosedBracket) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateEqualOperation) {
@@ -798,11 +798,11 @@ TEST(EvaluatorTest, EvaluateEqualOperation) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
@@ -812,11 +812,11 @@ TEST(EvaluatorTest, EvaluateGreaterThanOperation) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
@@ -830,11 +830,11 @@ TEST(EvaluatorTest, EvaluateStringEqualityOperation) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
@@ -844,11 +844,11 @@ TEST(EvaluatorTest, EvaluateLessThanOrEqualOperation) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "true\n");
 }
 
@@ -858,7 +858,7 @@ TEST(EvaluatorTest, FunctionCallWithRecursiveLoopThrowsError) {
 
         def main() -> null {
             x = x + 1;
-            if(x <= 1000) main();
+            if(x <= 1001) main();
         }
         main();
     )";
@@ -866,10 +866,10 @@ TEST(EvaluatorTest, FunctionCallWithRecursiveLoopThrowsError) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
 
 TEST(EvaluatorTest, EvaluateFunctionReturningWrongType) {
@@ -883,11 +883,12 @@ TEST(EvaluatorTest, EvaluateFunctionReturningWrongType) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     Evaluator evaluator;
-    ASSERT_THROW(evaluator.evaluate(program.get()), ZynkError);
+    ASSERT_THROW(evaluator.evaluate(std::move(program)), ZynkError);
 }
+
 TEST(EvaluatorTest, EvaluateFunctionReturningNullWhenValueExpected) {
     const std::string code = R"(
         def myFunction() -> int {
@@ -900,11 +901,11 @@ TEST(EvaluatorTest, EvaluateFunctionReturningNullWhenValueExpected) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "1\n");
 }
 
@@ -919,11 +920,11 @@ TEST(EvaluatorTest, EvaluateFunctionWithIntegerArgument) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "11\n");
 }
 
@@ -938,11 +939,11 @@ TEST(EvaluatorTest, EvaluateFunctionWithMultipleArguments) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "7\n");
 }
 
@@ -957,11 +958,11 @@ TEST(EvaluatorTest, EvaluateFunctionWithStringArgument) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Hello, Alice!\n");
 }
 
@@ -980,11 +981,11 @@ TEST(EvaluatorTest, EvaluateFunctionWithBooleanArgument) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "Active\n");
 }
 
@@ -1000,11 +1001,11 @@ TEST(EvaluatorTest, EvaluateWhileLoopBasic) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "0\n1\n2\n3\n4\n");
 }
 
@@ -1024,10 +1025,10 @@ TEST(EvaluatorTest, EvaluateWhileLoopWithBreak) {
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto program = parser.parse();
+    auto program = parser.parse();
 
     testing::internal::CaptureStdout();
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
     ASSERT_EQ(testing::internal::GetCapturedStdout(), "0\n1\n2\nLoop ended\n");
 }

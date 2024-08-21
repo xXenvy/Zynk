@@ -1,29 +1,29 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include "../../../parsing/include/ast.hpp"
 #include <unordered_map>
+#include <iostream>
 #include <memory>
 #include <string>
 
-class GCObject;
-
 class Block {
 public:
-    std::unordered_map<std::string, std::unique_ptr<GCObject>> variables;
-    std::unordered_map<std::string, std::unique_ptr<GCObject>> functions;
+    std::unordered_map<std::string, std::unique_ptr<ASTValue>> variables;
+    std::unordered_map<std::string, std::unique_ptr<ASTFunction>> functions;
     Block* parentBlock;
 
     Block(Block* parent = nullptr) : parentBlock(parent) {}
 
-    void setVariable(const std::string& name, std::unique_ptr<GCObject> value) {
+    inline void setVariable(const std::string& name, std::unique_ptr<ASTValue> value) {
         variables[name] = std::move(value);
     }
 
-    void setFunction(const std::string& name, std::unique_ptr<GCObject> func) {
-        functions[name] = std::move(func);
+    inline void setFunction(std::unique_ptr<ASTFunction> func) {
+        functions[func->name] = std::move(func);
     }
 
-    GCObject* getVariable(const std::string& name, bool deepSearch = true) {
+    ASTValue* getVariable(const std::string& name, bool deepSearch = true) {
         if (variables.find(name) != variables.end()) {
             return variables[name].get();
         }
@@ -31,14 +31,13 @@ public:
         return nullptr;
     }
 
-    GCObject* getFunction(const std::string& name, bool deepSearch = true) {
+    ASTFunction* getFunction(const std::string& name, bool deepSearch = true) {
         if (functions.find(name) != functions.end()) {
             return functions[name].get();
         }
         if (parentBlock && deepSearch) return parentBlock->getFunction(name);
         return nullptr;
     }
-
 };
 
 #endif // BLOCK_H

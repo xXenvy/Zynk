@@ -1,102 +1,140 @@
-#include "../common/include/errors.hpp"
+#include "../errors/include/errors.hpp"
 #include "include/evaluator.hpp"
+
 #include <memory>
 #include <cassert>
 #include <unordered_map>
 
 Evaluator::Evaluator() : typeChecker(env) {};
 
-void Evaluator::evaluate(ASTBase* ast) {
+void Evaluator::evaluate(std::unique_ptr<ASTBase> ast) {
     assert(ast != nullptr && "Ast should not be nullptr");
+
     switch (ast->type) {
-        case ASTType::Program:
-            evaluateProgram(static_cast<ASTProgram*>(ast));
-            break;
-        case ASTType::FunctionDeclaration:
-            evaluateFunctionDeclaration(static_cast<ASTFunction*>(ast));
-            break;
-        case ASTType::FunctionCall:
-            evaluateFunctionCall(static_cast<ASTFunctionCall*>(ast));
-            break;
-        case ASTType::VariableDeclaration:
-            evaluateVariableDeclaration(static_cast<ASTVariableDeclaration*>(ast));
-            break;
-        case ASTType::VariableModify:
-            evaluateVariableModify(static_cast<ASTVariableModify*>(ast));
-            break;
-        case ASTType::Print:
-            evaluatePrint(static_cast<ASTPrint*>(ast));
-            break;
-        case ASTType::ReadInput:
-            evaluateReadInput(static_cast<ASTReadInput*>(ast));
-            break;
-        case ASTType::Condition:
-            evaluateCondition(static_cast<ASTCondition*>(ast));
-            break;
-        case ASTType::While:
-            evaluateWhile(static_cast<ASTWhile*>(ast));
-            break;
-        case ASTType::Variable:
-        case ASTType::Value:
-            evaluateExpression(ast);
-            break;
-        default:
-            throw ZynkError(
-                ZynkErrorType::RuntimeError,
-                "Unknown AST type encountered during evaluation.",
-                ast->line
+        case ASTType::Program: {
+            std::unique_ptr<ASTProgram> programPtr(
+                static_cast<ASTProgram*>(ast.release())
             );
+            evaluateProgram(std::move(programPtr));
+            break;
+        }
+        case ASTType::FunctionDeclaration: {
+            std::unique_ptr<ASTFunction> funcDeclPtr(
+                static_cast<ASTFunction*>(ast.release())
+            );
+            evaluateFunctionDeclaration(std::move(funcDeclPtr));
+            break;
+        }
+        case ASTType::FunctionCall: {
+            std::unique_ptr<ASTFunctionCall> funcCallPtr(
+                static_cast<ASTFunctionCall*>(ast.release())
+            );
+            evaluateFunctionCall(std::move(funcCallPtr));
+            break;
+        }
+        case ASTType::VariableDeclaration: {
+            std::unique_ptr<ASTVariableDeclaration> varDeclPtr(
+                static_cast<ASTVariableDeclaration*>(ast.release())
+            );
+            evaluateVariableDeclaration(std::move(varDeclPtr));
+            break;
+        }
+        case ASTType::VariableModify: {
+            std::unique_ptr<ASTVariableModify> varModPtr(
+                static_cast<ASTVariableModify*>(ast.release())
+            );
+            evaluateVariableModify(std::move(varModPtr));
+            break;
+        }
+        case ASTType::Print: {
+            std::unique_ptr<ASTPrint> printPtr(
+                static_cast<ASTPrint*>(ast.release())
+            );
+            evaluatePrint(std::move(printPtr));
+            break;
+        }
+        case ASTType::ReadInput: {
+            std::unique_ptr<ASTReadInput> readInputPtr(
+                static_cast<ASTReadInput*>(ast.release())
+            );
+            evaluateReadInput(std::move(readInputPtr));
+            break;
+        }
+        case ASTType::Condition: {
+            std::unique_ptr<ASTCondition> conditionPtr(
+                static_cast<ASTCondition*>(ast.release())
+            );
+            evaluateCondition(std::move(conditionPtr));
+            break;
+        }
+        case ASTType::While: {
+            std::unique_ptr<ASTWhile> whilePtr(
+                static_cast<ASTWhile*>(ast.release())
+            );
+            evaluateWhile(std::move(whilePtr));
+            break;
+        }
+        case ASTType::Variable:
+        case ASTType::Value: {
+            evaluateExpression(std::move(ast));
+            break;
+        }
+        default:
+            throw std::runtime_error("Unknown AST type encountered during evaluation.");
     }
 }
 
-inline void Evaluator::evaluateProgram(ASTProgram* program) {
+inline void Evaluator::evaluateProgram(std::unique_ptr<ASTProgram> program) {
     env.enterNewBlock(); // Main program code block.
-    for (const std::unique_ptr<ASTBase>& child : program->body) {
-        if(child.get() != nullptr) evaluate(child.get());
+    for (std::unique_ptr<ASTBase>& child : program->body) {
+        if (child != nullptr) evaluate(std::move(child));
     }
-    env.exitCurrentBlock(); // We need to do that, cuz gc need to free memory on main block.
+    env.exitCurrentBlock();
 }
 
-inline void Evaluator::evaluateFunctionDeclaration(ASTFunction* function) {
-    env.declareFunction(function->name, function);
+inline void Evaluator::evaluateFunctionDeclaration(std::unique_ptr<ASTFunction> function) {
+    env.declareFunction(std::move(function));
 }
 
-inline void Evaluator::evaluatePrint(ASTPrint* print) {
-    const std::string value = evaluateExpression(print->expression.get());
+inline void Evaluator::evaluatePrint(std::unique_ptr<ASTPrint> print) {
+    const std::string value = evaluateExpression(std::move(print->expression));
     std::cout << value << (print->newLine ? "\n" : "");
 }
 
-inline void Evaluator::evaluateVariableDeclaration(ASTVariableDeclaration* declaration) {
+inline void Evaluator::evaluateVariableDeclaration(std::unique_ptr<ASTVariableDeclaration> declaration) {
     if (declaration->value.get() != nullptr) {
         typeChecker.checkType(declaration->varType, declaration->value.get());
 
-        ASTValue* varValue = new ASTValue(
-            evaluateExpression(declaration->value.get()),
+        std::unique_ptr<ASTValue> varValue = std::make_unique<ASTValue>(
+            evaluateExpression(std::move(declaration->value)),
             declaration->varType,
             declaration->line
         );
-        env.declareVariable(declaration->name, varValue);
+        env.declareVariable(declaration->name, std::move(varValue));
         return;
     }
+    // nullptr is here, because it allows to declare a variable, without specifying a value. 
+    // The variable in that time will be `null`.
     env.declareVariable(declaration->name, nullptr);
 }
 
-inline void Evaluator::evaluateVariableModify(ASTVariableModify* variableModify) {
-    ASTValue* var = env.getVariable(variableModify->name, variableModify->line, true);
-    typeChecker.checkType(var->valueType, variableModify->value.get());
-    var->value = evaluateExpression(variableModify->value.get());
+inline void Evaluator::evaluateVariableModify(std::unique_ptr<ASTVariableModify> variableModify) {
+    ASTValue* variable = env.getVariable(variableModify->name, variableModify->line, true);
+
+    typeChecker.checkType(variable->valueType, variableModify->value.get());
+    variable->value = evaluateExpression(std::move(variableModify->value));
 }
 
-std::string Evaluator::evaluateReadInput(ASTReadInput* read) {
+std::string Evaluator::evaluateReadInput(std::unique_ptr<ASTReadInput> read) {
     std::string input;
-    if (read->out.get() != nullptr) {
-        std::cout << evaluateExpression(read->out.get());
+    if (read->out != nullptr) {
+        std::cout << evaluateExpression(std::move(read->out));
     }
     std::getline(std::cin, input);
     return input;
 }
 
-std::string Evaluator::evaluateFString(ASTFString* fString) {
+std::string Evaluator::evaluateFString(std::unique_ptr<ASTFString> fString) {
     std::string result;
     size_t start = 0;
     std::string value = fString->value;
@@ -118,7 +156,6 @@ std::string Evaluator::evaluateFString(ASTFString* fString) {
                 fString->line
             );
         }
-
         std::string expression = value.substr(braceOpen + 1, braceClose - braceOpen - 1);
         result += evaluateExpression(expression, fString->line);
         start = braceClose + 1;
@@ -126,8 +163,8 @@ std::string Evaluator::evaluateFString(ASTFString* fString) {
     return result;
 }
 
-std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
-    std::string base = evaluateExpression(typeCast->value.get());
+std::string Evaluator::evaluateTypeCast(std::unique_ptr<ASTTypeCast> typeCast) {
+    std::string base = evaluateExpression(std::move(typeCast->value));
 
     switch (typeCast->castType) {
         case ASTValueType::Integer:
@@ -166,12 +203,13 @@ std::string Evaluator::evaluateTypeCast(ASTTypeCast* typeCast) {
     }
 }
 
-std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
-    ASTValueType valueTypes[2] = {
+std::string Evaluator::evaluateBinaryOperation(std::unique_ptr<ASTBinaryOperation> operation) {
+    const ASTValueType valueTypes[2] = {
         typeChecker.determineType(operation->left.get()),
         typeChecker.determineType(operation->right.get())
     };
-    for (ASTValueType& valueType : valueTypes) {
+
+    for (const ASTValueType& valueType : valueTypes) {
         if (valueType != ASTValueType::Integer && valueType != ASTValueType::Float) {
             throw ZynkError(
                 ZynkErrorType::ExpressionError,
@@ -180,8 +218,10 @@ std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
             );
         }
     }
-    const std::string left = evaluateExpression(operation->left.get());
-    const std::string right = evaluateExpression(operation->right.get());
+
+    const std::string left = evaluateExpression(std::move(operation->left));
+    const std::string right = evaluateExpression(std::move(operation->right));
+
     try {
         return calculateString(left, right, operation->op);
     } catch (const ZynkError& err) {
@@ -189,9 +229,9 @@ std::string Evaluator::evaluateBinaryOperation(ASTBinaryOperation* operation) {
     }
 }
 
-std::string Evaluator::evaluateComparisonOperation(ASTComparisonOperation* operation) {
-    const std::string left = evaluateExpression(operation->left.get());
-    const std::string right = evaluateExpression(operation->right.get());
+std::string Evaluator::evaluateComparisonOperation(std::unique_ptr<ASTComparisonOperation> operation) {
+    const std::string left = evaluateExpression(std::move(operation->left));
+    const std::string right = evaluateExpression(std::move(operation->right));
     const std::string& op = operation->op;
 
     auto compare = [&](auto a, auto b) -> std::string {
@@ -215,18 +255,19 @@ std::string Evaluator::evaluateComparisonOperation(ASTComparisonOperation* opera
     }
 }
 
-std::unique_ptr<ASTBase> Evaluator::evaluateCondition(ASTCondition* condition) {
-    const bool status = stringToBool(evaluateExpression(condition->expression.get()));
-    const auto& body = status ? condition->body : condition->elseBody;
-
+std::unique_ptr<ASTBase> Evaluator::evaluateCondition(std::unique_ptr<ASTCondition> condition) {
+    const bool status = stringToBool(evaluateExpression(std::move(condition->expression)));
+    auto& body = status ? condition->body : condition->elseBody;
+    
     env.enterNewBlock();
-    for (const std::unique_ptr<ASTBase>& child : body) {
+    for (std::unique_ptr<ASTBase>& child : body) {
 
         if (child->type == ASTType::Return) {
             ASTValueType resultType = typeChecker.determineType(child.get());
-            std::string result = evaluateExpression(child.get());
+            const size_t childLine = child->line;
+            std::string result = evaluateExpression(std::move(child));
             env.exitCurrentBlock();
-            return std::make_unique<ASTValue>(result, resultType, child->line);
+            return std::make_unique<ASTValue>(result, resultType, childLine);
         }
 
         if (child->type == ASTType::Break) {
@@ -234,40 +275,50 @@ std::unique_ptr<ASTBase> Evaluator::evaluateCondition(ASTCondition* condition) {
             return std::make_unique<ASTBreak>(child->line);
         }
 
-        else if (child->type == ASTType::Condition) {
-            auto result = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+        if (child->type == ASTType::Condition) {
+            std::unique_ptr<ASTCondition> conditionPtr(
+                static_cast<ASTCondition*>(child.release())
+            );
+            auto result = evaluateCondition(std::move(conditionPtr));
             if (result != nullptr) {
                 env.exitCurrentBlock();
                 return result;
             }
         }
-        else evaluate(child.get());
+        else evaluate(std::move(child));
     }
     env.exitCurrentBlock();
     return nullptr;
 }
 
-std::unique_ptr<ASTBase> Evaluator::evaluateWhile(ASTWhile* loop) {
+std::unique_ptr<ASTBase> Evaluator::evaluateWhile(std::unique_ptr<ASTWhile> loop) {
     env.enterNewBlock();
     bool shouldContinue = true;
 
-    while (stringToBool(evaluateExpression(loop->value.get())) && shouldContinue) {
+    while (stringToBool(evaluateExpression(loop->value->clone())) && shouldContinue) {
 
-        for (const std::unique_ptr<ASTBase>& child : loop->body) {
+        for (std::unique_ptr<ASTBase>& child : loop->body) {
             if (child == nullptr) continue;
+
             if (child->type == ASTType::Break) {
                 shouldContinue = false;
                 break;
             }
+
             if (child->type == ASTType::Return) {
                 ASTValueType resultType = typeChecker.determineType(child.get());
-                std::string result = evaluateExpression(child.get());
+                std::string result = evaluateExpression(child->clone());
                 env.exitCurrentBlock();
                 return std::make_unique<ASTValue>(result, resultType, child->line);
             }
+
             if (child->type == ASTType::Condition) {
-                auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+                std::unique_ptr<ASTCondition> conditionPtr(
+                    static_cast<ASTCondition*>(child->clone().release())
+                );
+                auto maybeResult = evaluateCondition(std::move(conditionPtr));
                 if (maybeResult == nullptr) continue;
+
                 if (maybeResult->type == ASTType::Break) {
                     shouldContinue = false;
                     break;
@@ -277,14 +328,14 @@ std::unique_ptr<ASTBase> Evaluator::evaluateWhile(ASTWhile* loop) {
                     return maybeResult;
                 }
             }
-            evaluate(child.get());
+            evaluate(child->clone());
         }
     }
     env.exitCurrentBlock();
     return nullptr;
 }
 
-std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
+std::string Evaluator::evaluateFunctionCall(std::unique_ptr<ASTFunctionCall> functionCall) {
     ASTFunction* func = env.getFunction(functionCall->name, functionCall->line);
 
     if (func->arguments.size() != functionCall->arguments.size()) {
@@ -303,18 +354,18 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
         );
     }
 
-    std::unordered_map<std::string, std::unique_ptr<ASTValue>> envArgs;
+    std::unordered_map<std::string, std::unique_ptr<ASTValue>> functionArgs;
 
     for (size_t i = 0; i < func->arguments.size(); ++i) {
-        ASTBase* funcCallArg = functionCall->arguments[i].get();
+        std::unique_ptr<ASTBase> funcCallArg = std::move(functionCall->arguments[i]);
         auto funcArg = static_cast<ASTFunctionArgument*>(func->arguments[i].get());
 
-        typeChecker.checkType(funcArg->valueType, funcCallArg);
+        typeChecker.checkType(funcArg->valueType, funcCallArg.get());
 
-        envArgs.insert({
+        functionArgs.insert({
                 funcArg->name,
                 std::make_unique<ASTValue>(
-                    evaluateExpression(funcCallArg),
+                    evaluateExpression(std::move(funcCallArg)),
                     funcArg->valueType,
                     funcArg->line)
             }
@@ -322,24 +373,28 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     }
 
     env.enterNewBlock(true);
-    for (const auto& argPair : envArgs) {
-        env.declareVariable(argPair.first, argPair.second.get());
+    for (auto& argPair : functionArgs) {
+        env.declareVariable(argPair.first, std::move(argPair.second));
     }
-
     std::string result = "null";
 
-    for (const std::unique_ptr<ASTBase>& child : func->body) {
+    for (std::unique_ptr<ASTBase>& child : func->body) {
         if (child == nullptr) continue;
 
         switch (child->type) {
             case ASTType::Return: {
                 typeChecker.checkType(func, child.get());
-                result = evaluateExpression(child.get());
+                result = evaluateExpression(child->clone());
                 env.exitCurrentBlock(true);
                 return result;
             }
+
             case ASTType::Condition: {
-                auto maybeResult = evaluateCondition(static_cast<ASTCondition*>(child.get()));
+                std::unique_ptr<ASTCondition> conditionPtr(
+                    static_cast<ASTCondition*>(child->clone().release())
+                );
+                auto maybeResult = evaluateCondition(std::move(conditionPtr));
+
                 if (maybeResult != nullptr && maybeResult->type == ASTType::Value) {
                     typeChecker.checkType(func, maybeResult.get());
                     result = static_cast<ASTValue*>(maybeResult.get())->value;
@@ -348,8 +403,13 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
                 }
                 break;
             }
+
             case ASTType::While: {
-                auto maybeResult = evaluateWhile(static_cast<ASTWhile*>(child.get()));
+                std::unique_ptr<ASTWhile> whilePtr(
+                    static_cast<ASTWhile*>(child->clone().release())
+                );
+                auto maybeResult = evaluateWhile(std::move(whilePtr));
+
                 if (maybeResult != nullptr && maybeResult->type == ASTType::Value) {
                     typeChecker.checkType(func, maybeResult.get());
                     result = static_cast<ASTValue*>(maybeResult.get())->value;
@@ -359,7 +419,7 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
                 break;
             }
             default:
-                evaluate(child.get());
+                evaluate(child->clone());
                 break;
         }
     }
@@ -376,16 +436,16 @@ std::string Evaluator::evaluateFunctionCall(ASTFunctionCall* functionCall) {
     return result;
 }
 
-std::string Evaluator::evaluateOrOperation(ASTOrOperation* operation) {
-    const std::string left = evaluateExpression(operation->left.get());
+std::string Evaluator::evaluateOrOperation(std::unique_ptr<ASTOrOperation> operation) {
+    const std::string left = evaluateExpression(std::move(operation->left));
     if (stringToBool(left)) return left;
-    return evaluateExpression(operation->right.get());
+    return evaluateExpression(std::move(operation->right));
 }
 
-std::string Evaluator::evaluateAndOperation(ASTAndOperation* operation) {
-    const std::string left = evaluateExpression(operation->left.get());
+std::string Evaluator::evaluateAndOperation(std::unique_ptr<ASTAndOperation> operation) {
+    const std::string left = evaluateExpression(std::move(operation->left));
     if (!stringToBool(left)) return left;
-    return evaluateExpression(operation->right.get());
+    return evaluateExpression(std::move(operation->right));
 }
 
 std::string Evaluator::evaluateExpression(const std::string& expression, size_t realLine) {
@@ -393,41 +453,78 @@ std::string Evaluator::evaluateExpression(const std::string& expression, size_t 
     const std::vector<Token> tokens = lexer.tokenize();
 
     Parser parser(tokens);
-    const auto astExpression = parser.parseExpression(0);
+    std::unique_ptr<ASTBase> astExpression = parser.parseExpression(0);
 
     // We set the line number manually here, because the parser doesn't know where
     // this expression came from. Without this, line in error message would be wrong.
     astExpression.get()->line = realLine;
-    return evaluateExpression(astExpression.get());
+    return evaluateExpression(std::move(astExpression));
 }
 
-std::string Evaluator::evaluateExpression(ASTBase* expression) {
+std::string Evaluator::evaluateExpression(std::unique_ptr<ASTBase> expression) {
     if (expression == nullptr) return "null";
+
     switch (expression->type) {
         case ASTType::Value:
-            return static_cast<ASTValue*>(expression)->value;
+            return static_cast<ASTValue*>(expression.get())->value;
         case ASTType::Variable: {
-            const auto var = static_cast<ASTVariable*>(expression);
-            return evaluateExpression(env.getVariable(var->name, var->line, true));
+            const auto var = static_cast<ASTVariable*>(expression.get());
+            return env.getVariable(var->name, var->line, true)->value;
         };
-        case ASTType::ReadInput:
-            return evaluateReadInput(static_cast<ASTReadInput*>(expression));
-        case ASTType::TypeCast:
-            return evaluateTypeCast(static_cast<ASTTypeCast*>(expression));
-        case ASTType::FString:
-            return evaluateFString(static_cast<ASTFString*>(expression));
-        case ASTType::BinaryOperation:
-            return evaluateBinaryOperation(static_cast<ASTBinaryOperation*>(expression));
-        case ASTType::ComparisonOperation:
-            return evaluateComparisonOperation(static_cast<ASTComparisonOperation*>(expression));
-        case ASTType::OrOperation:
-            return evaluateOrOperation(static_cast<ASTOrOperation*>(expression));
-        case ASTType::AndOperation: 
-            return evaluateAndOperation(static_cast<ASTAndOperation*>(expression));
-        case ASTType::FunctionCall:
-            return evaluateFunctionCall(static_cast<ASTFunctionCall*>(expression));
-        case ASTType::Return:
-            return evaluateExpression(static_cast<ASTReturn*>(expression)->value.get());
+        case ASTType::ReadInput: {
+            std::unique_ptr<ASTReadInput> readPtr(
+                static_cast<ASTReadInput*>(expression.release())
+            );
+            return evaluateReadInput(std::move(readPtr));
+        }
+        case ASTType::TypeCast: {
+            std::unique_ptr<ASTTypeCast> castPtr(
+                static_cast<ASTTypeCast*>(expression.release())
+            );
+            return evaluateTypeCast(std::move(castPtr));
+        }
+        case ASTType::FString: {
+            std::unique_ptr<ASTFString> fStringPtr(
+                static_cast<ASTFString*>(expression.release())
+            );
+            return evaluateFString(std::move(fStringPtr));
+        }
+        case ASTType::BinaryOperation: {
+            std::unique_ptr<ASTBinaryOperation> binaryOpPtr(
+                static_cast<ASTBinaryOperation*>(expression.release())
+            );
+            return evaluateBinaryOperation(std::move(binaryOpPtr));
+        }
+        case ASTType::ComparisonOperation: {
+            std::unique_ptr<ASTComparisonOperation> compOpPtr(
+                static_cast<ASTComparisonOperation*>(expression.release())
+            );
+            return evaluateComparisonOperation(std::move(compOpPtr));
+        }
+        case ASTType::OrOperation: {
+            std::unique_ptr<ASTOrOperation> orOpPtr(
+                static_cast<ASTOrOperation*>(expression.release())
+            );
+            return evaluateOrOperation(std::move(orOpPtr));
+        }
+        case ASTType::AndOperation: {
+            std::unique_ptr<ASTAndOperation> andOpPtr(
+                static_cast<ASTAndOperation*>(expression.release())
+            );
+            return evaluateAndOperation(std::move(andOpPtr));
+        }
+        case ASTType::FunctionCall: {
+            std::unique_ptr<ASTFunctionCall> funcCallPtr(
+                static_cast<ASTFunctionCall*>(expression.release())
+            );
+            return evaluateFunctionCall(std::move(funcCallPtr));
+        }
+        case ASTType::Return: {
+            std::unique_ptr<ASTReturn> returnPtr(
+                static_cast<ASTReturn*>(expression.release())
+            );
+            return evaluateExpression(std::move(returnPtr->value));
+        }
         default:
             throw ZynkError(
                 ZynkErrorType::RuntimeError,

@@ -61,7 +61,7 @@ Before building Zynk, make sure you have the following software installed:
     Then build the project:
 
     ``` 
-    cmake --build . --config Release
+    cmake --build .
     ```
 
 6. **Once the compilation is complete, you can run the Zynk interpreter from the `src` directory:**

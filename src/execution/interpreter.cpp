@@ -1,6 +1,6 @@
 #include "include/interpreter.hpp"
 
-#include "../common/include/errors.hpp"
+#include "../errors/include/errors.hpp"
 #include "../parsing/include/lexer.hpp"
 #include "../parsing/include/parser.hpp"
 #include "../parsing/include/ast.hpp"
@@ -17,11 +17,11 @@ void ZynkInterpreter::interpret(const std::string& source) {
 
     // Parsing the tokens into AST objects.
     Parser parser(tokens);
-    const std::unique_ptr<ASTProgram> program = parser.parse();
+    std::unique_ptr<ASTProgram> program = parser.parse();
     
     // Executing the program.
     Evaluator evaluator;
-    evaluator.evaluate(program.get());
+    evaluator.evaluate(std::move(program));
 }
 
 void ZynkInterpreter::interpretFile(const std::string& filePath) {

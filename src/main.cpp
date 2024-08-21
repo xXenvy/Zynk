@@ -3,8 +3,8 @@
 #include <csignal>
 
 #include "execution/include/interpreter.hpp"
-#include "common/include/cli.hpp"
-#include "common/include/errors.hpp"
+#include "cli/include/cli.hpp"
+#include "errors/include/errors.hpp"
 
 constexpr char const* version = "0.0.1";
 
@@ -12,16 +12,13 @@ static void handleSignal(int signal) {
 	switch (signal) {
 		case SIGINT:
 			std::cerr << "Program interrupted by user (SIGINT)." << std::endl;
-			std::exit(EXIT_SUCCESS);
-			break;
+			return std::exit(EXIT_SUCCESS);
 		case SIGSEGV:
 			std::cerr << "Segmentation fault encountered (SIGSEGV)." << std::endl;
-			std::exit(EXIT_FAILURE);
-			break;
+			return std::exit(EXIT_FAILURE);
 		default:
 			std::cerr << "Unhandled signal received: " << signal << std::endl;
-			std::exit(EXIT_FAILURE);
-			break;
+			return std::exit(EXIT_FAILURE);
 	}
 }
 

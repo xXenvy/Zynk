@@ -1,6 +1,6 @@
-#include <iostream>
+#include "../errors/include/errors.hpp"
 #include "include/cli.hpp"
-#include "include/errors.hpp"
+#include <iostream>
 
 bool Arguments::empty() const {
 	return file_path.empty() && !help && !version && !init;

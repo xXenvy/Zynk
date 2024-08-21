@@ -1,4 +1,4 @@
-#include "../common/include/errors.hpp"
+#include "../errors/include/errors.hpp"
 #include "include/runtime.hpp"
 #include <cassert>
 
@@ -6,12 +6,12 @@ bool RuntimeEnvironment::isRecursionDepthExceeded() const {
     return currentDepth >= MAX_DEPTH;
 }
 
-Block* RuntimeEnvironment::currentBlock() {
+Block* RuntimeEnvironment::currentBlock() const {
     if (blockStack.empty()) return nullptr;
     return blockStack.top().get();
 }
 
-void RuntimeEnvironment::declareVariable(const std::string& name, ASTValue* value) {
+void RuntimeEnvironment::declareVariable(const std::string& name, std::unique_ptr<ASTValue> value) const {
     if (isVariableDeclared(name, false)) {
         throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
@@ -21,28 +21,25 @@ void RuntimeEnvironment::declareVariable(const std::string& name, ASTValue* valu
     }
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-
-    auto gcObject = std::make_unique<GCObject>(value);
-    gc.mark(gcObject.get());
-    block->setVariable(name, std::move(gcObject));
+    block->setVariable(name, std::move(value));
 }
 
-ASTValue* RuntimeEnvironment::getVariable(const std::string& name, const size_t line, bool deepSearch) {
+ASTValue* RuntimeEnvironment::getVariable(const std::string& name, const size_t line, bool deepSearch) const {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-    GCObject* gcObject = block->getVariable(name, deepSearch);
+    ASTValue* variable = block->getVariable(name, deepSearch);
 
-    if (gcObject == nullptr) {
+    if (variable == nullptr) {
         throw ZynkError(
             ZynkErrorType::NotDefinedError,
             "Variable named '" + name + "' is not defined.",
             line
         );
     }
-    return static_cast<ASTValue*>(gcObject->value);
+    return variable;
 }
 
-bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSearch) {
+bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSearch) const {
     if (currentBlock() == nullptr) return false;
     try {
         getVariable(name, 1, deepSearch);
@@ -52,39 +49,35 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSe
     return true;
 }
 
-// todo: remove name argument.
-void RuntimeEnvironment::declareFunction(const std::string& name, ASTFunction* func) {
-    if (isFunctionDeclared(name)) {
-        throw ZynkError{
+void RuntimeEnvironment::declareFunction(std::unique_ptr<ASTFunction> func) const {
+    if (isFunctionDeclared(func->name)) {
+        throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
-            "Function '" + name + "' is already declared.",
+            "Function '" + func->name + "' is already declared.",
             func->line
-        };
+        );
     }
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-
-    auto gcObject = std::make_unique<GCObject>(func);
-    gc.mark(gcObject.get());
-    block->setFunction(name, std::move(gcObject));
+    block->setFunction(std::move(func));
 }
 
-ASTFunction* RuntimeEnvironment::getFunction(const std::string& name, const size_t line) {
+ASTFunction* RuntimeEnvironment::getFunction(const std::string& name, const size_t line) const {
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-    GCObject* gcObject = block->getFunction(name);
 
-    if (gcObject == nullptr) {
+    ASTFunction* function = block->getFunction(name);
+    if (function == nullptr) {
         throw ZynkError{
             ZynkErrorType::NotDefinedError,
             "Function named '" + name + "' is not defined.",
             line
         };
     }
-    return static_cast<ASTFunction*>(gcObject->value);
+    return function;
 }
 
-bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) {
+bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) const {
     if (currentBlock() == nullptr) return false;
     try {
         getFunction(name, 1);
@@ -94,30 +87,13 @@ bool RuntimeEnvironment::isFunctionDeclared(const std::string& name) {
     return true;
 }
 
-void RuntimeEnvironment::collectGarbage() {
-    gc.collectGarbage(currentBlock());
-}
-
-void RuntimeEnvironment::enterNewBlock(const bool increaseDepth) {
+ void RuntimeEnvironment::enterNewBlock(bool increaseDepth) {
     if (increaseDepth) currentDepth++;
     blockStack.push(std::make_unique<Block>(currentBlock()));
 }
 
-void RuntimeEnvironment::exitCurrentBlock(const bool decreaseDepth) {
+void RuntimeEnvironment::exitCurrentBlock(bool decreaseDepth) {
     if (blockStack.empty()) return;
-    Block* block = currentBlock();
-    assert(block != nullptr && "Block should not be nullptr");
     if (decreaseDepth) currentDepth--;
-    
-    // Unmarking all functions / variables in the current block since we don't need them anymore.
-    for (const auto& varPair : block->variables) {
-        varPair.second->unmark();
-    }
-    for (const auto& funcPair : block->functions) {
-        funcPair.second->unmark();
-    }
-    // Keep this block until garbage collection is complete, to ensure that the objects in the block are not destroyed prematurely.
-    std::unique_ptr<Block> blockPtr = std::move(blockStack.top());
     blockStack.pop();
-    collectGarbage();
 }
