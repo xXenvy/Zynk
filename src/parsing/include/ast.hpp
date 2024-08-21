@@ -63,6 +63,7 @@ struct ASTFunction : public ASTBase {
         : ASTBase(ASTType::FunctionDeclaration, line), name(name), returnType(returnType) {}
     const std::string name;
     const ASTValueType returnType;
+
     std::vector<std::unique_ptr<ASTBase>> arguments;
     std::vector<std::unique_ptr<ASTBase>> body;
 

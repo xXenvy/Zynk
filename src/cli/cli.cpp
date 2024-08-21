@@ -2,7 +2,7 @@
 #include "include/cli.hpp"
 #include <iostream>
 
-bool Arguments::empty() const {
+inline bool Arguments::empty() const {
 	return file_path.empty() && !help && !version && !init;
 }
 

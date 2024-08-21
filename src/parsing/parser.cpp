@@ -181,6 +181,7 @@ std::unique_ptr<ASTBase> Parser::parseReadStatement(bool isFinalInstruction) {
 	} else {
 		read = std::make_unique<ASTReadInput>(parseExpression(0), currentLine);
 	}
+
 	consume({ TokenType::RBRACKET, ")", currentLine });
 	if (isFinalInstruction) consume({ TokenType::SEMICOLON, ";", currentLine });
 	return read;

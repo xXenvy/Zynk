@@ -11,11 +11,11 @@ public:
 
     bool isRecursionDepthExceeded() const;
 
-    void declareVariable(const std::string& name, std::unique_ptr<ASTValue> value);
+    void declareVariable(const std::string& name, std::unique_ptr<ASTValue> value) const;
     ASTValue* getVariable(const std::string& name, const size_t line, bool deepSearch = true) const;
     bool isVariableDeclared(const std::string& name, bool deepSearch = true) const;
 
-    void declareFunction(std::unique_ptr<ASTFunction> func);
+    void declareFunction(std::unique_ptr<ASTFunction> func) const;
     ASTFunction* getFunction(const std::string& name, const size_t line) const;
     bool isFunctionDeclared(const std::string& name) const;
 

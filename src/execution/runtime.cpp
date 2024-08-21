@@ -11,7 +11,7 @@ Block* RuntimeEnvironment::currentBlock() const {
     return blockStack.top().get();
 }
 
-void RuntimeEnvironment::declareVariable(const std::string& name, std::unique_ptr<ASTValue> value) {
+void RuntimeEnvironment::declareVariable(const std::string& name, std::unique_ptr<ASTValue> value) const {
     if (isVariableDeclared(name, false)) {
         throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
@@ -21,7 +21,6 @@ void RuntimeEnvironment::declareVariable(const std::string& name, std::unique_pt
     }
     Block* block = currentBlock();
     assert(block != nullptr && "Block should not be nullptr");
-
     block->setVariable(name, std::move(value));
 }
 
@@ -50,7 +49,7 @@ bool RuntimeEnvironment::isVariableDeclared(const std::string& name, bool deepSe
     return true;
 }
 
-void RuntimeEnvironment::declareFunction(std::unique_ptr<ASTFunction> func) {
+void RuntimeEnvironment::declareFunction(std::unique_ptr<ASTFunction> func) const {
     if (isFunctionDeclared(func->name)) {
         throw ZynkError(
             ZynkErrorType::DuplicateDeclarationError,
