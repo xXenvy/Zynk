@@ -1,6 +1,8 @@
 <div align="center">
   
   <img src="https://github.com/xXenvy/Zynk/assets/111158232/2f92acf0-409e-4e6d-b80f-2379b01d31f7" width="200" height="200">
+  
+  `(I like the LLVM logo, so I asked AI for something similar and i got this 😭)`
 
   # Zynk - Turing-complete, interpreted programming language.
 
