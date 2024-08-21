@@ -6,7 +6,7 @@
 #include "cli/include/cli.hpp"
 #include "errors/include/errors.hpp"
 
-constexpr char const* version = "0.0.1";
+constexpr char const* version = "1.0.0";
 
 static void handleSignal(int signal) {
 	switch (signal) {
