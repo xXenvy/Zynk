@@ -45,7 +45,7 @@ TEST(LexerTokenizeTest, EmptySource) {
 }
 
 TEST(LexerTokenizeTest, SimpleFunctionDefinition) {
-	Lexer lexer("def main() {\n}");
+	Lexer lexer("def main() {\n\n}\n");
 	const std::vector<Token> tokens = lexer.tokenize();
 
 	EXPECT_TRUE(tokens.size() == 7);
