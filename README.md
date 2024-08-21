@@ -12,7 +12,7 @@
 <!--- ![release](https://img.shields.io/github/v/release/xXenvy/Zynk?include_prereleases&style=for-the-badge&color=%2315b328) -->
 
 ## `📃` Introduction
-Zynk is a Turing-complete, interpreted programming language, written in C++. This project was created as a personal endeavor to learn and practice C++. It is not intended for extensive practical use but rather serves as a learning platform.
+This project was created as a personal endeavor to learn and practice C++. It is not intended for extensive practical use but rather serves as a learning platform.
 
 ## `🌟` Features
 - **Interpreted Language:** Zynk is an interpreted language, which facilitates quick development and testing cycles.
@@ -30,7 +30,7 @@ Comprehensive documentation for Zynk is available on [**Link**](https://xxenvy.g
 
 ## `🔧` Example Usage
 
-```java
+```py
 def main() -> null {
     var name: string = readInput("Enter your name: ");
     var age: int = int(readInput("Enter your age: "));
