@@ -14,7 +14,7 @@ endif()
 
 if(MSVC)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /LTCG")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
     endif()
     add_compile_options(/W4 /WX)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
